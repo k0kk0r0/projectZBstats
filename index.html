@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Zomboid B42 stats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-6 rounded-2xl shadow-xl w-11/12 max-w-7xl flex">
+    
+    <!-- 왼쪽 전체 (스크롤되는 부분) -->
+    <div class="flex-1">
+      <!-- 상단 고정 영역 -->
+      <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md">
+        <h2 class="text-2xl font-bold mb-2 text-center">
+          B42 project Zomboid 직업 및 특성 계산기 ver 0.3
+        </h2>
+        <div class="flex space-x-2 mb-4">
+          <button id="lang-ko" class="px-4 py-2 bg-gray-200 rounded">한국어</button>
+          <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
+        </div>
+      </div>
+
+      <!-- 스크롤 영역 -->
+      <div class="flex space-x-6 mt-4 max-h-[500px] overflow-y-auto">
+        <!-- 왼쪽: 직업 리스트 2열 -->
+        <div id="jobs" class="grid grid-cols-2 gap-2 flex-1"></div>
+
+        <!-- 가운데: 상태 항목 좌우 2열 -->
+        <div class="flex space-x-4 flex-1">
+          <div id="negative-items" class="flex flex-col space-y-2 flex-1"></div>
+          <div id="positive-items" class="flex flex-col space-y-2 flex-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 결과 패널 (스크롤 고정됨) -->
+    <div id="result-panel" class="flex flex-col space-y-4 w-48 ml-6">
+      <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
+        합계: 0
+      </div>
+      <div id="result-strength" class="p-4 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        근력: 0
+      </div>
+      <div id="result-fitness" class="p-4 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        체력: 0
+      </div>
+      <!-- 추가 항목은 JS에서 동적으로 생성 -->
+    </div>
+  </div>
+
+  <script>
+    const positiveDiv = document.getElementById('positive-items');
+    const negativeDiv = document.getElementById('negative-items');
+    const jobsDiv = document.getElementById('jobs');
+    const resultDiv = document.getElementById('result');
+
+    let allJobs = [];
+    let allItems = [];
+    let currentLang = "ko"; // "ko" 또는 "en"
+    // 번역 테이블
+    const translations = {
+      ko: {
+        sum: "포인트",
+        strength: "근력",
+        fitness: "체력"
+      },
+      en: {
+        sum: "Point",
+        strength: "Strength",
+        fitness: "Fitness"
+      }
+    };
+
+
+function loadCSV() {
+  Papa.parse("jobs.csv", {
+    download: true,
+    header: true,
+    complete: function(results) {
+      allJobs = results.data;
+      Papa.parse("items.csv", {
+        download: true,
+        header: true,
+        complete: function(results2) {
+          allItems = results2.data;
+          renderUI();
+        }
+      });
+    }
+  });
+}
+
+  function renderUI() {
+    jobsDiv.innerHTML = "";
+    positiveDiv.innerHTML = "";
+    negativeDiv.innerHTML = "";
+
+    // ---- 직업 ----
+    allJobs.forEach(row => {
+      if (!row["항목"]) return;
+
+      const names = row["항목"].split(";");
+      const langIndex = currentLang === "ko" ? 0 : 1;
+      const displayName = names[langIndex] || names[0];
+
+      const value = parseInt(row["값"]) || 0;
+      const statsStr = row.stats || "";
+      const statPairs = statsStr.split(";"); // str:2;sta:1 ...
+      const statObj = {};
+      statPairs.forEach(pair => {
+          const [key, val] = pair.split(":");
+          if(key) statObj[key] = parseInt(val) || 0;
+    });
+      const displayValue = value >= 0 ? `+${value}` : `${value}`;
+
+      const label = document.createElement("label");
+      //label.className = "flex items-center p-2 border rounded-lg cursor-pointer";
+      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer";
+
+      const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
+
+      label.innerHTML = `
+        <div class="flex items-center min-w-[150px]">
+          <img src="${iconSrc}" class="w-16 h-16 mr-2" alt="아이콘">
+          <span>${displayName} (${displayValue})</span>
+        </div>
+        <input type="radio" name="job" data-value="${value}" class="w-4 h-4">
+      `;
+
+      jobsDiv.appendChild(label);
+
+      const input = label.querySelector("input");
+      // statObj의 모든 key-value를 dataset으로 저장
+      for (const statKey in statObj) {
+      input.dataset[statKey] = statObj[statKey];  // 예: input.dataset.str = 2
+      }
+      input.dataset.value = value;
+      input.addEventListener("change", updateSum);
+    });
+
+    // ---- 특성 ----
+    allItems.forEach(row => {
+      if (!row["항목"]) return;
+
+      const names = row["항목"].split(";");
+      const langIndex = currentLang === "ko" ? 0 : 1;
+      const displayName = names[langIndex] || names[0];
+
+      const value = parseInt(row["값"]) || 0;
+      const statsStr = row.stats || "";
+      const statPairs = statsStr.split(";"); // str:2;fit:1 ...
+      const statObj = {};
+      statPairs.forEach(pair => {
+          const [key, val] = pair.split(":");
+          if(key) statObj[key] = parseInt(val) || 0;
+    });
+
+      const colorClass = value >= 0 ? "text-green-600" : "text-red-600";
+      const displayValue = value >= 0 ? `+${value}` : `${value}`;
+
+      const label = document.createElement("label");
+      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer";
+
+      const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
+
+      label.innerHTML = `
+ <div class="flex items-center min-w-[150px]">
+    <img src="${iconSrc}" class="w-6 h-6 mr-2" alt="아이콘">
+    <span class="${colorClass}">${displayName}(${displayValue})</span>
+  </div>
+  <input type="checkbox" 
+    data-value="${value}"
+    ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
+   class="w-4 h-4">
+`;
+
+      if (value >= 0) positiveDiv.appendChild(label);
+      else negativeDiv.appendChild(label);
+
+      const input = label.querySelector("input");
+      // statObj의 모든 key-value를 dataset으로 저장
+      for (const statKey in statObj) {
+      input.dataset[statKey] = statObj[statKey];  // 예: input.dataset.str = 2
+      }
+      input.dataset.value = value;
+      input.addEventListener("change", updateSum);
+    });
+
+    updateSum(); // 초기 합계 계산
+  }
+
+  //특성 초기화
+  function resetExtraStats() {
+    for (const key in extraStats) {
+      extraStats[key].remove(); // 기존 div 삭제
+    }
+    Object.keys(extraStats).forEach(k => delete extraStats[k]);
+  }
+
+    const extraStats = {}; // key: div id, value: div element
+
+    // 합계 계산
+    function updateSum() {
+      resetExtraStats(); 
+
+      let sum = 0, strength = 5, fitness = 5;
+       const statsTotal = {};
+
+      document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+          if (input.checked) {
+            sum += parseInt(input.dataset.value) || 0;
+            strength += parseInt(input.dataset.str) || 0;
+            fitness += parseInt(input.dataset.fit) || 0;
+
+            const val = parseInt(input.dataset.value) || 0;
+            // stats 처리
+            for (const key in input.dataset) {
+              if (key != 'value' && key != 'str' && key != 'fit'  ) {
+                const statName = key;
+                statsTotal[statName] = (statsTotal[statName] || 0) + parseInt(input.dataset[key] || 0);
+              }
+            }
+          }
+      });
+
+      let resultSum = document.getElementById("result-sum");
+      resultSum.classList.remove("text-red-600", "text-green-600");
+      if (sum < 0) {
+        resultSum.classList.add("text-red-600");
+      } else {
+        resultSum.classList.add("text-green-600");
+      }
+      resultSum.innerText =        `${translations[currentLang].sum} : ${sum}`;
+
+      let resultStrength = document.getElementById("result-strength");
+      resultStrength.classList.remove("text-red-600", "text-black-600");
+      if (strength >10 || strength < 0) {
+        resultStrength.classList.add("text-red-600");
+      } else {
+        resultStrength.classList.add("text-black-600");
+      }
+      resultStrength.innerText =  `${translations[currentLang].strength } : ${strength}/10`;
+      let resultFitness = document.getElementById("result-fitness");
+      resultFitness.classList.remove("text-red-600", "text-black-600"); 
+      if ( fitness >10 || fitness< 0) {
+        resultFitness.classList.add("text-red-600");
+      } else {
+        resultFitness.classList.add("text-black-600");
+      }
+      document.getElementById("result-fitness").innerText =    `${translations[currentLang].fitness} : ${fitness}/10`;
+
+      // 동적 항목 표시
+      for (const statName in statsTotal) {
+        if (!extraStats[statName]) {
+          const div = document.createElement('div');
+          div.className = "py-1 px-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-green-600";
+          div.id = `result-${statName}`;
+          div.innerText = `${statName} +${statsTotal[statName]}`;
+          document.getElementById('result-panel').appendChild(div);
+          extraStats[statName] = div;
+        } else {
+          extraStats[statName].innerText = `${statName} +${statsTotal[statName]}`;
+        }
+      }
+    }
+    // CSV 불러오기
+    loadCSV('items.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
+    loadCSV('jobs.csv', jobsDiv, { colorPositive:'text-blue-500', colorNegative:'text-blue-700', type:'radio', name:'job' });
+    updateSum();
+
+    // 언어 전환 버튼
+document.getElementById("lang-ko").addEventListener("click", () => {
+  currentLang = "ko";
+  renderUI(); // UI 다시 그림
+});
+
+document.getElementById("lang-en").addEventListener("click", () => {
+  currentLang = "en";
+  renderUI(); // UI 다시 그림
+});
+  </script>
+
+</body>
+</html>
