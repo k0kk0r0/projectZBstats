@@ -1,9 +1,8 @@
 항목,값,icon,stats
-<<<<<<< HEAD
-백수;No job,8,icons/Profession_spiffo.png,
-소방관;Fire Officer,0,icons/Profession_fireofficer2.png ,str:1;Axe:1;Fitness:1;Running:1
-경찰관;Police Officer,-4,icons/Profession_policeofficer2.png ,Aiming:3;Nimble:1;Reloading:2
-공원 경비원;Park Ranger,-4,icons/Profession_parkranger2.png ,Axe:1;Carpentry:1;Forraging:1;Trapping:1
+백수;No job,8,icons/Profession_spiffo.png, 
+소방관;Fire Officer,0,icons/Profession_fireofficer2.png,str:1;Axe:1;Fitness:1;Running:1
+경찰관;Police Officer,-4,icons/Profession_policeofficer2.png,Aiming:3;Nimble:1;Reloading:2
+공원 경비원;Park Ranger,-4,icons/Profession_parkranger2.png,Axe:1;Carpentry:1;Forraging:1;Trapping:1
 건축 인부;Construction Worker,-2,icons/Profession_constructionworker2.png,Carpentry:1;Maintenance:1;Masonry:2;ShortBlunt:3
 보안 경비원;Security Guard,-2,icons/Profession_securityguard2.png,Lightfooted:1;Running:2
 목수;Carpenter,1,icons/Profession_hammer2.png,Carpentry:3;Carving:1;Maintenance:1;Masonry:1;ShortBlunt:1
