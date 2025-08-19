@@ -5,6 +5,9 @@
   <title>Project Zomboid B42 stats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    
+        <!-- 파비콘 추가 -->
+        <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
   <div class="bg-white p-6 rounded-2xl shadow-xl w-11/12 max-w-7xl flex">
@@ -16,8 +19,6 @@
         <h2 class="text-2xl font-bold mb-2 text-center">
           B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
         </h2>
-        <!-- 파비콘 추가 -->
-        <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
 
         <div class="flex space-x-2 mb-4">
           <!-- 모달 열기 버튼 -->
@@ -44,7 +45,7 @@
     </div>
 
     <!-- 오른쪽: 결과 패널 (스크롤 고정됨) -->
-    <div id="result-panel" class="flex flex-col space-y-4 w-32 ml-6">
+    <div id="result-panel" class="flex flex-col space-y-4 w-32 ml-6 min-w-[150px]">
       <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
         합계: 0
       </div>
@@ -72,8 +73,8 @@
     <p class="mb-2">- 현자와 느린 학습 아이콘이 거꾸로 표시되던 문제 수정(pzWiki가 트롤)</p>
     <p class="mb-2">- 긍정/부정특성이 서로 반대 색으로 표시되던 문제 수정</p>
     <p class="mb-2">- 직업 아이콘이 1000px보다 작은 화면에서 1열로 표시되도록 수정</p>
-    <p>본 항목은 정확하지 않을 수 있습니다. </p>
-    <p></p>자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
+    <p>** 본 항목은 정확하지 않을 수 있습니다. ** </p>
+    <p>자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
     
     <div class="mt-4 text-right">
       <button id="closeModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg">닫기</button>
@@ -81,7 +82,7 @@
   </div>
 </div>
 <script>
-  const version = "0.32"; // ← 버전 숫자 변수
+  const version = "0.33"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -120,7 +121,7 @@
     let allItems = [];
     let currentLang = "ko"; // "ko" 또는 "en"
     // 번역 테이블
-    const translations = {
+    let translations = {
       ko: {
         sum: "포인트",
         strength: "근력",
@@ -132,6 +133,23 @@
         fitness: "Fitness"
       }
     };
+    // 2. CSV 로딩 후 업데이트
+    Papa.parse("translations.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        results.data.forEach(row => {
+          const key = row.key.trim();   // 예: "Agriculture"
+          if(!translations.ko[key]) translations.ko[key] = row.ko.trim();
+          if(!translations.en[key]) translations.en[key] = row.en.trim();
+        });
+
+        console.log(translations);
+        // 이제 translations.ko["Agriculture"] -> "농업"
+        // translations.en["Agriculture"] -> "Agriculture"
+      }
+    });
+
 
 
 function loadCSV() {
@@ -312,15 +330,18 @@ function loadCSV() {
 
       // 동적 항목 표시
       for (const statName in statsTotal) {
+        const key = statName.trim();
+        const label = translations[currentLang][key] || statName; 
+        console.log(statName);
         if (!extraStats[statName]) {
           const div = document.createElement('div');
           div.className = "py-1 px-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-green-600";
           div.id = `result-${statName}`;
-          div.innerText = `${statName} +${statsTotal[statName]}`;
+          div.innerText = `${label} +${statsTotal[statName]}`;
           document.getElementById('result-panel').appendChild(div);
           extraStats[statName] = div;
         } else {
-          extraStats[statName].innerText = `${statName} +${statsTotal[statName]}`;
+          extraStats[statName].innerText = `${label} +${statsTotal[statName]}`;
         }
       }
     }
