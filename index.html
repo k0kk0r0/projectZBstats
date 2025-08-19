@@ -14,9 +14,16 @@
       <!-- 상단 고정 영역 -->
       <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md">
         <h2 class="text-2xl font-bold mb-2 text-center">
-          B42 project Zomboid 직업 및 특성 계산기 ver 0.31
+          B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
         </h2>
+        <!-- 파비콘 추가 -->
+        <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
+
         <div class="flex space-x-2 mb-4">
+          <!-- 모달 열기 버튼 -->
+          <button id="openModalBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow">
+            공지사항
+          </button>
           <button id="lang-ko" class="px-4 py-2 bg-gray-200 rounded">한국어</button>
           <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
         </div>
@@ -25,7 +32,8 @@
       <!-- 스크롤 영역 -->
       <div class="flex space-x-6 mt-4 max-h-[500px] overflow-y-auto">
         <!-- 왼쪽: 직업 리스트 2열 -->
-        <div id="jobs" class="grid grid-cols-2 gap-2 flex-1"></div>
+         
+        <div id="jobs" class="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-w-[200px]"></div>
 
         <!-- 가운데: 상태 항목 좌우 2열 -->
         <div class="flex space-x-4 flex-1">
@@ -36,19 +44,71 @@
     </div>
 
     <!-- 오른쪽: 결과 패널 (스크롤 고정됨) -->
-    <div id="result-panel" class="flex flex-col space-y-4 w-48 ml-6">
+    <div id="result-panel" class="flex flex-col space-y-4 w-32 ml-6">
       <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
         합계: 0
       </div>
-      <div id="result-strength" class="p-4 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+      <div id="result-strength" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
         근력: 0
       </div>
-      <div id="result-fitness" class="p-4 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+      <div id="result-fitness" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
         체력: 0
       </div>
       <!-- 추가 항목은 JS에서 동적으로 생성 -->
     </div>
   </div>
+
+
+<!-- 모달 (처음엔 hidden) -->
+<div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-2xl shadow-xl w-192 p-6 relative">
+    <!-- 닫기 버튼 -->
+    <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
+      ✕
+    </button>
+    
+    <h2 class="text-xl font-bold mb-4">공지사항 </h2>
+    <p class="mb-2">📢 <span id="version-text2"></span> 업데이트 안내</p>
+    <p class="mb-2">- 현자와 느린 학습 아이콘이 거꾸로 표시되던 문제 수정(pzWiki가 트롤)</p>
+    <p class="mb-2">- 긍정/부정특성이 서로 반대 색으로 표시되던 문제 수정</p>
+    <p class="mb-2">- 직업 아이콘이 1000px보다 작은 화면에서 1열로 표시되도록 수정</p>
+    <p>본 항목은 정확하지 않을 수 있습니다. </p>
+    <p></p>자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
+    
+    <div class="mt-4 text-right">
+      <button id="closeModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg">닫기</button>
+    </div>
+  </div>
+</div>
+<script>
+  const version = "0.32"; // ← 버전 숫자 변수
+  document.getElementById("version-text").textContent = `ver ${version}`;
+  document.getElementById("version-text2").textContent = `ver ${version}`;
+
+  const modal = document.getElementById("modal");
+  const openBtn = document.getElementById("openModalBtn");
+  const closeBtn = document.getElementById("closeModalBtn");
+  const closeBtn2 = document.getElementById("closeModalBtn2");
+
+  openBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  closeBtn2.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  // 모달 바깥 클릭 시 닫기
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+    }
+  });
+</script>
 
   <script>
     const positiveDiv = document.getElementById('positive-items');
@@ -157,7 +217,7 @@ function loadCSV() {
           if(key) statObj[key] = parseInt(val) || 0;
     });
 
-      const colorClass = value >= 0 ? "text-green-600" : "text-red-600";
+      const colorClass = value >= 0 ? "text-red-600" : "text-green-600";
       const displayValue = value >= 0 ? `+${value}` : `${value}`;
 
       const label = document.createElement("label");
@@ -166,15 +226,14 @@ function loadCSV() {
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
 
       label.innerHTML = `
- <div class="flex items-center min-w-[150px]">
-    <img src="${iconSrc}" class="w-6 h-6 mr-2" alt="아이콘">
-    <span class="${colorClass}">${displayName}(${displayValue})</span>
-  </div>
-  <input type="checkbox" 
-    data-value="${value}"
-    ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
-   class="w-4 h-4">
-`;
+        <div class="flex items-center min-w-[150px]">
+            <img src="${iconSrc}" class="w-6 h-6 mr-2" alt="아이콘">
+            <span class="${colorClass}">${displayName}(${displayValue})</span>
+          </div>
+          <input type="checkbox"  data-value="${value}"
+            ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
+          class="w-4 h-4">
+        `;
 
       if (value >= 0) positiveDiv.appendChild(label);
       else negativeDiv.appendChild(label);
