@@ -3,7 +3,7 @@
 장인;Artisan,-2,icons/Trait_artisan.png,Glassmaking:1;Pottery:1
 창의적인;Inventive,-2,icons/Trait_inventive.png,
 석공;Mason,-2,icons/Trait_mason.png,Masonry:2
-나무깎는노인;Whittler,-2,icons/Trait_whittler.png,Carving:2
+나무 조각가;Whittler,-2,icons/Trait_whittler.png,Carving:2
 고양이의 눈;Cat's Eyes,-2,icons/Trait_nightvision.png,
 낮은 갈증;Low Thirst,-2,icons/Trait_lowthirst.png,
 등산애호가;Outdoorsy,-2,icons/Trait_outdoorsman.png,
@@ -14,8 +14,8 @@
 정원사;Gardener,-2,icons/Trait_gardener.png,Agriculture:1
 
 강철 위장;Iron Gut,-3,icons/Trait_irongut.png,
-요리;Keen Cook,-3,icons/Trait_cook.png,Cooking:2;Butchering:1
-정비;Vehicle Knowledge,-3,icons/Trait_mechanics.png,Mechanics:1
+요리 레시피;Keen Cook,-3,icons/Trait_cook.png,Cooking:2;Butchering:1
+차량 정비;Vehicle Knowledge,-3,icons/Trait_mechanics.png,Mechanics:1
 
 강한 회복력;Resilient,-4,icons/Trait_resilient.png,
 낚시꾼;Angler,-4,icons/Trait_fishing.png,Fishing:1
