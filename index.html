@@ -29,35 +29,51 @@
           <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
         </div>
       </div>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-4 rounded-2xl shadow-xl w-12/12 max-w-7xl">
 
-      <!-- 스크롤 영역 -->
-      <div class="flex space-x-6 mt-4 max-h-[500px] overflow-y-auto">
-        <!-- 왼쪽: 직업 리스트 2열 -->
-         
-        <div id="jobs" class="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-w-[200px]"></div>
+    <!-- 반응형 레이아웃 -->
+    <div class="grid grid-cols-2 grid-rows-2 gap-2 h-[80vh] lg:flex lg:space-x-4">
 
-        <!-- 가운데: 상태 항목 좌우 2열 -->
-        <div class="flex space-x-4 flex-1">
-          <div id="negative-items" class="flex flex-col space-y-2 flex-1"></div>
-          <div id="positive-items" class="flex flex-col space-y-2 flex-1"></div>
+      
+
+      <!-- 결과 -->
+      <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
+        <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
+        <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
+          합계: 0
+        </div>
+        <div id="result-strength" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+          근력: 0
+        </div>
+        <div id="result-fitness" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+          체력: 0
+        </div>
+        <div id="result-icons">
+          <!-- 직업 아이콘 -->
+          <div id="job-icons" class="flex justify-center gap-2 mb-2"></div>
+
+          <!-- 일반 아이콘 -->
+          <div id="other-icons" class="flex flex-wrap justify-center gap-2"></div>
         </div>
       </div>
-    </div>
+      <!-- 직업 -->
+      <div id="jobs" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[200px] ">
+        <h3 class="text-lg font-bold text-center lg:hidden">직업</h3>
+      </div>
+      <!-- 긍정 -->
+      <div id="positive-items" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[150px]">
+        <h3 class="text-lg font-bold text-center lg:hidden">긍정</h3>
+      </div>
 
-    <!-- 오른쪽: 결과 패널 (스크롤 고정됨) -->
-    <div id="result-panel" class="flex flex-col space-y-4 w-32 ml-6 min-w-[150px]">
-      <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
-        합계: 0
+      <!-- 부정 -->
+      <div id="negative-items" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[150px]">
+        <h3 class="text-lg font-bold text-center lg:hidden">부정</h3>
       </div>
-      <div id="result-strength" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
-        근력: 0
-      </div>
-      <div id="result-fitness" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
-        체력: 0
-      </div>
-      <!-- 추가 항목은 JS에서 동적으로 생성 -->
+
     </div>
   </div>
+
 
 
 <!-- 모달 (처음엔 hidden) -->
@@ -70,6 +86,8 @@
     
     <h2 class="text-xl font-bold mb-4">공지사항 </h2>
     <p class="mb-2">📢 <span id="version-text2"></span> 업데이트 안내</p>
+    
+    <p class="mb-2">- 모바일 대충 지원(2x2그리드) </p>
     <p class="mb-2">- 특정 직업(피트니스,요리사 등등) 의 긍정 특성 예외 처리 적용</p>
     <p class="mb-2">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
     <p class="mb-2">- 현자와 느린 학습 아이콘이 거꾸로 표시되던 문제 수정(pzWiki가 트롤)</p>
@@ -83,8 +101,11 @@
     </div>
   </div>
 </div>
+
+
+
 <script>
-  const version = "0.4"; // ← 버전 숫자 변수
+  const version = "0.42"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -201,12 +222,14 @@ function loadCSV() {
 
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
 
+      //console.log(iconSrc);
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
           <img src="${iconSrc}" class="w-16 h-16 mr-2" alt="아이콘">
           <span>${displayName} (${displayValue})</span>
         </div>
-        <input type="radio" name="job" data-value="${value}" data-display-name="${displayName}"  class="w-4 h-4">
+        <input type="radio" name="job" data-value="${value}" data-display-name="${displayName}" data-iconsrc="${iconSrc}"
+          class="w-4 h-4">
       `;
 
       jobsDiv.appendChild(label);
@@ -254,7 +277,6 @@ function loadCSV() {
             ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
           class="w-4 h-4">
         `;
-
       if (value >= 0) positiveDiv.appendChild(label);
       else negativeDiv.appendChild(label);
 
@@ -411,25 +433,28 @@ function loadCSV() {
     function renderSelectedIcons() {
       const resultPanel = document.getElementById("result-panel");
 
-      // 아이콘 영역 없으면 새로 생성
-      let iconContainer = document.getElementById("result-icons");
-      if (!iconContainer) {
-        iconContainer = document.createElement("div");
-        iconContainer.id = "result-icons";
-        iconContainer.className = "flex flex-wrap justify-center gap-2 p-2 border-t";
-        resultPanel.appendChild(iconContainer); // 항상 맨 아래 추가
-      }
+      // 직업 아이콘 컨테이너 생성/획득
+// 초기화
+const jobIconsContainer = document.getElementById("job-icons");
+const otherIconsContainer = document.getElementById("other-icons");
 
-      iconContainer.innerHTML = ""; // 초기화
+jobIconsContainer.innerHTML = "";
+otherIconsContainer.innerHTML = "";
 
-      // 선택된 아이콘 표시
-      selectedIcons.forEach(icon => {
-          const img = document.createElement("img");
-          img.src = icon.src;
-          img.className = "w-6 h-6 rounded shadow";
-          img.title = icon.name; // 마우스 올리면 이름 표시
-          iconContainer.appendChild(img);
-      });
+selectedIcons.forEach(icon => {
+  const img = document.createElement("img");
+  img.src = icon.src;
+  img.title = icon.name;
+  if (img.src.includes("Profession") ){
+    img.className = "w-24 h-24 rounded shadow"; // Tailwind 기준 큰 아이콘
+    jobIconsContainer.appendChild(img);
+  } else {
+    img.className = "w-6 h-6 rounded shadow";  // 일반 아이콘
+    otherIconsContainer.appendChild(img);
+  }
+});
+
+
     }
     // CSV 불러오기
     loadCSV('items.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
