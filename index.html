@@ -9,68 +9,59 @@
         <!-- 파비콘 추가 -->
         <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen ">
-  <div class="w-full lg:max-w-5xl lg:mx-auto bg-white rounded-xl shadow p-4">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="w-full lg:max-w-5xl lg:mx-auto bg-white rounded-xl shadow p-2 sm:p-4">
     
-    <!-- 왼쪽 전체 (스크롤되는 부분) -->
-    <div class="flex-1 ">
-      <!-- 상단 고정 영역 -->
-      <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md max-h-[15vh]">
-        <h2 class="text-2xl font-bold mb-2 text-center">
-          B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
-        </h2>
+    <!-- 상단 -->
+    <div class="sticky top-0 bg-white z-10 p-2 sm:p-4 rounded-2xl shadow-md">
+      <h2 class="text-xl sm:text-2xl font-bold mb-2 text-center">
+        B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
+      </h2>
 
-        <div class="flex space-x-2 mb-4">
-          <!-- 모달 열기 버튼 -->
-          <button id="openModalBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow">
-            공지사항
-          </button>
-          <button id="lang-ko" class="px-4 py-2 bg-gray-200 rounded">한국어</button>
-          <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
-        </div>
+      <div class="flex space-x-2 mb-4 justify-center">
+        <button id="openModalBtn" class="px-3 py-2 sm:px-4 sm:py-2 bg-blue-500 text-white rounded-lg shadow text-sm sm:text-base">
+          공지사항
+        </button>
+        <button id="lang-ko" class="px-3 py-2 bg-gray-200 rounded text-sm sm:text-base">한국어</button>
+        <button id="lang-en" class="px-3 py-2 bg-gray-200 rounded text-sm sm:text-base">English</button>
       </div>
-  
-    <!-- 반응형 레이아웃 -->
-    <div class="grid grid-cols-2 grid-rows-2 gap-2  lg:flex lg:space-x-4 max-h-[70vh]">
+    </div>
 
+    <!-- 컨텐츠 -->
+    <div class="grid grid-cols-2 grid-rows-2 gap-2 lg:flex lg:space-x-4 max-h-[75vh]">
       
-
       <!-- 결과 -->
-      <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
-        <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
-        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
+      <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[180px]">
+        <h3 class="text-base sm:text-lg font-bold text-center lg:hidden">결과</h3>
+        <div id="result-sum" class="p-2 sm:p-3 border rounded-xl bg-white shadow text-lg sm:text-xl font-bold text-center text-green-600">
           합계: 0
         </div>
-        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow text-base sm:text-lg font-semibold text-center text-black-600">
           근력: 0
         </div>
-        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow text-base sm:text-lg font-semibold text-center text-black-600">
           체력: 0
         </div>
-        <div id="result-icons">
-          <!-- 직업 아이콘 -->
-          <div id="job-icons" class="flex justify-center gap-2 mb-2"></div>
+      </div>
 
-          <!-- 일반 아이콘 -->
-          <div id="other-icons" class="flex flex-wrap justify-center gap-2"></div>
-        </div>
-      </div>
       <!-- 직업 -->
-      <div id="jobs" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[200px] ">
-        <h3 class="text-lg font-bold text-center lg:hidden">직업</h3>
+      <div id="jobs" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[180px]">
+        <h3 class="text-base sm:text-lg font-bold text-center lg:hidden">직업</h3>
       </div>
+
       <!-- 긍정 -->
       <div id="positive-items" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[150px]">
-        <h3 class="text-lg font-bold text-center lg:hidden">긍정</h3>
+        <h3 class="text-base sm:text-lg font-bold text-center lg:hidden">긍정</h3>
       </div>
 
       <!-- 부정 -->
       <div id="negative-items" class="border rounded-xl p-2 overflow-y-auto lg:flex-1 min-w-[150px]">
-        <h3 class="text-lg font-bold text-center lg:hidden">부정</h3>
+        <h3 class="text-base sm:text-lg font-bold text-center lg:hidden">부정</h3>
       </div>
 
     </div>
   </div>
+
 
 
 
@@ -102,7 +93,7 @@
 
 
 <script>
-  const version = "0.44"; // ← 버전 숫자 변수
+  const version = "0.46"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
