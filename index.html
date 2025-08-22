@@ -9,13 +9,13 @@
         <!-- 파비콘 추가 -->
         <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white p-6 rounded-2xl shadow-xl w-1/1 max-w-6xl flex">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen ">
+  <div class="bg-white p-6 rounded-2xl shadow-xl w-1/1 max-w-6xl flex  ">
     
     <!-- 왼쪽 전체 (스크롤되는 부분) -->
-    <div class="flex-1">
+    <div class="flex-1 ">
       <!-- 상단 고정 영역 -->
-      <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md">
+      <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md max-h-[15vh]">
         <h2 class="text-2xl font-bold mb-2 text-center">
           B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
         </h2>
@@ -29,24 +29,22 @@
           <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
         </div>
       </div>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white p-4 rounded-2xl shadow-xl w-12/12 max-w-7xl">
-
+  
     <!-- 반응형 레이아웃 -->
-    <div class="grid grid-cols-2 grid-rows-2 gap-2 h-[80vh] lg:flex lg:space-x-4">
+    <div class="grid grid-cols-2 grid-rows-2 gap-2  lg:flex lg:space-x-4 max-h-[70vh]">
 
       
 
       <!-- 결과 -->
       <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
         <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
-        <div id="result-sum" class="p-4 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
+        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
           합계: 0
         </div>
-        <div id="result-strength" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
           근력: 0
         </div>
-        <div id="result-fitness" class="px-4 py-2 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
           체력: 0
         </div>
         <div id="result-icons">
@@ -92,7 +90,6 @@
     <p class="mb-2">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
     <p class="mb-2">- 현자와 느린 학습 아이콘이 거꾸로 표시되던 문제 수정(pzWiki가 트롤)</p>
     <p class="mb-2">- 긍정/부정특성이 서로 반대 색으로 표시되던 문제 수정</p>
-    <p class="mb-2">- 직업 아이콘이 1000px보다 작은 화면에서 1열로 표시되도록 수정</p>
     <p>** 본 항목은 정확하지 않을 수 있습니다. ** </p>
     <p>자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
     
@@ -105,7 +102,7 @@
 
 
 <script>
-  const version = "0.43"; // ← 버전 숫자 변수
+  const version = "0.44"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -134,7 +131,7 @@
   });
 </script>
 
-  <script>
+<script>
     const positiveDiv = document.getElementById('positive-items');
     const negativeDiv = document.getElementById('negative-items');
     const jobsDiv = document.getElementById('jobs');
@@ -175,23 +172,23 @@
 
 
 
-function loadCSV() {
-  Papa.parse("jobs.csv", {
-    download: true,
-    header: true,
-    complete: function(results) {
-      allJobs = results.data;
-      Papa.parse("items.csv", {
-        download: true,
-        header: true,
-        complete: function(results2) {
-          allItems = results2.data;
-          renderUI();
-        }
-      });
-    }
-  });
-}
+  function loadCSV() {  
+    Papa.parse("jobs.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        allJobs = results.data;
+        Papa.parse("items.csv", {
+          download: true,
+          header: true,
+          complete: function(results2) {
+            allItems = results2.data;
+            renderUI();
+          }
+        });
+      }
+    });
+  }
 
   function renderUI() {
     jobsDiv.innerHTML = "";
@@ -446,7 +443,7 @@ selectedIcons.forEach(icon => {
   img.src = icon.src;
   img.title = icon.name;
   if (img.src.includes("Profession") ){
-    img.className = "w-24 h-24 rounded shadow"; // Tailwind 기준 큰 아이콘
+    img.className = "w-16 h-16 rounded shadow"; // Tailwind 기준 큰 아이콘
     jobIconsContainer.appendChild(img);
   } else {
     img.className = "w-6 h-6 rounded shadow";  // 일반 아이콘
@@ -456,22 +453,22 @@ selectedIcons.forEach(icon => {
 
 
     }
-    // CSV 불러오기
-    loadCSV('items.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
-    loadCSV('jobs.csv', jobsDiv, { colorPositive:'text-blue-500', colorNegative:'text-blue-700', type:'radio', name:'job' });
-    updateSum();
+  // CSV 불러오기
+  loadCSV('items.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
+  loadCSV('jobs.csv', jobsDiv, { colorPositive:'text-blue-500', colorNegative:'text-blue-700', type:'radio', name:'job' });
+  updateSum();
 
     // 언어 전환 버튼
-document.getElementById("lang-ko").addEventListener("click", () => {
-  currentLang = "ko";
-  renderUI(); // UI 다시 그림
-});
+  document.getElementById("lang-ko").addEventListener("click", () => {
+    currentLang = "ko";
+    renderUI(); // UI 다시 그림
+  });
 
-document.getElementById("lang-en").addEventListener("click", () => {
-  currentLang = "en";
-  renderUI(); // UI 다시 그림
-});
-  </script>
+  document.getElementById("lang-en").addEventListener("click", () => {
+    currentLang = "en";
+    renderUI(); // UI 다시 그림
+  });
+    </script>
 
 </body>
 </html>
