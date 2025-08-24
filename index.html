@@ -16,17 +16,17 @@
     <div class="flex-1 ">
       <!-- 상단 고정 영역 -->
       <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md max-h-[15vh]">
-        <h2 class="text-2xl font-bold mb-2 text-center">
+        <h2 class="lg:text-2xl sm:text-4xl font-bold mb-2 text-center">
           B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
         </h2>
 
         <div class="flex space-x-2 mb-4">
           <!-- 모달 열기 버튼 -->
-          <button id="openModalBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow">
+          <button id="openModalBtn" class="px-4 py-2 bg-blue-500 text-white lg:text-lg sm:text-2xl rounded-lg shadow">
             공지사항
           </button>
-          <button id="lang-ko" class="px-4 py-2 bg-gray-200 rounded">한국어</button>
-          <button id="lang-en" class="px-4 py-2 bg-gray-200 rounded">English</button>
+          <button id="lang-ko" class="px-4 py-2 lg:text-lg sm:text-2xl bg-gray-200 rounded">한국어</button>
+          <button id="lang-en" class="px-4 py-2 lg:text-lg sm:text-2xl bg-gray-200 rounded">English</button>
         </div>
       </div>
   
@@ -38,13 +38,13 @@
       <!-- 결과 -->
       <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
         <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
-        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow lg:text-md sm:text-xl font-bold text-center text-green-600">
+        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow lg:text-md sm:text-2xl font-bold text-center text-green-600">
           합계: 0
         </div>
-        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-lg font-semibold text-center text-black-600">
+        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-xl font-semibold text-center text-black-600">
           근력: 0
         </div>
-        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-lg font-semibold text-center text-black-600">
+        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-xl font-semibold text-center text-black-600">
           체력: 0
         </div>
         <div id="result-icons">
@@ -102,7 +102,7 @@
 
 
 <script>
-  const version = "0.4.11"; // ← 버전 숫자 변수
+  const version = "0.4.12"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -222,11 +222,11 @@
       //console.log(iconSrc);
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
-          <img src="${iconSrc}" class="w-16 h-16 mr-2" alt="아이콘">
-          <span class="lg:text-sm sm:text-lg">${displayName} (${displayValue})</span>
+          <img src="${iconSrc}" class="lg:w-16 lg:h-16 sm:w-22 sm:h-22 mr-2" alt="아이콘">
+          <span class="lg:text-sm sm:text-xl">${displayName} (${displayValue})</span>
         </div>
         <input type="radio" name="job" data-value="${value}" data-display-name="${displayName}" data-iconsrc="${iconSrc}"
-          class="lg:w-4 lg:h-4 sm:w-6 sm:h-6">
+          class="lg:w-4 lg:h-4 sm:w-8 sm:h-8">
       `;
 
       jobsDiv.appendChild(label);
@@ -267,12 +267,12 @@
 
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
-            <img src="${iconSrc}" class="lg:w-6 lg:h-6 sm:w-12 sm:h-12 mr-2 " alt="아이콘">
-            <span class="${colorClass} lg:text-sm sm:text-lg">${displayName}(${displayValue})</span>
+            <img src="${iconSrc}" class="lg:w-6 lg:h-6 sm:w-16 sm:h-16 mr-2 " alt="아이콘">
+            <span class="${colorClass} lg:text-sm sm:text-xl">${displayName}(${displayValue})</span>
           </div>
           <input type="checkbox"  data-value="${value}" data-display-name="${displayName}" data-iconsrc="${iconSrc}"
             ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
-          class="lg:w-4 lg:h-4 sm:w-6 sm:h-6">
+          class="lg:w-4 lg:h-4 sm:w-8 sm:h-8">
         `;
       if (value >= 0) positiveDiv.appendChild(label);
       else negativeDiv.appendChild(label);
@@ -443,10 +443,10 @@ selectedIcons.forEach(icon => {
   img.src = icon.src;
   img.title = icon.name;
   if (img.src.includes("Profession") ){
-    img.className = "w-16 h-16 rounded shadow"; // Tailwind 기준 큰 아이콘
+    img.className = "lg:w-16 lg:h-16 sm:w-22 sm:h-22 rounded shadow"; // Tailwind 기준 큰 아이콘
     jobIconsContainer.appendChild(img);
   } else {
-    img.className = "w-6 h-6 rounded shadow";  // 일반 아이콘
+    img.className = "lg:w-6 lg:h-6 sm:w-16 sm:h-16 rounded shadow";  // 일반 아이콘
     otherIconsContainer.appendChild(img);
   }
 });
