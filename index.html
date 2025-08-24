@@ -38,13 +38,13 @@
       <!-- 결과 -->
       <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
         <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
-        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow text-xl font-bold text-center text-green-600">
+        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow lg:text-md sm:text-xl font-bold text-center text-green-600">
           합계: 0
         </div>
-        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-lg font-semibold text-center text-black-600">
           근력: 0
         </div>
-        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow text-lg font-semibold text-center text-black-600">
+        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-lg font-semibold text-center text-black-600">
           체력: 0
         </div>
         <div id="result-icons">
@@ -85,7 +85,7 @@
     <h2 class="text-xl font-bold mb-4">공지사항 </h2>
     <p class="mb-2">📢 <span id="version-text2"></span> 업데이트 안내</p>
     
-    <p class="mb-2">- 모바일 대충 지원(2x2그리드) </p>
+    <p class="mb-2">- 모바일 지원(2x2그리드) </p>
     <p class="mb-2">- 특정 직업(피트니스,요리사 등등) 의 긍정 특성 예외 처리 적용</p>
     <p class="mb-2">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
     <p class="mb-2">- 현자와 느린 학습 아이콘이 거꾸로 표시되던 문제 수정(pzWiki가 트롤)</p>
@@ -102,7 +102,7 @@
 
 
 <script>
-  const version = "0.4.10"; // ← 버전 숫자 변수
+  const version = "0.4.11"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -223,10 +223,10 @@
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
           <img src="${iconSrc}" class="w-16 h-16 mr-2" alt="아이콘">
-          <span>${displayName} (${displayValue})</span>
+          <span class="lg:text-sm sm:text-lg">${displayName} (${displayValue})</span>
         </div>
         <input type="radio" name="job" data-value="${value}" data-display-name="${displayName}" data-iconsrc="${iconSrc}"
-          class="w-4 h-4">
+          class="lg:w-4 lg:h-4 sm:w-6 sm:h-6">
       `;
 
       jobsDiv.appendChild(label);
@@ -267,12 +267,12 @@
 
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
-            <img src="${iconSrc}" class="w-6 h-6 mr-2" alt="아이콘">
-            <span class="${colorClass}">${displayName}(${displayValue})</span>
+            <img src="${iconSrc}" class="lg:w-6 lg:h-6 sm:w-12 sm:h-12 mr-2 " alt="아이콘">
+            <span class="${colorClass} lg:text-sm sm:text-lg">${displayName}(${displayValue})</span>
           </div>
           <input type="checkbox"  data-value="${value}" data-display-name="${displayName}" data-iconsrc="${iconSrc}"
             ${Object.entries(statObj).map(([k,v]) => `data-value="${value}"`).join(" ")}
-          class="w-4 h-4">
+          class="lg:w-4 lg:h-4 sm:w-6 sm:h-6">
         `;
       if (value >= 0) positiveDiv.appendChild(label);
       else negativeDiv.appendChild(label);
@@ -407,7 +407,7 @@
           div.id = `result-${statName}`;
           const value = statsTotal[statName];
           div.innerText = value == 0 ? `${label}` : `${label} +${statsTotal[statName]}`;
-          div.className = `py-1 px-2 border rounded-xl bg-white shadow text-lg font-semibold text-center
+          div.className = `py-1 px-2 border rounded-xl bg-white shadow lg:text-sm sm:text-lg font-semibold text-center
             ${value == 0 ? "text-gray-500" : "text-green-600"} `;
 
           // 아이콘 영역보다 위에만 삽입
