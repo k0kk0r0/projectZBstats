@@ -37,16 +37,16 @@
 
       <!-- 결과 -->
       <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[200px]">
-        <h3 class="text-lg font-bold text-center lg:hidden">결과</h3>
-        <div id="result-sum" class="p-3 border rounded-xl bg-white shadow lg:text-md sm:text-2xl mr-2 font-bold text-center text-green-600">
-          합계: 0
-        </div>
-        <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-xl mr-2 text-center text-black-600">
-          근력: 0
-        </div>
-        <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-xl mr-2 text-center text-black-600">
-          체력: 0
-        </div>
+        <h3 class="lg:text-lg sm:text-2xl font-bold text-center lg:hidden">결과</h3>
+          <div id="result-sum" class="p-3 border rounded-xl bg-white shadow lg:text-md sm:text-2xl mr-2 font-bold text-center text-green-600">
+            합계: 0
+          </div>
+          <div id="result-strength" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-2xl mr-2 text-center text-black-600">
+            근력: 0
+          </div>
+          <div id="result-fitness" class="px-2 py-1 border rounded-xl bg-white shadow lg:text-sm sm:text-2xl mr-2 text-center text-black-600">
+            체력: 0
+          </div>
         <div id="result-icons">
           <!-- 직업 아이콘 -->
           <div id="job-icons" class="flex justify-center gap-2 mb-2"></div>
@@ -102,7 +102,7 @@
 
 
 <script>
-  const version = "0.4.13"; // ← 버전 숫자 변수
+  const version = "0.4.14"; // ← 버전 숫자 변수
   document.getElementById("version-text").textContent = `ver ${version}`;
   document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -407,7 +407,7 @@
           div.id = `result-${statName}`;
           const value = statsTotal[statName];
           div.innerText = value == 0 ? `${label}` : `${label} +${statsTotal[statName]}`;
-          div.className = `py-1 px-2 border rounded-xl bg-white shadow lg:text-sm sm:text-lg mr-2 font-semibold text-center
+          div.className = `py-1 px-2 border rounded-xl bg-white shadow lg:text-sm sm:text-xl mr-2 font-semibold text-center
             ${value == 0 ? "text-gray-500" : "text-green-600"} `;
 
           // 아이콘 영역보다 위에만 삽입
@@ -443,7 +443,7 @@ selectedIcons.forEach(icon => {
   img.src = icon.src;
   img.title = icon.name;
   if (img.src.includes("Profession") ){
-    img.className = "lg:w-16 lg:h-16 sm:w-22 sm:h-22 rounded shadow"; // Tailwind 기준 큰 아이콘
+    img.className = "lg:w-16 lg:h-16 sm:w-32 sm:h-32 rounded shadow"; // Tailwind 기준 큰 아이콘
     jobIconsContainer.appendChild(img);
   } else {
     img.className = "lg:w-6 lg:h-6 sm:w-16 sm:h-16 rounded shadow";  // 일반 아이콘
