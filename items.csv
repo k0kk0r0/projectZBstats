@@ -10,7 +10,7 @@
 민첩한;Dextrous,-2,icons/Trait_dextrous.png,,
 소식가;Light Eater,-2,icons/Trait_lighteater.png,,Hearty Appetite
 속독;Fast Reader,-2,icons/Trait_fastreader.png,,Slow Reader
-잠이없는;Wakeful,-2,icons/Trait_needslesssleep.png,,Restless Sleeper
+잠이없는;Wakeful,-2,icons/Trait_needslesssleep.png,,Restless Sleeper;Sleepyhead
 정원사;Gardener,-2,icons/Trait_gardener.png,Agriculture:1,
 재주꾼;Crafty,-3,icons/default.png,,Fast Learner;Slow Learner
 강철 위장;Iron Gut,-3,icons/Trait_irongut.png,,Weak Stomach
@@ -63,7 +63,7 @@
 대식가;Hearty Appetite,4,icons/Trait_heartyappetite.png,,Light Eater
 밀실 공포증;Claustrophobic,4,icons/Trait_claustophobic.png,,
 어두운 귀;Hard of Hearing,4,icons/Trait_hardofhearing.png,,
-잠꾸러기;Sleepyhead,4,icons/Trait_needsmoresleep.png,,
+잠꾸러기;Sleepyhead,4,icons/Trait_needsmoresleep.png,,Wakeful;Restless Sleeper
 질병에 취약함;Prone to Illness,4,icons/Trait_hypercondriac.png,,
 평화주의자;Reluctant Fighter,4,icons/Trait_pacifist.png,,
 천식환자;Short of Breath,5,icons/Trait_asthmatic.png,,
@@ -71,7 +71,7 @@
 건강 이상;Out of Shape,6,icons/Trait_out_of_shape.png,fit:-2,
 느린 학습;Slow Learner,6,icons/Trait_slowlearner.png,,Crafty;Fast Learner
 비체계적인;Disorganized,6,icons/Trait_disorganized.png,,Organized
-수면장애;Restless Sleeper,6,icons/Trait_insomniac.png,,Wakeful
+수면장애;Restless Sleeper,6,icons/Trait_insomniac.png,,Wakeful;Sleepyhead
 연약함;Weak,6,icons/Trait_feeble.png,str:-2,
 문맹;Illiterate,8,icons/Trait_illiterate.png,,
 얇은 피부;Thin-skinned,8,icons/Trait_thinskinned.png,,Thick Skinned
