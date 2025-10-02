@@ -9,7 +9,7 @@
 등산애호가;Outdoorsy,-2,icons/Trait_outdoorsman.png,,
 민첩한;Dextrous,-2,icons/Trait_dextrous.png,,All Thumbs
 소식가;Light Eater,-2,icons/Trait_lighteater.png,,Hearty Appetite;Obese
-속독;Fast Reader,-2,icons/Trait_fastreader.png,,Slow Reader;illiterate
+속독;Fast Reader,-2,icons/Trait_fastreader.png,,Slow Reader;Illiterate
 잠이없는;Needs Less Sleep,-2,icons/Trait_needslesssleep.png,,Needs More Sleep
 정원사;Gardener,-2,icons/Trait_gardener.png,Agriculture:1,
 재주꾼;Crafty,-3,icons/Trait_default.png,,Fast Learner;Slow Learner
@@ -35,12 +35,12 @@
 대장장이 기술;Blacksmith Knowledge,-6,icons/Trait_blacksmith.png,Maintenance:1;Blacksmith:2,
 도보 여행자;Hiker,-6,icons/Trait_hiker.png,Foraging:1;Trapping:1,
 빠른 회복;Fast Healer,-6,icons/Trait_fasthealer.png,,Slow Healer
-싸움꾼;Brawler,-6,icons/Trait_brawler.png,Blunt:1;Axe:1,
+싸움꾼;Brawler,-6,icons/Trait_brawler.png,LongBlunt:1;Axe:1,
 예민한 청력;Keen Hearing,-6,icons/Trait_keenhearing.png,,Deaf;Hard of Hearing
 정찰병 경험;Former Scout,-6,icons/Trait_formerscout.png,FirstAid:1;Foraging:1,
 통통함;Stout,-6,icons/Trait_stout.png,str:2,Weak;Feeble;Strong
 현자;Fast Learner,-6,icons/Trait_fastlearner.png,,Crafty;Slow Learner
-황무지 지식;Wilderness Knowledge,-8,icons/Trait_wildernessknowledge.png,FlintKnapping:0;Foraging:1;Maintenance:1;Carving:1,,
+황무지 지식;Wilderness Knowledge,-8,icons/Trait_wildernessknowledge.png,FlintKnapping:0;Foraging:1;Maintenance:1;Carving:1,
 능숙함;Handy,-8,icons/Trait_handy.png,Maintenance:1;Carving:1;Carpentry:1;Masonry:1,
 두꺼운 피부;Thick Skinned,-8,icons/Trait_thickskinned.png,,Thin-skinned
 사냥꾼;Hunter,-8,icons/Trait_hunter.png,Butchering:1;ShortBlade:1;Aiming:1;Trapping:1;Sneaking:1,
