@@ -16,8 +16,8 @@
     <div class="flex-1 ">
       <!-- 상단 고정 영역 -->
       <div class="sticky top-0 bg-white z-10 p-4 rounded-2xl shadow-md max-h-[15vh]">
-        <h2 class="lg:text-2xl sm:text-4xl font-bold mb-2 text-center">
-          B42 project Zomboid 직업 및 특성 계산기 <span id="version-text"></span>
+        <h2 id="titlename" class="lg:text-2xl sm:text-4xl font-bold mb-2 text-center">
+          B42 project Zomboid 직업 및 특성 계산기 
         </h2>
 
         <div class="flex space-x-2 mb-4">
@@ -37,11 +37,18 @@
 
       <!-- 결과 -->
       <div id="result-panel" class="border rounded-xl p-2 overflow-y-auto lg:w-40 min-w-[240px] mg-2">
+        <h3 id="result-preview" class="lg:text-lg sm:text-2xl font-bold text-center lg:hidden">결과 미리보기</h3> <!--UI변경함수 확인-->
+        
+        <div id="result-sum" class="gap-2 p-3 border rounded-md bg-white shadow text-md lg:text-md sm:text-2xl mr-2 font-bold text-center text-green-600">
+          합계: 0
+        </div>
+
         <div id="resultPn" class="lg:columns-1 sm:columns-2 gap-2">
-          <h3 class="lg:text-lg sm:text-2xl font-bold text-center lg:hidden">결과</h3>
+            <!--
             <div id="result-sum" class="gap-2 p-3 border rounded-md bg-white shadow lg:text-md sm:text-2xl mr-2 font-bold text-center text-green-600">
               합계: 0
             </div>
+            -->
             <div id="result-strength" class="gap-2 px-2 py-1 border rounded-md bg-white shadow lg:text-sm sm:text-2xl mr-2 text-center text-black-600">
               근력: 0
             </div>
@@ -51,12 +58,13 @@
           
         </div>
         <div id="result-icons">
-            <!-- 직업 아이콘 -->
-            <div id="job-icons" class="flex justify-center gap-2 mb-2"></div>
+          <!-- 직업 아이콘 -->
+          <div id="job-icons" class="flex justify-center gap-2 mb-2"></div>
 
-            <!-- 일반 아이콘 -->
-            <div id="other-icons" class="flex flex-wrap justify-center gap-2 mr-1"></div>
-          </div>
+          <!-- 일반 아이콘 -->
+          <div id="other-icons" class="flex flex-wrap justify-center gap-2 mr-1"></div>
+        </div>
+      
       </div>
       <!-- 직업 -->
       <div id="jobs" class="border rounded-md p-2 overflow-y-auto lg:flex-1 min-w-[200px] ">
@@ -74,67 +82,150 @@
 
     </div>
   </div>
-
-
-
-<!-- 모달 (처음엔 hidden) -->
-<div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-  <div class="bg-white rounded-2xl shadow-xl w-192 p-6 relative">
-    <!-- 닫기 버튼 -->
-    <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
-      ✕
+  <!-- 결과생성 버튼 -->
+  <div class="flex justify-center mt-4 w-full">
+    <button id="generateResultBtn" class="px-6 py-3 bg-blue-500 text-white lg:text-2xl sm:text-4xl rounded-lg shadow w-full">
+      결과 생성
     </button>
-    
-    <h2 class="text-xl font-bold mb-4">공지사항 </h2>
-    <p class="mb-2">📢 <span id="version-text2"></span> 업데이트 안내</p>
-    
-    <p class="mb-2">- 모바일 지원(2x2그리드) </p>
-    <p class="mb-2">- 중복으로 선택 불가능한 트레잇 작업 중</p>    
-    <p class="mb-2">- Crafty(재주꾼) 특성 추가</p>
-    <p class="mb-2">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
-    <p class="mb-2">- 긍정/부정특성이 서로 반대 색으로 표시되던 문제 수정</p>
-    <p>** 본 항목은 정확하지 않을 수 있습니다. ** </p>
-    <p>자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
-    
-    <div class="mt-4 text-right">
-      <button id="closeModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg">닫기</button>
+  </div>
+  <!-- 하단 바 -->
+  <div class="mt-4 text-center">
+    <p class="text-gray-500 text-2xl lg:text-sm"> <span id="version-text"></span> | 제작자: K0KK0R0 |
+       위키 링크: 
+       <a href="https://pzwiki.net/wiki/Trait" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm"> Trait </a> | 
+       <a href="https://pzwiki.net/wiki/Occupation" target="_blank" class="text-blue-500 underlin text-2xl lg:text-sm"> Occupation </a> | 
+       프좀갤: <a href="https://gall.dcinside.com/mgallery/board/lists/?id=pzom" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm">링크</a>
+    </p>
+  </div>
+
+  <!-- 모달 (처음엔 hidden) -->
+  <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-2xl p-6 relative">
+      <!-- 닫기 버튼 -->
+      <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
+        ✕
+      </button>
+      
+      <h2 class="text-4xl lg:text-xl  font-bold mb-4">공지사항 </h2>
+      <p class="mb-2 text-3xl md:text-lg"> 📢 <span id="version-text2"></span> 업데이트 안내</p>
+      
+      <p class="mb-1 text-4xl lg:text-lg">- 결과값을 png파일로 저장 할 수 있도록 작업 </p>
+      <p class="mb-1 text-4xl lg:text-lg">- 중복으로 선택 불가능한 트레잇 작업</p>    
+      <p class="mb-1 text-4xl lg:text-lg">- Crafty(재주꾼) 특성 추가</p>
+      <p class="mb-1 text-4xl lg:text-lg">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
+      <p class="mb-1 text-2xl lg:text-lg">** 본 항목은 정확하지 않을 수 있습니다. ** </p>
+      <p class="mb-1 text-2xl lg:text-lg"> 자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
+      
+      <!--
+      <div class="mt-4 text-right">
+        <button id="closeModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">닫기</button>
+      </div>
+      -->
     </div>
   </div>
-</div>
+  <!-- 결과값 모달-->
+  <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
+      <!-- 닫기 버튼 -->
+      <button id="closeResultModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
+        ✕
+      </button>
+      
+      <h2 class="text-4xl lg:text-xl  font-bold mb-4">결과 출력하기 </h2>
+      <div id="detailedResults" class="text-2xl lg:text-lg">
+        <!-- 상세 결과 내용이 여기에 추가됩니다. -->
+      </div>
+      
+     
+      <div class="mt-4 text-center">
+        <button id="saveImgBt" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>
+         <!--
+        <button id="closeResultModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">닫기</button>
+         -->
+      </div>
+     
+    </div>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const version = "0.4.12.5"; // ← 버전 숫자 변수
+    document.getElementById("version-text").textContent = `ver ${version}`;
+    document.getElementById("version-text2").textContent = `ver ${version}`;
 
-<script>
-  const version = "0.4.12.4"; // ← 버전 숫자 변수
-  document.getElementById("version-text").textContent = `ver ${version}`;
-  document.getElementById("version-text2").textContent = `ver ${version}`;
+    //공지사항 모달
+    const modal = document.getElementById("modal");
+    const openBtn = document.getElementById("openModalBtn");
+    const closeBtn = document.getElementById("closeModalBtn");
 
-  const modal = document.getElementById("modal");
-  const openBtn = document.getElementById("openModalBtn");
-  const closeBtn = document.getElementById("closeModalBtn");
-  const closeBtn2 = document.getElementById("closeModalBtn2");
+    openBtn.addEventListener("click", () => {
+      modal.classList.remove("hidden");
+    });
 
-  openBtn.addEventListener("click", () => {
-    modal.classList.remove("hidden");
-  });
-
-  closeBtn.addEventListener("click", () => {
-    modal.classList.add("hidden");
-  });
-
-  closeBtn2.addEventListener("click", () => {
-    modal.classList.add("hidden");
-  });
-
-  // 모달 바깥 클릭 시 닫기
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
+    closeBtn.addEventListener("click", () => {
       modal.classList.add("hidden");
-    }
-  });
-</script>
+    });
 
-<script src="core.js">  </script>
+   
+
+    // 모달 바깥 클릭 시 닫기
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+    //결과값 모달
+    const resultModal = document.getElementById("resultModal");
+    const openBtnResult = document.getElementById("generateResultBtn");
+    const closeResultBtn = document.getElementById("closeResultModalBtn");
+    //const closeResultBtn2 = document.getElementById("closeResultModalBtn2");
+    openBtnResult.addEventListener("click", () => {
+      resultModal.classList.remove("hidden");
+      //내용추가
+      const value1 = document.getElementById("result-icons").innerHTML;
+      const value2 = document.getElementById("result-sum").innerHTML;
+      const value3 = document.getElementById("resultPn").innerHTML;
+      document.getElementById("detailedResults").innerHTML =`
+          
+            ${value1}            
+            <div class="columns-2 gap-4 mb-2">${value3}</div>
+            <div class="mb-4 gap-2 p-3 border rounded-md bg-white shadow text-md lg:text-lg sm:text-4xl mr-2 font-bold text-center text-green-600">  
+            ${value2} 
+            </div>
+            <h3 class="text-center lg:text-lg sm:text-xl font-bold mt-4">${translations[currentLang].title} ver${version} | K0KK0R0</h3>
+          
+          <h2>ㅤ</h2>
+      `;
+    });
+    closeResultBtn.addEventListener("click", () => {
+      resultModal.classList.add("hidden");
+    });
+    /*
+    closeResultBtn2.addEventListener("click", () => {
+      resultModal.classList.add("hidden");
+    });
+    */
+    // 모달 바깥 클릭 시 닫기
+    resultModal.addEventListener("click", (e) => {
+      if (e.target === resultModal) {
+        resultModal.classList.add("hidden");
+      }   
+    });
+    
+    const saveImgBtn = document.getElementById("saveImgBt");
+    saveImgBtn.addEventListener("click", () => {
+      // 모달 안의 흰색 상자만 캡처
+        const target = document.getElementById("detailedResults");
+        html2canvas(target, { scale: 1.5, backgroundColor: "#ffffff" }).then(canvas => {
+          const link = document.createElement("a");
+          link.download = "B42stat_capture.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        });
+      });
+  </script>
+
+  <script src="core.js">ㅤ</script>
    
 </body>
 </html>

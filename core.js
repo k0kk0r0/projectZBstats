@@ -10,12 +10,10 @@
     // 번역 테이블
     let translations = {
       ko: {
-        sum: "포인트",
         strength: "근력",
         fitness: "체력"
       },
       en: {
-        sum: "Point",
         strength: "Strength",
         fitness: "Fitness"
       }
@@ -57,6 +55,15 @@
   }
 
   function renderUI() {
+
+    //번역
+    let titleName = document.getElementById("titlename");
+    titleName.innerText = translations[currentLang].title;
+    let saveImgBtn = document.getElementById("saveImgBt");
+    saveImgBtn.innerText = translations[currentLang].save;
+    let generateBtn = document.getElementById("generateResultBtn");
+    generateBtn.innerText = translations[currentLang].generate;
+
     jobsDiv.innerHTML = "";
     positiveDiv.innerHTML = "";
     negativeDiv.innerHTML = "";
@@ -258,6 +265,9 @@
           }
       });
 
+      let resultPreview = document.getElementById("result-preview");
+      resultPreview.innerText = translations[currentLang].preview;
+
       let resultSum = document.getElementById("result-sum");
       resultSum.classList.remove("text-red-600", "text-green-600");
       if (sum < 0) {
@@ -333,8 +343,21 @@
     img.src = icon.src;
     img.title = icon.name;
     if (img.src.includes("Profession") ){
+        const label = document.createElement("label");
+        label.className = "flex items-center justify-between p-1 border rounded-lg cursor-pointer"; 
+        const displayName = icon.name;
+        label.innerHTML = `
+            <div class="flex items-center">
+                <img src="${img.src}" class="lg:w-16 lg:h-16 sm:w-32 sm:h-32" alt="아이콘">
+                <span class="text-black-600 lg:text-md sm:text-xl text-bold">${displayName}</span>
+            </div>
+            `;
+        jobIconsContainer.appendChild(label);
+
+            /*
         img.className = "lg:w-16 lg:h-16 sm:w-32 sm:h-32 rounded shadow"; // Tailwind 기준 큰 아이콘
         jobIconsContainer.appendChild(img);
+        */
     } else {
         //img.className = "lg:w-6 lg:h-6 sm:w-16 sm:h-16 rounded shadow lg:show md:show sm:hidden";  // 일반 아이콘
         //otherIconsContainer.appendChild(img);
@@ -346,7 +369,7 @@
         label.innerHTML = `
             <div class="flex items-center">
                 <img src="${img.src}" class="lg:w-4 lg:h-4 sm:w-12 sm:h-12" alt="아이콘">
-                <span class="${colorClass} lg:text-sm sm:text-lg text-bold">${displayName}</span>
+                <span class="${colorClass} lg:text-md md:text-md sm:text-xl text-bold">${displayName}</span>
             </div>
             `;
         otherIconsContainer.appendChild(label);
