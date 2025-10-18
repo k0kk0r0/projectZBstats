@@ -2,15 +2,26 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Project Zomboid B42 stats</title>
+    <title>Project Zomboid B42 stats</title>
+    <script>    // 배경색 기본값
+      window.bgColorClass = "bg-white-500";
+      window.bgbtbgColorClass = "bg-gray-200";
+      window.textColorClass = "text-black";
+      window.darkbgColorClass = "bg-gray-700";
+      
+      window.darkbtbgColorClass = "bg-gray-800";
+      window.darktextColorClass = "text-white";
+      window.blueBgColorClass = "bg-blue-500";
+      window.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     
         <!-- 파비콘 추가 -->
-        <link rel="icon" type="image/png" href="icons/Trait_fastlearner.png">
+        <link rel="icon" type="image/png" href="icons/Trait_slowlearner.png">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen ">
-  <div class="w-full lg:max-w-5xl lg:mx-auto bg-white rounded-xl shadow p-4">
+<body class="bg-white text-black flex items-center justify-center min-h-screen">
+  <div class="w-full lg:max-w-5xl lg:mx-auto bg-gray-300 rounded-xl shadow p-4">
     
     <!-- 왼쪽 전체 (스크롤되는 부분) -->
     <div class="flex-1 ">
@@ -25,13 +36,14 @@
           <button id="openModalBtn" class="px-4 py-2 bg-blue-500 text-white lg:text-lg sm:text-2xl rounded-lg shadow">
             공지사항
           </button>
+          <button id="toggleDark" class="px-4 py-2 lg:text-lg sm:text-2xl bg-gray-200 rounded">어둠의Dark</button>
           <button id="lang-ko" class="px-4 py-2 lg:text-lg sm:text-2xl bg-gray-200 rounded">한국어</button>
           <button id="lang-en" class="px-4 py-2 lg:text-lg sm:text-2xl bg-gray-200 rounded">English</button>
         </div>
       </div>
   
-    <!-- 반응형 레이아웃 -->
-    <div class="grid grid-cols-2 grid-rows-2 gap-2  lg:flex lg:space-x-4 max-h-[70vh]">
+    <!-- 반응형 레이아웃, 최대높이-->
+    <div class="grid grid-cols-2 grid-rows-2 gap-2 lg:flex lg:space-x-4 sm:max-h-[60vh] lg:max-h-[70vh]">
 
       
 
@@ -84,35 +96,37 @@
   </div>
   <!-- 결과생성 버튼 -->
   <div class="flex justify-center mt-4 w-full">
-    <button id="generateResultBtn" class="px-6 py-3 bg-blue-500 text-white lg:text-2xl sm:text-4xl rounded-lg shadow w-full">
+    <button id="generateResultBtn" class="px-6 py-8 bg-blue-500 text-white lg:text-2xl sm:text-4xl rounded-lg shadow w-full">
       결과 생성
     </button>
   </div>
   <!-- 하단 바 -->
   <div class="mt-4 text-center">
     <p class="text-gray-500 text-2xl lg:text-sm"> <span id="version-text"></span> | 제작자: K0KK0R0 |
+      프좀갤: <a href="https://gall.dcinside.com/mgallery/board/lists/?id=pzom" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm">링크</a> |
        위키 링크: 
-       <a href="https://pzwiki.net/wiki/Trait" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm"> Trait </a> | 
-       <a href="https://pzwiki.net/wiki/Occupation" target="_blank" class="text-blue-500 underlin text-2xl lg:text-sm"> Occupation </a> | 
-       프좀갤: <a href="https://gall.dcinside.com/mgallery/board/lists/?id=pzom" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm">링크</a>
+       <a href="https://pzwiki.net/wiki/Trait" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm"> Trait</a> ,
+       <a href="https://pzwiki.net/wiki/Occupation" target="_blank" class="text-blue-500 underline text-2xl lg:text-sm"> Occupation</a>  | 
+       
     </p>
   </div>
 
   <!-- 모달 (처음엔 hidden) -->
-  <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-2xl p-6 relative">
       <!-- 닫기 버튼 -->
-      <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
+      <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl sm:text-4xl">
         ✕
       </button>
       
       <h2 class="text-4xl lg:text-xl  font-bold mb-4">공지사항 </h2>
       <p class="mb-2 text-3xl md:text-lg"> 📢 <span id="version-text2"></span> 업데이트 안내</p>
       
-      <p class="mb-1 text-4xl lg:text-lg">- 결과값을 png파일로 저장 할 수 있도록 작업 </p>
-      <p class="mb-1 text-4xl lg:text-lg">- 중복으로 선택 불가능한 트레잇 작업</p>    
-      <p class="mb-1 text-4xl lg:text-lg">- Crafty(재주꾼) 특성 추가</p>
-      <p class="mb-1 text-4xl lg:text-lg">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
+      <p class="mb-1 text-2xl lg:text-lg">- 어둠의 Dark모드 적용(시스템 기본값을 따라갑니다) </p>
+      <p class="mb-1 text-2xl lg:text-lg">- 결과값을 png파일로 저장 할 수 있도록 작업 </p>
+      <p class="mb-1 text-2xl lg:text-lg">- 중복으로 선택 불가능한 트레잇 작업</p>    
+      <p class="mb-1 text-2xl lg:text-lg">- Crafty(재주꾼) 특성 추가</p>
+      <p class="mb-1 text-2xl lg:text-lg">- 선택한 트레잇 아이콘이 결과창에 뜨도록 수정</p>
       <p class="mb-1 text-2xl lg:text-lg">** 본 항목은 정확하지 않을 수 있습니다. ** </p>
       <p class="mb-1 text-2xl lg:text-lg"> 자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
       
@@ -124,24 +138,24 @@
     </div>
   </div>
   <!-- 결과값 모달-->
-  <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+  <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
       <!-- 닫기 버튼 -->
-      <button id="closeResultModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black">
+      <button id="closeResultModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl sm:text-4xl">
         ✕
       </button>
       
       <h2 class="text-4xl lg:text-xl  font-bold mb-4">결과 출력하기 </h2>
-      <div id="detailedResults" class="text-2xl lg:text-lg">
+      <div id="detailedResults" class="text-2xl lg:text-lg space-y-4">
         <!-- 상세 결과 내용이 여기에 추가됩니다. -->
       </div>
       
      
-      <div class="mt-4 text-center">
-        <button id="saveImgBt" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>
-         <!--
-        <button id="closeResultModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">닫기</button>
-         -->
+      <div class="mt-4 text-center space-x-4">
+        <button id="saveImgBt" class="px-4 py-6 mg-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>  
+        <!--  
+        <button id="gameStartBt" class="px-4 py-6 mg-4 bg-blue-500 text-white rounded-lg sm:text-4xl lg:text-2xl"> ???:진행시켜 </button>
+        -->
       </div>
      
     </div>
@@ -149,7 +163,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const version = "0.4.12.5"; // ← 버전 숫자 변수
+    const version = "0.4.12.7"; // ← 버전 숫자 변수
     document.getElementById("version-text").textContent = `ver ${version}`;
     document.getElementById("version-text2").textContent = `ver ${version}`;
 
@@ -165,7 +179,13 @@
     closeBtn.addEventListener("click", () => {
       modal.classList.add("hidden");
     });
-
+    
+    //다크모드 버튼
+    document.getElementById("toggleDark").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      isDarkMode = !isDarkMode;
+      renderUI();
+    });
    
 
     // 모달 바깥 클릭 시 닫기
@@ -188,12 +208,14 @@
       document.getElementById("detailedResults").innerHTML =`
           
             ${value1}            
-            <div class="columns-2 gap-4 mb-2">${value3}</div>
-            <div class="mb-4 gap-2 p-3 border rounded-md bg-white shadow text-md lg:text-lg sm:text-4xl mr-2 font-bold text-center text-green-600">  
+            <div class="columns-2 gap-2 space-y-2">${value3}</div>
+            <div class="mb-4 gap-2 p-3 border rounded-md bg-white-500 shadow text-md lg:text-lg sm:text-4xl mr-2 font-bold text-center text-green-600">  
             ${value2} 
             </div>
-            <h3 class="text-center lg:text-lg sm:text-xl font-bold mt-4">${translations[currentLang].title} ver${version} | K0KK0R0</h3>
-          
+            <div class="mb-2 space-y-0">
+              <h3 class="text-center lg:text-2xl sm:text-2xl font-bold">"${translations[currentLang].ment}"</h3>
+              <h3 class="text-center lg:text-sm sm:text-lg font-bold mt-2">${translations[currentLang].title} ver ${version} | K0KK0R0</h3>
+            </div>
           <h2>ㅤ</h2>
       `;
     });

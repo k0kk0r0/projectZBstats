@@ -1,3 +1,4 @@
+
     const positiveDiv = document.getElementById('positive-items');
     const negativeDiv = document.getElementById('negative-items');
     const jobsDiv = document.getElementById('jobs');
@@ -7,6 +8,10 @@
     let allItems = [];
     let currentLang = "ko"; // "ko" 또는 "en"
     let items = [];
+
+
+
+
     // 번역 테이블
     let translations = {
       ko: {
@@ -55,6 +60,41 @@
   }
 
   function renderUI() {
+    //다크모드
+    const elements = document.querySelectorAll("div, label, body, button");
+
+    elements.forEach(el => {
+      // Tailwind 클래스 직접 추가/제거
+      if(el.classList.contains("bg-blue-500", "bg-gray-300")){
+          //강조색은 만지지 않음
+
+      }else{
+        if (window.isDarkMode) {
+          //다크모드인 경우
+          
+          if(el.tagName === "BUTTON"){
+            el.classList.remove(bgbtbgColorClass, "text-black");
+            el.classList.add(darkbtbgColorClass, darktextColorClass);
+          }else{
+            el.classList.remove("bg-white", "text-black");
+            el.classList.add(darkbgColorClass, darktextColorClass);
+          }
+        } else {
+          //라이트모드인 경우
+          if( el.tagName === "BUTTON"){
+            el.classList.remove(darkbtbgColorClass, darktextColorClass);
+            el.classList.add( bgbtbgColorClass, "text-black");
+
+          }else{
+            el.classList.remove(darkbgColorClass, darktextColorClass);
+            el.classList.add("bg-white", "text-black");
+          
+          }
+        }
+
+      }
+      
+    });
 
     //번역
     let titleName = document.getElementById("titlename");
@@ -67,6 +107,7 @@
     jobsDiv.innerHTML = "";
     positiveDiv.innerHTML = "";
     negativeDiv.innerHTML = "";
+
 
     // ---- 직업 ----
     allJobs.forEach(row => {
@@ -83,12 +124,14 @@
       statPairs.forEach(pair => {
           const [key, val] = pair.split(":");
           if(key) statObj[key] = parseInt(val) || 0;
-    });
+      });
+
       const displayValue = value >= 0 ? `+${value}` : `${value}`;
 
       const label = document.createElement("label");
       //label.className = "flex items-center p-2 border rounded-lg cursor-pointer";
-      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer";
+      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer bg-white-600";
+      //label.classList.add( bgColorClass, textColorClass);
 
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
 
@@ -107,11 +150,16 @@
       const input = label.querySelector("input");
       // statObj의 모든 key-value를 dataset으로 저장
       for (const statKey in statObj) {
-      input.dataset[statKey] = statObj[statKey];  // 예: input.dataset.str = 2
+        input.dataset[statKey] = statObj[statKey];  // 예: input.dataset.str = 2
       }
       input.dataset.value = value;
       input.addEventListener("change", updateSum);
     });
+    //jobsDiv 첫 번째 항목을 기본 선택
+    const firstJobInput = jobsDiv.querySelector('input[type="radio"]');
+    if (firstJobInput) {
+      firstJobInput.checked = true;
+    }
 
     // ---- 특성 ----
     allItems.forEach(row => {
@@ -133,14 +181,16 @@
         let bannedTraits = row["금지항목"].split(";");
 
 
-      const colorClass = value >= 0 ? "text-red-600" : "text-green-600";
+      let colorClass2 = value >= 0 ? "text-red-600" : "text-green-600";
+      const colorClass =  isDarkMode ? "text-white-600" : colorClass2;
       const displayValue = value >= 0 ? `+${value}` : `${value}`;
 
       const label = document.createElement("label");
       label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer" ;
+      //label.classList.add( bgColorClass, textColorClass);
       label.id = names[1];
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
-
+     
       label.innerHTML = `
         <div class="flex items-center min-w-[150px]">
             <img src="${iconSrc}" class="lg:w-6 lg:h-6 sm:w-16 sm:h-16 mr-2 " alt="아이콘">
@@ -178,159 +228,169 @@
     Object.keys(extraStats).forEach(k => delete extraStats[k]);
   }
 
-    const extraStats = {}; // key: div id, value: div element
-    let selectedIcons = [];
-    // 합계 계산
-    function updateSum() {
-      resetExtraStats(); 
-      selectedIcons = []; // 아이콘 배열 초기화
+  const extraStats = {}; // key: div id, value: div element
+  let selectedIcons = [];
+
+
+
+  /////////////////////////// 합계 계산
+  function updateSum() {
+    resetExtraStats(); 
+    selectedIcons = []; // 아이콘 배열 초기화
+  
+
+    let sum = 0, strength = 5, fitness = 5; maxstrength=10; maxfitness=10;
+    const statsTotal = {};
+    const ignoreStats = []; // 무시할 통계 항목
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+        //직업 먼저 ignore 확인
+        if (input.checked) {
+          // stats 처리
+          for (const key in input.dataset) {
+            if (key != 'value' && key != 'str' && key != 'fit' && key != 'displayName'&& key != 'iconsrc' ) {
+              const statName = key;
+              //console.log(statName);
+              let value = parseInt(input.dataset[key]) || 0;
+              if(value == 0  ){
+                ignoreStats.push(statName); // 무시할 통계 항목 추가
+              } 
+            }
+            
+          }
+        }
+    });
     
 
-      let sum = 0, strength = 5, fitness = 5; maxstrength=10; maxfitness=10;
-      const statsTotal = {};
-      const ignoreStats = []; // 무시할 통계 항목
-      document.querySelectorAll('input[type="radio"]').forEach(input => {
-          //직업 먼저 ignore 확인
-          if (input.checked) {
-            // stats 처리
-            for (const key in input.dataset) {
-              if (key != 'value' && key != 'str' && key != 'fit' && key != 'displayName'&& key != 'iconsrc' ) {
-                const statName = key;
-                //console.log(statName);
-                let value = parseInt(input.dataset[key]) || 0;
-                if(value == 0  ){
-                  ignoreStats.push(statName); // 무시할 통계 항목 추가
-                } 
+    
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+
+        if (input.checked) {
+
+
+          if(ignoreStats.length>0){
+            if(translations[currentLang][ignoreStats[0]] == input.dataset.displayName){
+              //console.log(`무시: ${input.dataset.displayName}`);
+              return; // 무시할 항목이면 건너뛰기
+            } 
+          }
+          const iconSrc = input.dataset.iconsrc;
+          if (iconSrc != null && input.dataset.displayName != null) {
+            // 배열에 같은 src 가진 게 이미 있는지 체크
+            const exists = selectedIcons.some(icon => icon.src === iconSrc);
+            if (!exists) {
+                selectedIcons.push({
+                    src: iconSrc,
+                    name: input.dataset.displayName, // 툴팁에 표시할 이름
+                    colorText: input.type === "radio" ? "text-blue-600" : (parseInt(input.dataset.value) >= 0 ? "text-red-600" : "text-green-600")  
+                });
+            }
+        }
+          
+        //금지리스트
+          // console.log(input.dataset.banned);
+          const bannedList = input.dataset.banned ? input.dataset.banned.split(";") : [];
+          if(bannedList.length>0){
+              for(let i =0; i<bannedList.length; i++){
+                  if(bannedList[i].trim() !== ""){
+                      addBannedList(bannedList[i]);
+                  }
               }
+          }
+              
+
+          sum += parseInt(input.dataset.value) || 0;
+          strength += parseInt(input.dataset.str) || 0;
+          fitness += parseInt(input.dataset.fit) || 0;
+          maxstrength += parseInt(input.dataset.maxstr) || 0;
+          maxfitness += parseInt(input.dataset.maxfit) || 0;
+
+          const val = parseInt(input.dataset.value) || 0;
+          // stats 처리
+          for (const key in input.dataset) {
+            if (key != 'value' && key != 'str' && key != 'fit'&& key != 'maxstr' && key != 'maxfit' && key != 'displayName'&& key != 'iconsrc' && key != 'banned') {
+              const statName = key;
+              let value = parseInt(input.dataset[key]) || 0;
+              //console.log( value);
+              statsTotal[statName] = (statsTotal[statName] || 0) + parseInt(input.dataset[key] || 0);
               
             }
           }
-      });
-     
-
-      
-      document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
-
-          if (input.checked) {
-
-
-            if(ignoreStats.length>0){
-              if(translations[currentLang][ignoreStats[0]] == input.dataset.displayName){
-                //console.log(`무시: ${input.dataset.displayName}`);
-                return; // 무시할 항목이면 건너뛰기
-              } 
-            }
-            const iconSrc = input.dataset.iconsrc;
-            if (iconSrc != null && input.dataset.displayName != null) {
-              // 배열에 같은 src 가진 게 이미 있는지 체크
-              const exists = selectedIcons.some(icon => icon.src === iconSrc);
-              if (!exists) {
-                  selectedIcons.push({
-                      src: iconSrc,
-                      name: input.dataset.displayName, // 툴팁에 표시할 이름
-                      colorText: input.type === "radio" ? "text-blue-600" : (parseInt(input.dataset.value) >= 0 ? "text-red-600" : "text-green-600")  
-                  });
-              }
-          }
-            
-          //금지리스트
-           // console.log(input.dataset.banned);
-            const bannedList = input.dataset.banned ? input.dataset.banned.split(";") : [];
-            if(bannedList.length>0){
-                for(let i =0; i<bannedList.length; i++){
-                    if(bannedList[i].trim() !== ""){
-                        addBannedList(bannedList[i]);
-                    }
-                }
-            }
-               
-
-            sum += parseInt(input.dataset.value) || 0;
-            strength += parseInt(input.dataset.str) || 0;
-            fitness += parseInt(input.dataset.fit) || 0;
-            maxstrength += parseInt(input.dataset.maxstr) || 0;
-            maxfitness += parseInt(input.dataset.maxfit) || 0;
-
-            const val = parseInt(input.dataset.value) || 0;
-            // stats 처리
-            for (const key in input.dataset) {
-              if (key != 'value' && key != 'str' && key != 'fit'&& key != 'maxstr' && key != 'maxfit' && key != 'displayName'&& key != 'iconsrc' && key != 'banned') {
-                const statName = key;
-                let value = parseInt(input.dataset[key]) || 0;
-                //console.log( value);
-                statsTotal[statName] = (statsTotal[statName] || 0) + parseInt(input.dataset[key] || 0);
-               
-              }
-            }
-          }
-      });
-
-      let resultPreview = document.getElementById("result-preview");
-      resultPreview.innerText = translations[currentLang].preview;
-
-      let resultSum = document.getElementById("result-sum");
-      resultSum.classList.remove("text-red-600", "text-green-600");
-      if (sum < 0) {
-        resultSum.classList.add("text-red-600");
-      } else {
-        resultSum.classList.add("text-green-600");
-      }
-      resultSum.innerText =        `${translations[currentLang].sum} : ${sum}`;
-
-      let resultStrength = document.getElementById("result-strength");
-      resultStrength.classList.remove("text-red-600", "text-black-600");
-      if (strength >10 || strength < 0 || maxstrength <10) {
-        resultStrength.classList.add("text-red-600");
-      } else {
-        resultStrength.classList.add("text-black-600");
-      }
-      resultStrength.innerText =  `${translations[currentLang].strength } : ${strength}/${maxstrength}`;
-      let resultFitness = document.getElementById("result-fitness");
-      resultFitness.classList.remove("text-red-600", "text-black-600"); 
-      if ( fitness >10 || fitness< 0 || maxfitness <10) {
-        resultFitness.classList.add("text-red-600");
-      } else {
-        resultFitness.classList.add("text-black-600");
-      }
-      document.getElementById("result-fitness").innerText =    `${translations[currentLang].fitness} : ${fitness}/${maxfitness}`;
-
-      // 동적 항목 표시
-      for (const statName in statsTotal) {
-        const key = statName.trim();
-        const label = translations[currentLang][key] || statName; 
-
-        if (!extraStats[statName]) {
-          const div = document.createElement('div');
-         
-          div.id = `result-${statName}`;
-          const value = statsTotal[statName];
-          div.innerText = value == 0 ? `${label}` : `${label} +${statsTotal[statName]}`;
-          div.className = `py-1 px-2 border rounded-md bg-white shadow lg:text-sm sm:text-2xl gap-2 mr-2 font-semibold text-center
-            ${value == 0 ? "text-gray-500" : "text-green-600"} `;
-
-          // 아이콘 영역보다 위에만 삽입
-          const resultPanel = document.getElementById('resultPn'); //result-panel
-          const iconContainer = document.getElementById('result-icons');
-          if (iconContainer) {
-            //resultPanel.insertBefore(div, iconContainer); // 아이콘 영역 위에 넣기
-            resultPanel.appendChild(div);
-          } else {
-            resultPanel.appendChild(div);
-          }
-          extraStats[statName] = div;
-        } else {
-          extraStats[statName].innerText = `${label} +${statsTotal[statName]}`;
         }
+    });
+
+    let resultPreview = document.getElementById("result-preview");
+    resultPreview.innerText = translations[currentLang].preview;
+
+    let resultSum = document.getElementById("result-sum");
+ 
+    resultSum.classList.remove("text-red-600", "text-green-600");
+    if (sum < 0) {
+      resultSum.classList.add("text-red-600");
+    } else {
+      resultSum.classList.add("text-green-600");
+    }
+    resultSum.innerText =        `${translations[currentLang].sum} : ${sum}`;
+
+
+    let resultStrength = document.getElementById("result-strength");
+
+    resultStrength.classList.remove("text-red-600", "text-black-600");
+    if (strength >10 || strength < 0 || maxstrength <10) {
+      resultStrength.classList.add("text-red-600");
+    } else {
+      resultStrength.classList.add("text-black-600");
+    }
+    resultStrength.innerText =  `${translations[currentLang].strength } : ${strength}/${maxstrength}`;
+
+
+    let resultFitness = document.getElementById("result-fitness");
+    resultFitness.classList.remove("text-red-600", "text-black-600"); 
+
+    if ( fitness >10 || fitness< 0 || maxfitness <10) {
+      resultFitness.classList.add("text-red-600");
+    } else {
+      resultFitness.classList.add("text-black-600");
+    }
+    document.getElementById("result-fitness").innerText =    `${translations[currentLang].fitness} : ${fitness}/${maxfitness}`;
+
+    // 동적 항목 표시
+    for (const statName in statsTotal) {
+      const key = statName.trim();
+      const label = translations[currentLang][key] || statName; 
+
+      if (!extraStats[statName]) {
+        const div = document.createElement('div');
+        
+        div.id = `result-${statName}`;
+        const value = statsTotal[statName];
+        div.innerText = value == 0 ? `${label}` : `${label} +${statsTotal[statName]}`;
+        div.className = `py-1 px-2 border rounded-md bg-white-500 shadow lg:text-sm sm:text-2xl gap-2 mr-2 font-semibold text-center
+          ${value == 0 ? "text-gray-500" : "text-green-600"} `;
+
+        //div.classList.add( bgColorClass, textColorClass);
+        // 아이콘 영역보다 위에만 삽입
+        const resultPanel = document.getElementById('resultPn'); //result-panel
+        const iconContainer = document.getElementById('result-icons');
+        if (iconContainer) {
+          //resultPanel.insertBefore(div, iconContainer); // 아이콘 영역 위에 넣기
+          resultPanel.appendChild(div);
+        } else {
+          resultPanel.appendChild(div);
+        }
+        extraStats[statName] = div;
+      } else {
+        extraStats[statName].innerText = `${label} +${statsTotal[statName]}`;
       }
-      // 아이콘 표시
-        renderSelectedIcons();
-        renderBannedUI();
+    }
+    // 아이콘 표시
+      renderSelectedIcons();
+      renderBannedUI();
     }
 
  function renderSelectedIcons() {
-      const resultPanel = document.getElementById("result-panel");
+    const resultPanel = document.getElementById("result-panel");
 
-        // 직업 아이콘 컨테이너 생성/획득
+    // 직업 아이콘 컨테이너 생성/획득
     // 초기화
     const jobIconsContainer = document.getElementById("job-icons");
     const otherIconsContainer = document.getElementById("other-icons");
@@ -345,11 +405,12 @@
     if (img.src.includes("Profession") ){
         const label = document.createElement("label");
         label.className = "flex items-center justify-between p-1 border rounded-lg cursor-pointer"; 
+       // label.classList.add( bgColorClass, textColorClass);
         const displayName = icon.name;
         label.innerHTML = `
             <div class="flex items-center">
-                <img src="${img.src}" class="lg:w-16 lg:h-16 sm:w-32 sm:h-32" alt="아이콘">
-                <span class="text-black-600 lg:text-md sm:text-xl text-bold">${displayName}</span>
+                <img src="${img.src}" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24" alt="아이콘">
+                <span class="text-black-600 lg:text-lg sm:text-4xl text-bold">${displayName}</span>
             </div>
             `;
         jobIconsContainer.appendChild(label);
@@ -364,12 +425,13 @@
 
         const label = document.createElement("label");
         label.className = "flex items-center justify-between p-1 border rounded-lg cursor-pointer"; 
-        const colorClass = icon.colorText;
+        //label.classList.add( bgColorClass, textColorClass);
+        const colorClass =  isDarkMode ? "text-white-600" :icon.colorText;
         const displayName = icon.name;
         label.innerHTML = `
             <div class="flex items-center">
                 <img src="${img.src}" class="lg:w-4 lg:h-4 sm:w-12 sm:h-12" alt="아이콘">
-                <span class="${colorClass} lg:text-md md:text-md sm:text-xl text-bold">${displayName}</span>
+                <span class="${colorClass} lg:text-lg sm:text-2xl text-bold">${displayName}</span>
             </div>
             `;
         otherIconsContainer.appendChild(label);
