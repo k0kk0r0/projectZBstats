@@ -38,6 +38,7 @@
         // 이제 translations.ko["Agriculture"] -> "농업"
         // translations.en["Agriculture"] -> "Agriculture"
       }
+      
     });
 
 
@@ -53,15 +54,16 @@
           complete: function(results2) {
             allItems = results2.data;
             renderUI();
+            darkModRenderUI();
           }
         });
       }
     });
   }
-
-  function renderUI() {
+  
+  function darkModRenderUI(){
     //다크모드
-    const elements = document.querySelectorAll("div, label, body, button");
+    const elements = document.querySelectorAll("div, label, body, button"); //, button
 
     elements.forEach(el => {
       // Tailwind 클래스 직접 추가/제거
@@ -71,30 +73,71 @@
       }else{
         if (window.isDarkMode) {
           //다크모드인 경우
+          if(el.classList.contains("bg-white-600")){
+
+          }else{
+            if(el.classList.contains(bgbtbgColorClass)){
+              el.classList.remove(bgbtbgColorClass);
+              el.classList.add(darkbtbgColorClass);
+            }
+          }
           
+          if(el.classList.contains(bgColorClass)){
+            el.classList.remove(bgColorClass);
+            el.classList.add(darkbgColorClass); 
+          }
+          if(el.classList.contains(textColorClass)){
+            el.classList.remove(textColorClass);
+            el.classList.add(darktextColorClass); 
+          }
+          /*
           if(el.tagName === "BUTTON"){
-            el.classList.remove(bgbtbgColorClass, "text-black");
+            el.classList.remove(bgbtbgColorClass, textColorClass);
             el.classList.add(darkbtbgColorClass, darktextColorClass);
           }else{
-            el.classList.remove("bg-white", "text-black");
+            el.classList.remove(bgColorClass, textColorClass);
             el.classList.add(darkbgColorClass, darktextColorClass);
-          }
+          }*/
         } else {
           //라이트모드인 경우
+          if(el.classList.contains("bg-white-600")){
+
+          }else{
+            if(el.classList.contains(darkbtbgColorClass)){
+              el.classList.remove(darkbtbgColorClass);
+              el.classList.add(bgbtbgColorClass);
+            }
+          }
+          
+          if(el.classList.contains(darkbgColorClass)){
+            el.classList.remove(darkbgColorClass);
+            el.classList.add(bgColorClass); 
+          }
+          if(el.classList.contains(darktextColorClass)){
+            el.classList.remove(darktextColorClass);
+            el.classList.add(textColorClass); 
+          }
+          /*
           if( el.tagName === "BUTTON"){
             el.classList.remove(darkbtbgColorClass, darktextColorClass);
-            el.classList.add( bgbtbgColorClass, "text-black");
+            el.classList.add( bgbtbgColorClass, textColorClass);
 
           }else{
             el.classList.remove(darkbgColorClass, darktextColorClass);
-            el.classList.add("bg-white", "text-black");
+            el.classList.add(bgColorClass, textColorClass);
           
           }
+            */
         }
 
       }
       
     });
+  }
+  function renderUI() {
+    
+    //다크모드 처리
+    darkModRenderUI();
 
     //번역
     let titleName = document.getElementById("titlename");
@@ -130,8 +173,8 @@
 
       const label = document.createElement("label");
       //label.className = "flex items-center p-2 border rounded-lg cursor-pointer";
-      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer bg-white-600";
-      //label.classList.add( bgColorClass, textColorClass);
+      label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer";
+      label.classList.add( bgColorClass, textColorClass);
 
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
 
@@ -187,7 +230,7 @@
 
       const label = document.createElement("label");
       label.className = "flex items-center justify-between p-2 border rounded-lg cursor-pointer" ;
-      //label.classList.add( bgColorClass, textColorClass);
+      label.classList.add( bgColorClass, textColorClass);
       label.id = names[1];
       const iconSrc = row.icon && row.icon.trim() !== "" ? row.icon : "default.png";
      
@@ -353,7 +396,7 @@
     }
     document.getElementById("result-fitness").innerText =    `${translations[currentLang].fitness} : ${fitness}/${maxfitness}`;
 
-    // 동적 항목 표시
+    // 추가능력치 등 동적 항목 표시
     for (const statName in statsTotal) {
       const key = statName.trim();
       const label = translations[currentLang][key] || statName; 
@@ -364,10 +407,11 @@
         div.id = `result-${statName}`;
         const value = statsTotal[statName];
         div.innerText = value == 0 ? `${label}` : `${label} +${statsTotal[statName]}`;
-        div.className = `py-1 px-2 border rounded-md bg-white-500 shadow lg:text-sm sm:text-2xl gap-2 mr-2 font-semibold text-center
+        div.className = `py-1 px-2 border rounded-md shadow lg:text-sm sm:text-2xl gap-2 mr-2 font-semibold text-center
           ${value == 0 ? "text-gray-500" : "text-green-600"} `;
 
-        //div.classList.add( bgColorClass, textColorClass);
+        div.classList.add( isDarkMode? darkbgColorClass : bgColorClass);
+
         // 아이콘 영역보다 위에만 삽입
         const resultPanel = document.getElementById('resultPn'); //result-panel
         const iconContainer = document.getElementById('result-icons');
@@ -403,9 +447,10 @@
     img.src = icon.src;
     img.title = icon.name;
     if (img.src.includes("Profession") ){
+      //직업 추가
         const label = document.createElement("label");
         label.className = "flex items-center justify-between p-1 border rounded-lg cursor-pointer"; 
-       // label.classList.add( bgColorClass, textColorClass);
+        label.classList.add( bgColorClass, textColorClass);
         const displayName = icon.name;
         label.innerHTML = `
             <div class="flex items-center">
@@ -422,11 +467,11 @@
     } else {
         //img.className = "lg:w-6 lg:h-6 sm:w-16 sm:h-16 rounded shadow lg:show md:show sm:hidden";  // 일반 아이콘
         //otherIconsContainer.appendChild(img);
-
+        //특성추가
         const label = document.createElement("label");
         label.className = "flex items-center justify-between p-1 border rounded-lg cursor-pointer"; 
-        //label.classList.add( bgColorClass, textColorClass);
-        const colorClass =  isDarkMode ? "text-white-600" :icon.colorText;
+        label.classList.add( bgColorClass);
+        const colorClass =  isDarkMode ? (icon.colorText == "text-red-600"?  darktextColorClass : icon.colorText) : icon.colorText;
         const displayName = icon.name;
         label.innerHTML = `
             <div class="flex items-center">
@@ -439,7 +484,8 @@
     
     
     });
-    
+  
+    darkModRenderUI();
 }
 
 //금지항목 처리
