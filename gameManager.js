@@ -6,6 +6,12 @@ const timerTxt = document.getElementById('timer');
 const mapNameTxt = document.getElementById('mapName');
 const zombieNumTxt = document.getElementById("zombieNum");
 
+//체력, 스태미나 바
+const healthBar = document.getElementById("healthBar");
+const helathTxt = document.getElementById("healthTxt");
+const staminaBar = document.getElementById("staminaBar");
+const staminaTxt = document.getElementById("staminaTxt");
+
 //장소의 상단 설비 아이콘들
 const generatorIcon = document.getElementById('generatorOn');
 const generatorOffIcon = document.getElementById('generatorOff');
@@ -16,7 +22,8 @@ const frigeIcon = document.getElementById('fridge');
 const ovenIcon = document.getElementById('oven');
 const microIcon = document.getElementById('micro');
 const storageIcon = document.getElementById('storage'); 
-const facilityIconsList = [generatorIcon, generatorOffIcon, bedIcon, sofaIcon, faucetIcon, frigeIcon, ovenIcon, microIcon, storageIcon];
+const livestockIcon = document.getElementById("livestock");
+const facilityIconsList = [generatorIcon, generatorOffIcon, bedIcon, sofaIcon, faucetIcon, frigeIcon, ovenIcon, microIcon, storageIcon,livestockIcon];
 
 //게임 매니저 객체
 const player = document.getElementById('player');
@@ -86,8 +93,7 @@ attackBt.addEventListener('click', () => {
     if(delaying) return;//딜레이 중이면 무시
     stopResting();
     if(!isAnimating){
-        playerAttack(weapon.multiHit);
-        
+        playerAttack(weapon.multiHit);    
     }
     characterMove();
     advanceTurn();
@@ -103,7 +109,11 @@ restBt.addEventListener('click', () => {
     isResting = !isResting;
     log("휴식중...");
     interval =  setInterval(() => {
+        //스태미나 회복
+        stamina += 10;
+        if(stamina>=100){stamina=100}
         advanceTurn();
+        renderGameUI();
     },400); 
 });
 nextMapBt.addEventListener('click',() =>{
@@ -114,9 +124,11 @@ nextMapBt.addEventListener('click',() =>{
     if(mapNum==mapData.length){
         if(currentMapData.name =="road"){
             //현재 길거리에 있을 때에만
-            if(rng<0.2){
+            if(rng<0.15){
                 mapData.push( findMapData('store_tool'));
-            }else if(rng<0.5){
+            }else if(rng<0.35){
+                mapData.push( findMapData("livestock"));
+            }else if(rng<0.6){
                 mapData.push( findMapData("house"));
             }else{
                 mapData.push( findMapData('road'));
@@ -208,6 +220,8 @@ const stunClass = 'rotate-90';
 //플레이어 데이터
 let weapon;
 let backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
+let stamina;
+let health;
 
 weaponImg.addEventListener('click', ()=>{ 
    changeWeapon();
@@ -309,13 +323,19 @@ async function ResetAllGame(){
     hour= 7; //게임 시간 (시간단위)
     min = 0; //게임 시간 (분단위)
     day = 1; //현재 날짜
+
+    zombies = [];
+
     currentMapData=null;
+    mapNum=0;
     mapData = [];
     mapData.push( findMapData('house'));
     
     isResting = false;
     delaying = false;    
     weapon =null;
+    health = 100;
+    stamina = 100;
 
     //맵 이동 함수
     mapData[0].zombieNum = 1; //난이도 하락
@@ -336,11 +356,11 @@ function mapSetting(data) {
     interval = null;
     spawnZombies(currentMapData.zombieNum); //좀비소환
     bgLightDark( currentMapData );
-    //맵 보관함 아이템 출력
+    //맵 보관함 아이템 출력(임시)
     if(currentMapData.dropItems.length>0){
         console.log(currentMapData.dropItems);
     }
-   
+   renderGameUI();
 }
 //배경 밤낮
 function bgLightDark(data){
@@ -417,8 +437,11 @@ function advanceTurn() {
             zombies[i].isStunning --;
         }
     }
+    renderGameUI();
+    setTimeout(() => {
+        TurnEnd();
+    },  200);
     
-    TurnEnd();
 }
 function zombieAttack( timedelay=600){
     if(zombies.length>0){
@@ -459,7 +482,13 @@ function zombieAttack( timedelay=600){
     }
 }
 function TurnEnd() {
+    
     if(!delaying) {
+        
+        //스텟 회복
+        stamina++;
+        if(stamina>100){stamina=100}
+
         min += 10; //15분씩 증가
         // 분이 60이 넘으면 시간 증가
         if(min >= 60) {
@@ -476,22 +505,44 @@ function TurnEnd() {
 }
 //플레이어 변수 계산
 function playerStat(){
-    
+    let panicMd = findMoodle('Moodle_Icon_Panic');
     //패닉수치 계산(임시)
-    let panicMd = moodles.find(m => m.icon.id == 'Moodle_Icon_Panic');
     if(zombies.length>2){
         const panic = Math.floor(zombies.length/3);
         const n = panic>4 ? 4:panic;
-        panicMd.value = -n;
+        setMoodleValue('Moodle_Icon_Panic',-n);
     }else{
-        panicMd.value = 0;
+        setMoodleValue('Moodle_Icon_Panic',0);
     }
-    return {panic:-panicMd.value };
+    let enduValue = 0;
+    if(stamina<=75){enduValue-- };
+    if(stamina<=50){enduValue--};
+    if(stamina<=25){enduValue--};
+    if(stamina<=10){enduValue--};
+    setMoodleValue('Moodle_Icon_Endurance', enduValue);
+
+    //데이터반환
+    return {panic:-panicMd.value, endurance: enduValue};
+}
+function findMoodle(_moodleName){
+    return moodles.find(m => m.icon.id == _moodleName);
+}
+function setMoodleValue(_moodleName, _value){
+    let moodle = findMoodle(_moodleName);
+    moodle.value = _value;
+    return moodle;
+}
+function getMoodleValue(_moodleName){
+    return findMoodle(_moodleName).value;
 }
 
 function renderGameUI(){
     //플레이어 스텟 
     playerStat();
+    healthBar.style.width = ( health )+"%";
+    helathTxt.textContent = parseInt(health) +"/100";
+    staminaBar.style.width = ( stamina )+"%";
+    staminaTxt.textContent = parseInt(stamina) +"/100";
 
     //시설 표시
     for(let i=0; i<facilityIconsList.length; i++){
@@ -616,21 +667,35 @@ function stopResting(){
     log("휴식 끝");
 }
 function playerAttack(multiHit){
-    let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
+
+    //무기 스태미나 소모
+    stamina -= weapon.stamina;
+    if(stamina<=0){
+        stamina = 0;
+    }
     let stat = playerStat();
 
 
-    log(`${translations[currentLang][weapon.name]}으로 공격! `);
+    log(`${translations[currentLang][weapon.name]}으로 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
+    let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
     for(let i =0 ; i< num; i++){
         //대미지 계산
-        let damage = Math.ceil( weapon.damage/2 + randomInt(0,weapon.damage/2) );
+        let damage = weapon.damage/2 + randomInt(0,weapon.damage/2);
         if(zombies[i].isStunning>0){
             damage = damage*2;
         }
         //패닉
         if(stat.panic>0){
-            damage = Math.ceil( damage * (5-stat.panic)/5 );
+            damage =  damage * (5-stat.panic)/5 ;
         }
+        //스태미나 고갈(Endurance)
+        if(stat.endurance==-1){ damage * 0.5}
+        if(stat.endurance==-2){damage *0.2}
+        if(stat.endurance==-3){damage*0.1}
+        if(stat.endurance==-4){damage*0.05}
+
+        //대미지 최종 정수화
+        damage = Math.ceil(damage);
         zombies[i].hp -= damage;
         damageTxt[i].textContent = `-${damage}`;
         damageTxt[i].classList.remove('hidden');
@@ -655,8 +720,16 @@ function playerAttack(multiHit){
         //좀비가 없다
        
     }
+    
+    renderGameUI();
 }
 function playerPush(multiHit){
+
+    stamina -= 5;//고정값?
+    if(stamina<=0){
+        stamina = 0;
+    }
+    playerStat();
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
     log(`밀치기!`);
     for(let i =0 ; i <num ; i++){
@@ -675,6 +748,7 @@ function playerPush(multiHit){
             moveZombie(i,10);
         }
     }
+    renderGameUI();
 }
 //좀비 움직임
 function moveZombie(i , distance=20) {
