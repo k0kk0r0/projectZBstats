@@ -44,17 +44,21 @@ const Moodle_Endurance= document.getElementById("Moodle_Icon_Endurance");
 const Moodle_Panic = document.getElementById("Moodle_Icon_Panic");
 const Moodle_Sick = document.getElementById("Moodle_Icon_Sick");
 const Moodle_Stressed = document.getElementById("Moodle_Icon_Stressed");
+const Moodle_Zombie = document.getElementById("Moodle_Icon_Zombie");
+
 const bar_Tired = document.getElementById("pgBar_Tired");
 const bar_Endurance= document.getElementById("pgBar_Endurance");
 const bar_Panic = document.getElementById("pgBar_Panic");
 const bar_Sick = document.getElementById("pgBar_Sick");
 const bar_Stressed = document.getElementById("pgBar_Stressed");
+const bar_Zombie = document.getElementById("pgBar_Zombie");
 const moodles = [
     {icon:Moodle_Tired,bar:bar_Tired , value:0 },
     {icon:Moodle_Endurance , bar:bar_Endurance , value:0 },
     {icon:Moodle_Panic , bar:bar_Panic , value:0 },
     {icon:Moodle_Sick , bar:bar_Sick , value:0 },
-    {icon:Moodle_Stressed , bar:bar_Stressed , value:0 }
+    {icon:Moodle_Stressed , bar:bar_Stressed , value:0 },
+    {icon:Moodle_Zombie, bar:bar_Zombie, value:0}
 ];
 //명령 버튼
 const pushBt = document.getElementById('pushBt');
@@ -64,7 +68,9 @@ const sleepBt = document.getElementById('sleepBt');
 const atHomeBt = document.getElementById('atHomeBt');
 const nextMapBt = document.getElementById('nextMapBt');
 
+
 //무기 아이콘
+const weaponIcon = document.getElementById('weaponIcon');
 const weaponImg = document.getElementById('weaponImg');
 const weaponName = document.getElementById('weaponName');
 //가방 아이콘
@@ -72,12 +78,15 @@ const backpackIcon = document.getElementById(`backpackIcon`);
 const backpackImg = document.getElementById(`backpackImg`);
 const backpackName = document.getElementById('backpackName');
 
+const commandBts = [pushBt,attackBt,restBt,sleepBt,atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
+
 //로그텍스트 추가
 const logtxt = document.getElementById("logText");
 
 //버튼함수
 pushBt.addEventListener('click', () => {
     //캐릭터 밀치기(좀비 넘어트리기)
+     if(gameOver)return;
     if(delaying) return; //딜레이 중이면 무시
     stopResting();
     if(!isAnimating){
@@ -85,38 +94,54 @@ pushBt.addEventListener('click', () => {
         playerPush(parseInt(weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
     }
     
-    characterMove();
+    playerMove();
     advanceTurn();
 });
 attackBt.addEventListener('click', () => {
     //캐릭터 공격
+     if(gameOver)return;
     if(delaying) return;//딜레이 중이면 무시
     stopResting();
     if(!isAnimating){
         playerAttack(weapon.multiHit);    
     }
-    characterMove();
+    
+    playerMove();
     advanceTurn();
+    callZombies(1,0.02);//좀비추가
 });
 
 restBt.addEventListener('click', () => {
     //휴식 및 턴 넘기기
+     if(gameOver)return;
     if(delaying) return; //딜레이 중이면 무시
     if(isResting){
         stopResting();
         return;
     }
-    isResting = !isResting;
+    isResting = true;
     log("휴식중...");
+    renderGameUI();
     interval =  setInterval(() => {
-        //스태미나 회복
-        stamina += 10;
-        if(stamina>=100){stamina=100}
+        //스태미나, 체력 회복
+        if(stamina<100 || health < 100){
+             stamina += 10;
+             health += 5;
+            if(stamina>=100)stamina=100;
+            if(health>=100)health=100;
+            if(stamina>=100 && health>=100){
+                //회복하다가 한 번 멈춤
+                stopResting();
+            }
+        }
+        
+       
         advanceTurn();
         renderGameUI();
     },400); 
 });
 nextMapBt.addEventListener('click',() =>{
+     if(gameOver)return;
     if(delaying)return;//딜레이 중이면 무시
     //다음 맵 이동
     mapNum++;
@@ -149,6 +174,7 @@ nextMapBt.addEventListener('click',() =>{
     }
      zombieAttack(0); //맵 이동 시 좀비 공격
      setTimeout(() => { 
+        if(gameOver)return;
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
@@ -160,6 +186,7 @@ nextMapBt.addEventListener('click',() =>{
     
 })
 atHomeBt.addEventListener('click', ()=>{
+     if(gameOver)return;
     if(delaying)return;//딜레이 중이면 무시
     //이전 맵 이동
     mapNum--;
@@ -176,6 +203,7 @@ atHomeBt.addEventListener('click', ()=>{
     }
      zombieAttack(0); //맵 이동 시 좀비 공격
      setTimeout(() => { 
+        if(gameOver)return;
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
@@ -198,6 +226,7 @@ let mapDatas = [];//맵리스트
 //턴 진행 함수
 let debug = true;
 let delaying = false;
+let gameOver =false;
 
 let interval = null;
 let basePos = 60; // 기본 위치 (기준점)
@@ -222,6 +251,7 @@ let weapon;
 let backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
 let stamina;
 let health;
+let zombieKillCount;
 
 weaponImg.addEventListener('click', ()=>{ 
    changeWeapon();
@@ -331,19 +361,22 @@ async function ResetAllGame(){
     mapData = [];
     mapData.push( findMapData('house'));
     
+    gameOver=false;
     isResting = false;
     delaying = false;    
     weapon =null;
     health = 100;
     stamina = 100;
+    zombieKillCount=0;
 
     //맵 이동 함수
     mapData[0].zombieNum = 1; //난이도 하락
     mapSetting(mapData[0]);
 
-    characterMove();
+    playerMove();
     renderGameUI();
     changeWeapon();
+    commandBtsVisible(true);
     
     //준비완료
     logtxt.innerHTML='';
@@ -411,24 +444,9 @@ function log(text, value=0) {
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-//좀비생성함수
-function spawnZombie(num){
-    zombies.push( { id:num, hp: 40, isAnimating: false ,isStunning:0}) ;
-}
-function spawnZombies(num){
-    const rng = randomInt(0,num);
-    for(let i =0 ; i <rng; i++){
-        spawnZombie(i);
-    }
-    for(let i =0; i< zombies.length; i++){
-        if(i<zombieElements.length){
-            zombieElements[i].style.right =(200- 60*i)+ "px";
-            zombieElements[i].classList.remove('hidden');
-            zombieElements[i].classList.remove(stunClass);
-        }
-    }
-}
+
 function advanceTurn() {
+     if(gameOver)return;
     //좀비반격
     zombieAttack();
     for(let i =0;i<zombies.length;i++){
@@ -439,61 +457,27 @@ function advanceTurn() {
     }
     renderGameUI();
     setTimeout(() => {
+         if(gameOver)return;
         TurnEnd();
     },  200);
     
 }
-function zombieAttack( timedelay=600){
-    if(zombies.length>0){
-        const attackNum = 2;
-        const num = (attackNum > zombies.length)? zombies.length: attackNum;
-        //console.log(num);
-        if(delaying==false){
-            delaying = true;
-            stopResting();
-        }
-        for(let i =0; i< num; i++){
-            if(zombies[i].hp > 0 && zombies[i].isStunning <= 0 ){
-                setTimeout(() => {
-                    log(`좀비${i}의 공격!`);
-                    moveZombie(i,-45);
-                    //TurnEnd();
-                },  timedelay +i*250);
-            }
-        }
-         setTimeout(() => { 
-            delaying = false;
-            // isStunning 값을 기준으로 오름차순 정렬, 순서변경
-            let swap =false;
-            for(let i =0 ; i <zombies.length ; i++){
-                if(zombies[i].isStunning>0){
-                    swap=true;
-                }
-            }
-            if(swap){
-                log(`뒤에 있던 좀비가 넘어진 좀비를 밟고 지나왔다`);
-                zombies.sort((a, b) => a.isStunning - b.isStunning);
-            }
-            
-            
-            TurnEnd();
-        }, timedelay+400+num*200);
-        
-    }
-}
+
 function TurnEnd() {
-    
+    if(gameOver)return;
     if(!delaying) {
         
         //스텟 회복
         stamina++;
         if(stamina>100){stamina=100}
-
+        if(health>100){health=100}
         min += 10; //15분씩 증가
         // 분이 60이 넘으면 시간 증가
         if(min >= 60) {
             min = 0;
             hour++;
+            //좀비소환
+            callZombies(1);
             bgLightDark(currentMapData);
         }
         if(hour >= 24) {
@@ -501,29 +485,11 @@ function TurnEnd() {
             day++;
         }
     }
+    
+
     renderGameUI();
 }
-//플레이어 변수 계산
-function playerStat(){
-    let panicMd = findMoodle('Moodle_Icon_Panic');
-    //패닉수치 계산(임시)
-    if(zombies.length>2){
-        const panic = Math.floor(zombies.length/3);
-        const n = panic>4 ? 4:panic;
-        setMoodleValue('Moodle_Icon_Panic',-n);
-    }else{
-        setMoodleValue('Moodle_Icon_Panic',0);
-    }
-    let enduValue = 0;
-    if(stamina<=75){enduValue-- };
-    if(stamina<=50){enduValue--};
-    if(stamina<=25){enduValue--};
-    if(stamina<=10){enduValue--};
-    setMoodleValue('Moodle_Icon_Endurance', enduValue);
 
-    //데이터반환
-    return {panic:-panicMd.value, endurance: enduValue};
-}
 function findMoodle(_moodleName){
     return moodles.find(m => m.icon.id == _moodleName);
 }
@@ -535,38 +501,18 @@ function setMoodleValue(_moodleName, _value){
 function getMoodleValue(_moodleName){
     return findMoodle(_moodleName).value;
 }
-
-function renderGameUI(){
-    //플레이어 스텟 
-    playerStat();
-    healthBar.style.width = ( health )+"%";
-    helathTxt.textContent = parseInt(health) +"/100";
-    staminaBar.style.width = ( stamina )+"%";
-    staminaTxt.textContent = parseInt(stamina) +"/100";
-
-    //시설 표시
-    for(let i=0; i<facilityIconsList.length; i++){
-        const icon = facilityIconsList[i];
-        if(currentMapData.thisFacilities.includes(icon.id)){
-            setFacilityIconVisibility(icon.id, true);
-        }else{
-            setFacilityIconVisibility(icon.id, false);
-        }
-    }
-    //무들표시
-    for(let i = 0; i < moodles.length;i++){
-        if(moodles[i].value==0){
-            moodles[i].icon.classList.add('hidden');
-        }else{
-            moodles[i].icon.classList.remove('hidden');
-            moodles[i].bar.src = `uxicons/pgbar${moodles[i].value}.png`;
-        }
-    }
+function renderPlayer(){
     //플레이어 동작
+     if(gameOver){
+        player.classList.toggle('hidden', true);
+        playerRest.classList.toggle('hidden', true);
+     }
     player.classList.toggle('hidden', isResting);
     playerRest.classList.toggle('hidden', !isResting);
-
-    //좀비 표시
+}
+function renderZombie(){
+    if(gameOver)return;
+    //좀비 동작 표시
     for(let i =0; i< zombies.length; i++){
         if(i>=zombieElements.length){
             break;
@@ -582,7 +528,8 @@ function renderGameUI(){
             zombieElements[i].classList.remove(stunClass);
         }
         if(zombies[i].hp <=0){
-            //체력 감소 시 좀비 숨김
+            //체력 감소 시 좀비 숨김, 좀비 사망
+            zombieKillCount++;
             zombies.splice(i,1);
             i--;
         }else{
@@ -597,16 +544,38 @@ function renderGameUI(){
              zombieElements[i].classList.add('hidden');
         }
     }
-    
-    //필드이동표시
-    /*
-    if(zombies.length>0){
-        nextMapBt.classList.add('hidden');
-        atHomeBt.classList.add('hidden');
-    }else{
-        nextMapBt.classList.remove('hidden');
-        atHomeBt.classList.remove('hidden');        
-    }*/
+}
+function renderMooldes(){
+    //무들표시
+    for(let i = 0; i < moodles.length;i++){
+        if(moodles[i].value==0){
+            moodles[i].icon.classList.add('hidden');
+        }else{
+            moodles[i].icon.classList.remove('hidden');
+            moodles[i].bar.src = `uxicons/pgbar${moodles[i].value}.png`;
+        }
+    }
+}
+function renderGameUI(){
+    //플레이어 스텟 
+    playerStat();
+    healthBar.style.width = ( health )+"%";
+    helathTxt.textContent = parseInt(health) +"/100";
+    staminaBar.style.width = ( stamina )+"%";
+    staminaTxt.textContent = parseInt(stamina) +"/100";
+
+
+    //시설 표시
+    for(let i=0; i<facilityIconsList.length; i++){
+        const icon = facilityIconsList[i];
+        if(currentMapData.thisFacilities.includes(icon.id)){
+            setFacilityIconVisibility(icon.id, true);
+        }else{
+            setFacilityIconVisibility(icon.id, false);
+        }
+    }
+    renderMooldes();
+    renderZombie();
 
     //타이머 표시
     timerTxt.textContent = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') } ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
@@ -619,7 +588,30 @@ function renderGameUI(){
     }else{
         zombieNumTxt.classList.add('hidden');
     }   
-   
+    renderPlayer();
+    //플레이어 사망, 게임오버
+    checkGameOver();
+}
+function checkGameOver(){
+    if(!gameOver && health<=0){
+        playerStat();
+        stopResting();
+        commandBtsVisible(false);
+        interval =null;
+        gameOver =true;
+        delaying= true;
+        //게임오버
+        renderPlayer();
+        renderMooldes();
+        log(`= 게임오버 =`);
+        log(`당신은 ${day}일, ${hour}시간 동안 생존하였습니다.`);
+        log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
+    }
+}
+function commandBtsVisible(value){
+    for(let i = 0; i<commandBts.length;i++){
+        commandBts[i].classList.toggle('hidden', !value);
+    }
 }
 
 
@@ -632,174 +624,3 @@ function setFacilityIconVisibility(name, visible) {
     icon.classList.toggle('hidden', !visible);
 }
 
-//캐릭터움직임
-function characterMove(distance=40) {
-  if (isAnimating) return; // 이미 동작 중이면 무시
-  isAnimating = true;
-
-  const startPos = basePos;          // 시작 위치
-  const targetPos = basePos + distance;    // 이동 목표 위치
-  const startTime = performance.now();
-
-  function chaMoveAnimate(time) {
-    const elapsed = time - startTime;
-    const duration = 200; // 1초
-
-    if (elapsed < duration) {
-      const progress = elapsed / duration; // 0 ~ 1
-      const currentPos = startPos + (targetPos - startPos) * (1-progress) *5;
-      player.style.left = currentPos + "px";
-      requestAnimationFrame(chaMoveAnimate);
-    } else {
-      player.style.left = targetPos + "px";
-      isAnimating = false;
-    }
-  }
-  requestAnimationFrame(chaMoveAnimate);
-}
-
-function stopResting(){
-    if(!isResting) return;
-    isResting = false;
-    clearInterval(interval );
-    interval = null;
-    renderGameUI();
-    log("휴식 끝");
-}
-function playerAttack(multiHit){
-
-    //무기 스태미나 소모
-    stamina -= weapon.stamina;
-    if(stamina<=0){
-        stamina = 0;
-    }
-    let stat = playerStat();
-
-
-    log(`${translations[currentLang][weapon.name]}으로 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
-    let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
-    for(let i =0 ; i< num; i++){
-        //대미지 계산
-        let damage = weapon.damage/2 + randomInt(0,weapon.damage/2);
-        if(zombies[i].isStunning>0){
-            damage = damage*2;
-        }
-        //패닉
-        if(stat.panic>0){
-            damage =  damage * (5-stat.panic)/5 ;
-        }
-        //스태미나 고갈(Endurance)
-        if(stat.endurance==-1){ damage * 0.5}
-        if(stat.endurance==-2){damage *0.2}
-        if(stat.endurance==-3){damage*0.1}
-        if(stat.endurance==-4){damage*0.05}
-
-        //대미지 최종 정수화
-        damage = Math.ceil(damage);
-        zombies[i].hp -= damage;
-        damageTxt[i].textContent = `-${damage}`;
-        damageTxt[i].classList.remove('hidden');
-        setTimeout(() => {
-            damageTxt[i].classList.add('hidden');
-        }, 300);
-
-        log( (stat.panic>0?`패닉 ${stat.panic}단계(대미지${((5-stat.panic)/5*100).toFixed(0)}%) - `:"")+ `${i+1}번째 좀비가 ${damage}의 대미지를 입었다.`);
-        let rng = Math.random();
-        const stunPer = 0.3;
-        if(rng<= stunPer){
-            //확률로 넉백
-            zombies[i].isStunning = 4; //스턴 턴 횟수
-            moveZombie(i,10);
-            log(`${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
-        }else{
-            //좀비 경직을 넣을까?
-            moveZombie(i,20);
-        }
-    }
-    if(zombies.length<=0){
-        //좀비가 없다
-       
-    }
-    
-    renderGameUI();
-}
-function playerPush(multiHit){
-
-    stamina -= 5;//고정값?
-    if(stamina<=0){
-        stamina = 0;
-    }
-    playerStat();
-    let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
-    log(`밀치기!`);
-    for(let i =0 ; i <num ; i++){
-        
-        //밀치기 계산
-       let rng = Math.random();
-        const stunPer = 0.65;
-        if(rng<= stunPer){
-            //확률로 넉백            
-            zombies[i].isStunning = 3;
-            log(`${(stunPer*100).toFixed(1)}% 확률로 넉백!`,rng);
-            moveZombie(i,20);
-        }else{
-            zombies[i].isStunning = 1; //한 턴 공격 못하게 미루기
-            log(`넘어트리지 못했지만 좀비가 움찔했다.`,rng)
-            moveZombie(i,10);
-        }
-    }
-    renderGameUI();
-}
-//좀비 움직임
-function moveZombie(i , distance=20) {
-    if(zombies[i]==null){return};
-    if(zombies[i].hp<0){return};
-    if (zombies[i].isAnimating) return; // 이미 움직이면 무시
-    if(i>= zombieElements.length){return};
-    zombies[i].isAnimating = true;
-
-    // 현재 위치 가져오기
-    const startPos = parseFloat(zombieElements[i].style.right) || 0;
-    const targetPos = startPos - distance; // 이동 목표
-    const duration = 200; // 이동 시간(ms)
-    const startTime = performance.now();
-
-    // 오른쪽으로 이동
-    function moveRight(time) {
-        if(zombies[i] ==null)return;
-        const elapsed = time - startTime;
-        if (elapsed < duration) {
-            const progress = elapsed / duration; // 0 ~ 1
-            const currentPos = startPos + (targetPos - startPos) * progress*5;
-            zombieElements[i].style.right = currentPos + "px";
-            requestAnimationFrame(moveRight);
-        } else {
-            zombieElements[i].style.right = targetPos + "px";
-            // 원위치로 돌아오기 시작 (왕복)
-            requestAnimationFrame(() => moveLeft(performance.now()));
-        }
-    }
-
-    // 왼쪽으로 돌아오기
-    function moveLeft(start) {
-        if(zombies[i] ==null)return;
-        const elapsed = performance.now() - start;
-        const leftDuration = 200; // 돌아오는 시간
-        if (elapsed < leftDuration) {
-            const progress = elapsed / leftDuration;
-            const currentPos = targetPos - (targetPos - startPos) * progress;
-            zombieElements[i].style.right = currentPos + "px";
-            requestAnimationFrame(() => moveLeft(start));
-        } else {
-            zombieElements[i].style.right = startPos + "px"; // 원위치 고정
-            zombies[i].isAnimating = false;
-        }
-    }
-
-    requestAnimationFrame(moveRight);
-}
-
-// 특정 좀비만 움직이도록
-function ZombieStun(num) {
-    moveZombie(num);
-}
