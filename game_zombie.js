@@ -19,8 +19,19 @@ function callZombies(num, addPer=0){
     //좀비소환
     let rng = Math.random();
     let per = 0.05 + zombies.length*0.01 + addPer;
+    let txt =""
+    if(findPlayerTrait("conspicuous")!=null){
+        //넘치는존재감
+        txt = "<넘치는 존재감>으로 ";
+        per = per*2;
+    }
+    if(findPlayerTrait("inconspicuous")!=null){
+        //부족한존재감
+        per = per/2;
+    }
+
     if(rng <= per){
-        log(`주변의 좀비가 이끌려 나타났습니다.`, per.toFixed(4));
+        log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
         spawnZombie(num,1);
         stopResting();
     }

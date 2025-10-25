@@ -9,8 +9,16 @@
     let currentLang = "ko"; // "ko" 또는 "en"
     let items = [];
 
-
-
+    let selectedItems=[];
+    function addSelectedItem(_name, _value, _imgsrc=null){
+      selectedItems.push({name:_name, value:_value, imgsrc:_imgsrc});
+    }
+    function clearSelectedItemList(){
+      selectedItems = [];
+    }
+    function getSelectedItemList(){
+      return selectedItems;
+    }
 
     // 번역 테이블
     let translations = {
@@ -273,14 +281,14 @@
 
   const extraStats = {}; // key: div id, value: div element
   let selectedIcons = [];
-
+  selectedItems = [];//선택된 특성 초기화
 
 
   /////////////////////////// 합계 계산
   function updateSum() {
     resetExtraStats(); 
     selectedIcons = []; // 아이콘 배열 초기화
-  
+    clearSelectedItemList();
 
     let sum = 0, strength = 5, fitness = 5; maxstrength=10; maxfitness=10;
     const statsTotal = {};
@@ -303,62 +311,67 @@
         }
     });
     
-
     
+    //항목선택 호출함수
     document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
 
-        if (input.checked) {
+      if (input.checked) {
 
-
-          if(ignoreStats.length>0){
-            if(translations[currentLang][ignoreStats[0]] == input.dataset.displayName){
-              //console.log(`무시: ${input.dataset.displayName}`);
-              return; // 무시할 항목이면 건너뛰기
-            } 
-          }
-          const iconSrc = input.dataset.iconsrc;
-          if (iconSrc != null && input.dataset.displayName != null) {
-            // 배열에 같은 src 가진 게 이미 있는지 체크
-            const exists = selectedIcons.some(icon => icon.src === iconSrc);
-            if (!exists) {
-                selectedIcons.push({
-                    src: iconSrc,
-                    name: input.dataset.displayName, // 툴팁에 표시할 이름
-                    colorText: input.type === "radio" ? "text-blue-600" : (parseInt(input.dataset.value) >= 0 ? "text-red-600" : "text-green-600")  
-                });
+        
+        if(ignoreStats.length>0){
+          if(translations[currentLang][ignoreStats[0]] == input.dataset.displayName){
+            //console.log(`무시: ${input.dataset.displayName}`);
+            return; // 무시할 항목이면 건너뛰기
+          } 
+        }
+        const iconSrc = input.dataset.iconsrc;
+        if (iconSrc != null && input.dataset.displayName != null) {
+          // 배열에 같은 src 가진 게 이미 있는지 체크
+          const exists = selectedIcons.some(icon => icon.src === iconSrc);
+          if (!exists) {
+              selectedIcons.push({
+                  src: iconSrc,
+                  name: input.dataset.displayName, // 툴팁에 표시할 이름
+                  colorText: input.type === "radio" ? "text-blue-600" : (parseInt(input.dataset.value) >= 0 ? "text-red-600" : "text-green-600")  
+              });
             }
         }
-          
+        
         //금지리스트
-          // console.log(input.dataset.banned);
-          const bannedList = input.dataset.banned ? input.dataset.banned.split(";") : [];
-          if(bannedList.length>0){
-              for(let i =0; i<bannedList.length; i++){
-                  if(bannedList[i].trim() !== ""){
-                      addBannedList(bannedList[i]);
-                  }
-              }
-          }
-              
-
-          sum += parseInt(input.dataset.value) || 0;
-          strength += parseInt(input.dataset.str) || 0;
-          fitness += parseInt(input.dataset.fit) || 0;
-          maxstrength += parseInt(input.dataset.maxstr) || 0;
-          maxfitness += parseInt(input.dataset.maxfit) || 0;
-
-          const val = parseInt(input.dataset.value) || 0;
-          // stats 처리
-          for (const key in input.dataset) {
-            if (key != 'value' && key != 'str' && key != 'fit'&& key != 'maxstr' && key != 'maxfit' && key != 'displayName'&& key != 'iconsrc' && key != 'banned') {
-              const statName = key;
-              let value = parseInt(input.dataset[key]) || 0;
-              //console.log( value);
-              statsTotal[statName] = (statsTotal[statName] || 0) + parseInt(input.dataset[key] || 0);
-              
+        // console.log(input.dataset.banned);
+        const bannedList = input.dataset.banned ? input.dataset.banned.split(";") : [];
+        if(bannedList.length>0){
+            for(let i =0; i<bannedList.length; i++){
+                if(bannedList[i].trim() !== ""){
+                    addBannedList(bannedList[i]);
+                }
             }
+        }
+            
+
+        sum += parseInt(input.dataset.value) || 0;
+        strength += parseInt(input.dataset.str) || 0;
+        fitness += parseInt(input.dataset.fit) || 0;
+        maxstrength += parseInt(input.dataset.maxstr) || 0;
+        maxfitness += parseInt(input.dataset.maxfit) || 0;
+
+        
+
+
+        const val = parseInt(input.dataset.value) || 0;
+        // stats 처리
+        for (const key in input.dataset) {
+          if (key != 'value' && key != 'str' && key != 'fit'&& key != 'maxstr' && key != 'maxfit' && key != 'displayName'&& key != 'iconsrc' && key != 'banned') {
+            const statName = key;
+            let value = parseInt(input.dataset[key]) || 0;
+            //console.log( value);
+            statsTotal[statName] = (statsTotal[statName] || 0) + value;
+            addSelectedItem( statName,value);
           }
         }
+
+        
+      }
     });
 
     let resultPreview = document.getElementById("result-preview");
@@ -424,12 +437,20 @@
         extraStats[statName] = div;
       } else {
         extraStats[statName].innerText = `${label} +${statsTotal[statName]}`;
+        addSelectedItem( statName, value);
       }
     }
+
+    addSelectedItem("strength", strength);
+    addSelectedItem("fitness", fitness);
+    //addSelectedItem("maxStrength", maxstrength);
+    //addSelectedItem("maxFitenss",maxfitness);
+    
     // 아이콘 표시
       renderSelectedIcons();
       renderBannedUI();
-    }
+
+  }
 
  function renderSelectedIcons() {
     const resultPanel = document.getElementById("result-panel");
@@ -459,7 +480,7 @@
             </div>
             `;
         jobIconsContainer.appendChild(label);
-
+        addSelectedItem("Profession", (icon.src.split("_")[1]).split(".")[0] , icon.src.toString());
             /*
         img.className = "lg:w-16 lg:h-16 sm:w-32 sm:h-32 rounded shadow"; // Tailwind 기준 큰 아이콘
         jobIconsContainer.appendChild(img);
@@ -480,6 +501,7 @@
             </div>
             `;
         otherIconsContainer.appendChild(label);
+        addSelectedItem("Trait", (icon.src.split("_")[1]).split(".")[0] , icon.src.toString());
     }
     
     

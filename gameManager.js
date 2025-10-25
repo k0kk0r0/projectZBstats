@@ -251,8 +251,46 @@ let weapon;
 let backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
 let stamina;
 let health;
+let skills = {};
+let job;
 let zombieKillCount;
+let playerTraitDatas;
+const xpData = [0, 100,200,400,600,800, 1000,1200,1400,1800,2000 ];
+function setPlayerTrait(){
+    //선택한 플레이어 데이터 수집
+    let data = getSelectedItemList();
+      //console.log( data );
+      /*
+      addSelectedItem("strength", strength);
+    addSelectedItem("fitness", fitness);
+    addSelectedItem("maxStrength", maxstrength);
+    addSelectedItem("maxFitenss",maxfitness);
+    */
+    for(let i =0 ; i< data.length; i++){
+        let value = data[i].value;
+       if(data[i].name =="strength"){
+            skills.strength = {lv:value, xp:0, maxXp: xpData[value]};
+       } 
+       else if(data[i].name =="fitness") {
+            skills.fitness = {lv:value, xp:0, maxXp:xpData[value]};
+       }
+       else if(data[i].name =="Profession"){
+            job = {name:value, src:data[i].imgsrc};
+       }
+       else if(data[i].name=="Trait"){
+            skills[value] = true;
+       }else{
+            skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
+       }
+    }
+    //console.log(skills.strength);
+}
+function findPlayerTrait(name) {
+  return skills[name];
+}
 
+
+//무기아이콘 클릭 시 무기변경
 weaponImg.addEventListener('click', ()=>{ 
    changeWeapon();
 });
@@ -331,7 +369,7 @@ function findMapData(itemName){
         item = dropTable[i].split("-");
         let rng = Math.random();
         if(rng < parseFloat(item[1])){
-            console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
+           // console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
             dropItemsArray.push(item[0]);
         }
     }
@@ -368,13 +406,16 @@ async function ResetAllGame(){
     health = 100;
     stamina = 100;
     zombieKillCount=0;
+     setPlayerTrait();
 
     //맵 이동 함수
     mapData[0].zombieNum = 1; //난이도 하락
     mapSetting(mapData[0]);
 
     playerMove();
-    renderGameUI();
+   
+
+    //renderGameUI();
     changeWeapon();
     commandBtsVisible(true);
     
@@ -389,6 +430,8 @@ function mapSetting(data) {
     interval = null;
     spawnZombies(currentMapData.zombieNum); //좀비소환
     bgLightDark( currentMapData );
+
+
     //맵 보관함 아이템 출력(임시)
     if(currentMapData.dropItems.length>0){
         console.log(currentMapData.dropItems);
@@ -428,9 +471,9 @@ function bgLightDark(data){
     }
     bg.src = editsrc;
 }
-function log(text, value=0) {
+function log(text, value="") {
   const p = document.createElement("p"); // 한 줄씩 추가
-  p.textContent = `${hour}:${min.toString().padStart(2, '0') } : ` + text + (debug? (value>0? `  (${value})`:"" ) :"");
+  p.textContent = `${hour}:${min.toString().padStart(2, '0') } : ` + text + (debug? (value.length>0? `(${value})`:"" ):"");
   p.className = "text-white text-left text-md"; // Tailwind 스타일 적용
   logtxt.appendChild( p);
   // 자동 스크롤: 맨 아래로
@@ -466,7 +509,8 @@ function advanceTurn() {
 function TurnEnd() {
     if(gameOver)return;
     if(!delaying) {
-        
+        //좀비소환
+            callZombies(1);
         //스텟 회복
         stamina++;
         if(stamina>100){stamina=100}
@@ -476,8 +520,7 @@ function TurnEnd() {
         if(min >= 60) {
             min = 0;
             hour++;
-            //좀비소환
-            callZombies(1);
+            
             bgLightDark(currentMapData);
         }
         if(hour >= 24) {
@@ -604,7 +647,7 @@ function checkGameOver(){
         renderPlayer();
         renderMooldes();
         log(`= 게임오버 =`);
-        log(`당신은 ${day}일, ${hour}시간 동안 생존하였습니다.`);
+        log(`당신은 ${day-1}일, ${hour}시간 동안 생존하였습니다.`);
         log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
     }
 }

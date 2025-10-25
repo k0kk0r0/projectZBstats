@@ -13,10 +13,22 @@ function playerStat(){
     if(zombies.length>2){
         const panic = Math.floor(zombies.length/3);
         const n = panic>4 ? 4:panic;
-        setMoodleValue('Moodle_Icon_Panic',-n);
+        panicMd.value = -n;
     }else{
-        setMoodleValue('Moodle_Icon_Panic',0);
+        if(findPlayerTrait("claustophobic") !=null && currentMapData.outdoor==false){
+            //밀실공포
+            panicMd.value = -1;
+        }
+        else if(findPlayerTrait("agoraphobic")!=null && currentMapData.outdoor==true){
+            //광장공포
+            panicMd.value = -1;
+        }else{
+            panicMd.value = 0;
+        } 
+        //setMoodleValue('Moodle_Icon_Panic',0);
     }
+    
+   
     let enduValue = 0;
     if(stamina<=75){enduValue-- };
     if(stamina<=50){enduValue--};
@@ -24,8 +36,11 @@ function playerStat(){
     if(stamina<=10){enduValue--};
     setMoodleValue('Moodle_Icon_Endurance', enduValue);
 
+
+    let str = findPlayerTrait("strength");
+    let fit= findPlayerTrait("fitness");
     //데이터반환
-    return {panic:-panicMd.value, endurance: enduValue, zombie:0};
+    return {strength:str.lv, fitness:fit.lv, panic:-panicMd.value, endurance: enduValue, zombie:0};
 }
 
 
@@ -70,7 +85,8 @@ function playerAttack(multiHit){
     if(stamina<=0){
         stamina = 0;
     }
-    let stat = playerStat();
+    
+    const stat = playerStat();
 
 
     log(`${translations[currentLang][weapon.name]}으로 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
@@ -103,13 +119,13 @@ function playerAttack(multiHit){
 
         log( (stat.panic>0?`패닉 ${stat.panic}단계(대미지${((5-stat.panic)/5*100).toFixed(0)}%) - `:"")+ `${i+1}번째 좀비가 ${damage}의 대미지를 입었다.`);
         let rng = Math.random();
-        const stunPer = 0.3;
+        const stunPer = 0.35 + stat.strength0*0.05;
         if(rng<= stunPer){
             //확률로 넉백
             zombies[i].isStunning = 4; //스턴 턴 횟수
             zombieMove(i,10);
             zombieStun(i,4);
-            log(`${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
+            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
         }else{
             //좀비 경직을 넣을까?
             zombieMove(i,20);
@@ -123,28 +139,28 @@ function playerAttack(multiHit){
     renderGameUI();
 }
 function playerPush(multiHit){
-
+    const stat = playerStat();
     stamina -= 5;//고정값?
     if(stamina<=0){
         stamina = 0;
     }
-    playerStat();
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
     log(`밀치기!`);
     for(let i =0 ; i <num ; i++){
         
         //밀치기 계산
        let rng = Math.random();
-        const stunPer = 0.65;
+        const stunPer = 0.35 + stat.strength*0.05;
         if(rng<= stunPer){
             //확률로 넉백            
-            log(`${(stunPer*100).toFixed(1)}% 확률로 넉백!`,rng);
+            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
             zombieMove(i,20);
             zombieStun(i,4);
         }else{
-            zombies[i].isStunning = 1; //한 턴 공격 못하게 미루기
-            log(`넘어트리지 못했지만 좀비가 움찔했다.`,rng)
             zombieMove(i,10);
+            zombieStun(i,1);//zombies[i].isStunning = 1; //한 턴 공격 못하게 미루기
+            log(`넘어트리지 못했지만 좀비가 움찔했다.`,rng)
+            
         }
     }
     renderGameUI();
