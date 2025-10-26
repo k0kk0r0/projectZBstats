@@ -28,6 +28,7 @@ const facilityIconsList = [generatorIcon, generatorOffIcon, bedIcon, sofaIcon, f
 //게임 매니저 객체
 const player = document.getElementById('player');
 const playerRest = document.getElementById('playerRest');
+const playerZb = document.getElementById('playerZb');
 const equipWp = document.getElementById('equipWp');
 const zombie0 = document.getElementById('zombie0');
 const zombie1 = document.getElementById('zombie1');
@@ -65,6 +66,7 @@ const pushBt = document.getElementById('pushBt');
 const attackBt = document.getElementById('attackBt');
 const restBt = document.getElementById('restBt');
 const sleepBt = document.getElementById('sleepBt');
+const bandingBt = document.getElementById('bandingBt');
 const atHomeBt = document.getElementById('atHomeBt');
 const nextMapBt = document.getElementById('nextMapBt');
 
@@ -78,7 +80,7 @@ const backpackIcon = document.getElementById(`backpackIcon`);
 const backpackImg = document.getElementById(`backpackImg`);
 const backpackName = document.getElementById('backpackName');
 
-const commandBts = [pushBt,attackBt,restBt,sleepBt,atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
+const commandBts = [pushBt,attackBt,restBt,sleepBt,bandingBt, atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
 
 //로그텍스트 추가
 const logtxt = document.getElementById("logText");
@@ -108,7 +110,7 @@ attackBt.addEventListener('click', () => {
     
     playerMove();
     advanceTurn();
-    callZombies(1,0.02);//좀비추가
+    callZombies(1);//좀비추가
 });
 
 restBt.addEventListener('click', () => {
@@ -211,8 +213,19 @@ atHomeBt.addEventListener('click', ()=>{
      },timedelay);
     
     //TurnEnd();
-    
-    
+
+})
+//치료버튼
+bandingBt.addEventListener('click', ()=>{
+    if(gameOver)return;
+    if(delaying) return; //딜레이 중이면 무시
+
+    let bool =  playerBanding();
+    if(bool){
+        advanceTurn();
+    }else{
+        log(`치료할 상처가 없습니다`);
+    }
 })
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //배경
@@ -241,6 +254,7 @@ let day = 1; //현재 날짜
 let mapData = [];
 let currentMapData;
 let mapNum = 0;
+let stack = {};
 //좀비 스텟
 let zombies = [];
 const stunClass = 'rotate-90';
@@ -251,6 +265,7 @@ let weapon;
 let backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
 let stamina;
 let health;
+let wound = [];//상처 배열
 let skills = {};
 let job;
 let zombieKillCount;
@@ -287,6 +302,13 @@ function setPlayerTrait(){
 }
 function findPlayerTrait(name) {
   return skills[name];
+}
+function playerHasTrait(name){
+    if(findPlayerTrait(name) != null){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 
@@ -394,23 +416,35 @@ async function ResetAllGame(){
 
     zombies = [];
 
-    currentMapData=null;
-    mapNum=0;
-    mapData = [];
-    mapData.push( findMapData('house'));
+    
     
     gameOver=false;
     isResting = false;
     delaying = false;    
     weapon =null;
+    wound = [];
     health = 100;
     stamina = 100;
     zombieKillCount=0;
      setPlayerTrait();
 
     //맵 이동 함수
+    currentMapData=null;
+    mapNum=0;
+    mapData = [];
+    mapData.push( findMapData('house'));
     mapData[0].zombieNum = 1; //난이도 하락
     mapSetting(mapData[0]);
+    
+    stack = {
+        climate:"sunny",
+        nextClimate:"rain",
+        prevClimate:"sunny",
+        climateTime:3,
+
+        zombieSpawn:0
+    };
+
 
     playerMove();
    
@@ -437,6 +471,36 @@ function mapSetting(data) {
         console.log(currentMapData.dropItems);
     }
    renderGameUI();
+}
+//날씨변경
+function changeClimate(){
+    stack.climateTime--;
+    if(stack.climateTime<=0){
+        let txt ="";
+        if(stack.climate != stack.nextClimate){
+            //날씨변경 시 알림
+            if(stack.climate=="rain"){  txt="비가 옵니다.";   }
+            if(stack.climate=="windy"){ txt="바람이 붑니다."   }
+            if(stack.climate=="sunny"){ txt="날씨가 잔잔해졌습니다."  }
+            
+            log(txt);
+        }
+        stack.climate = stack.nextClimate;
+        const rng = Math.random();
+         if(rng < 0.3){
+            nextClimate = "rain";
+            stack.climateTime = randomInt(4,20);
+            
+        }else if(rng < 0.7){
+            nextClimate = "windy";
+            stack.climateTime = randomInt(2,8);
+            
+        }else{
+            nextClimate = "sunny";
+            stack.climateTime = randomInt(10,10);
+           
+        }
+    }
 }
 //배경 밤낮
 function bgLightDark(data){
@@ -515,6 +579,12 @@ function TurnEnd() {
         stamina++;
         if(stamina>100){stamina=100}
         if(health>100){health=100}
+
+        changeClimate();//날씨변경
+        
+        woundHealingCalculate(); //부상계산
+
+
         min += 10; //15분씩 증가
         // 분이 60이 넘으면 시간 증가
         if(min >= 60) {
@@ -549,9 +619,14 @@ function renderPlayer(){
      if(gameOver){
         player.classList.toggle('hidden', true);
         playerRest.classList.toggle('hidden', true);
+        playerZb.classList.toggle('hidden', false);
+        return;
+     }else{
+         player.classList.toggle('hidden', isResting);
+        playerRest.classList.toggle('hidden', !isResting);
+        playerZb.classList.toggle('hidden', true);
      }
-    player.classList.toggle('hidden', isResting);
-    playerRest.classList.toggle('hidden', !isResting);
+   
 }
 function renderZombie(){
     if(gameOver)return;
@@ -588,7 +663,7 @@ function renderZombie(){
         }
     }
 }
-function renderMooldes(){
+function renderMoodles(){
     //무들표시
     for(let i = 0; i < moodles.length;i++){
         if(moodles[i].value==0){
@@ -617,7 +692,8 @@ function renderGameUI(){
             setFacilityIconVisibility(icon.id, false);
         }
     }
-    renderMooldes();
+    renderMoodles();
+   
     renderZombie();
 
     //타이머 표시
@@ -632,7 +708,7 @@ function renderGameUI(){
         zombieNumTxt.classList.add('hidden');
     }   
     renderPlayer();
-    //플레이어 사망, 게임오버
+    //플레이어 사망, 게임오버 검사
     checkGameOver();
 }
 function checkGameOver(){
@@ -645,7 +721,7 @@ function checkGameOver(){
         delaying= true;
         //게임오버
         renderPlayer();
-        renderMooldes();
+        renderMoodles();
         log(`= 게임오버 =`);
         log(`당신은 ${day-1}일, ${hour}시간 동안 생존하였습니다.`);
         log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);

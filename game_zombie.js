@@ -17,8 +17,9 @@ function spawnZombies(num, min=0){
 }
 function callZombies(num, addPer=0){
     //좀비소환
-    let rng = Math.random();
-    let per = 0.05 + zombies.length*0.01 + addPer;
+    //stack.zombieSpawn++;
+    const rng = Math.random();
+    let per = 0.05 + zombies.length*0.01 + addPer + stack.zombieSpawn* 0.01;
     let txt =""
     if(findPlayerTrait("conspicuous")!=null){
         //넘치는존재감
@@ -27,6 +28,7 @@ function callZombies(num, addPer=0){
     }
     if(findPlayerTrait("inconspicuous")!=null){
         //부족한존재감
+        txt = "<부족한 존재감>에도 불구하고 ";
         per = per/2;
     }
 
@@ -34,6 +36,7 @@ function callZombies(num, addPer=0){
         log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
         spawnZombie(num,1);
         stopResting();
+        stack.zombieSpawn = 0;
     }
 }
 function zombieAttack( timedelay=600){
@@ -51,7 +54,7 @@ function zombieAttack( timedelay=600){
                     if(gameOver)return;
                     log(`좀비${i}의 공격!`);
                     zombieMove(i,-45);
-                    playerIsDamaged( 10);
+                    playerIsDamaged( 5);
                     //TurnEnd();
                 },  timedelay +i*250);
             }

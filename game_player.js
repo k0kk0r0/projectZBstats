@@ -15,11 +15,11 @@ function playerStat(){
         const n = panic>4 ? 4:panic;
         panicMd.value = -n;
     }else{
-        if(findPlayerTrait("claustophobic") !=null && currentMapData.outdoor==false){
+        if(playerHasTrait("claustophobic") && currentMapData.outdoor==false){
             //밀실공포
             panicMd.value = -1;
         }
-        else if(findPlayerTrait("agoraphobic")!=null && currentMapData.outdoor==true){
+        else if(playerHasTrait("agoraphobic") && currentMapData.outdoor==true){
             //광장공포
             panicMd.value = -1;
         }else{
@@ -40,7 +40,7 @@ function playerStat(){
     let str = findPlayerTrait("strength");
     let fit= findPlayerTrait("fitness");
     //데이터반환
-    return {strength:str.lv, fitness:fit.lv, panic:-panicMd.value, endurance: enduValue, zombie:0};
+    return {strength:str.lv, fitness:fit.lv, panic:-panicMd.value, endurance: enduValue };
 }
 
 
@@ -171,5 +171,101 @@ function playerIsDamaged(value){
         health -= value;
         playerMove(20);
     }
+
+    //https://pzwiki.net/wiki/Health#Types_of_injuries 
+    const rng = Math.random();
+    const zbrng = Math.random();
+    let healer =0;
+    let per = 0;
+    if(playerHasTrait("thickskinned")){
+        //두꺼운피부 버프
+        per = -0.05;
+    }
+    if(playerHasTrait("thinskinned")){
+        //얇은 피부 패널티
+        per = 0.05;
+    }
+    if(playerHasTrait("fasthealer")){
+        //빠른회복
+        healer = -5;
+    }
+    if(playerHasTrait("slowhealer")){
+        healer = 5;
+    }
+    //slowhealer, fasthealer, thinskinned, thickskinned
+    if(rng< 0.15 +per){
+        //물림
+        wound.push( {tag:"bitten", turn:(50+healer)} );
+        wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
+        log(`${ ((0.15 +per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+    }else if(rng<0.4+per){
+        //찢어진상처
+        wound.push( {tag:"scratched", turn:randomInt(10+healer,20+healer)} );
+        log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+        if(zbrng<0.25){
+            //감염
+            wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
+        }
+    }else if(rng<0.6+per){
+        //긁힘
+        wound.push( {tag:"lacerated", turn:randomInt(7+healer,15+healer)} );
+        log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+        if(zbrng<0.07){
+            //감염
+            wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
+        }
+    }
+    
     renderGameUI();
+}
+function woundHealingCalculate(){
+    for(let i=0;i<wound.length;i++){
+        let data = wound[i];
+        data.turn--;
+        if(data.tag =="zombie"){
+            if(data.turn/data.turn0  <= 0.2){
+                setMoodleValue('Moodle_Icon_Sick',-2);
+                setMoodleValue('Moodle_Icon_Stressed',-4);
+            }else  if(data.turn/data.turn0  <= 0.3){
+                setMoodleValue('Moodle_Icon_Sick',-1);
+                setMoodleValue('Moodle_Icon_Stressed',-3);
+            }else if(data.turn/data.turn0  <= 0.5){
+                setMoodleValue('Moodle_Icon_Stressed',-2);
+            }else if(data.turn/data.turn0  <= 0.8){
+                setMoodleValue('Moodle_Icon_Stressed',-1);
+            }
+        }
+        if(data.tag=="scratched" || data.tag == "bitten"){
+            health -=3;
+        }
+        if(data.tag=="lacerated"){
+            health -=2;
+        }
+        if(data.turn<=0){
+            if( data.tag =="zombie"){
+                //좀비화 상태의 경우 즉시 게임오버
+                health=0;
+                setMoodleValue('Moodle_Icon_Sick',0);
+                setMoodleValue('Moodle_Icon_Stressed',0);
+                checkGameOver();
+            }
+            wound.splice(i,1);
+            i--;
+        }
+
+
+    }
+}
+function playerBanding(){
+    let bool =false;
+     for(let i =0 ; i<wound.length; i++){
+        let data = wound[i];
+        if(data.tag =="lacerated" || data.tag =="scratched" || data.tag=="bitten"){
+            log( `[${translations[currentLang][data.tag]}]에 붕대 감음.`);
+            wound.splice(i,1);
+            i--;
+            bool = true;
+        }
+    }
+    return bool;
 }

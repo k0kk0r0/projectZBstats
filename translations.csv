@@ -83,3 +83,6 @@ road,길거리,Road
 store_tool,도구상점,Tool store
 store,상점,Store
 livestock,목축지,Livestock
+lacerated,긁힌 상처,Lacerated Wound
+scratched,찢어진 상처,Scratched Wound
+bitten,물린 상처,Bitten Wound

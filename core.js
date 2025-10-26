@@ -56,7 +56,7 @@
       header: true,
       complete: function(results) {
         allJobs = results.data;
-        Papa.parse("items.csv", {
+        Papa.parse("traits.csv", {
           download: true,
           header: true,
           complete: function(results2) {
@@ -366,7 +366,7 @@
             let value = parseInt(input.dataset[key]) || 0;
             //console.log( value);
             statsTotal[statName] = (statsTotal[statName] || 0) + value;
-            addSelectedItem( statName,value);
+            addSelectedItem( statName, value);
           }
         }
 
@@ -529,7 +529,7 @@ function renderBannedUI(){
 }
 
   // CSV 불러오기
-  loadCSV('items.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
+  loadCSV('traits.csv', positiveDiv); // 양수/음수는 함수 내에서 처리
   loadCSV('jobs.csv', jobsDiv, { colorPositive:'text-blue-500', colorNegative:'text-blue-700', type:'radio', name:'job' });
   updateSum();
 
