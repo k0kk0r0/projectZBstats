@@ -100,11 +100,25 @@
     </div>
   </div>
   <!-- 결과생성 버튼 -->
+   <!--
   <div class="flex justify-center mt-4 w-full">
     <button id="generateResultBtn" class="px-6 py-8 bg-blue-500 text-white lg:text-2xl sm:text-4xl rounded-lg shadow w-full">
       결과 생성
     </button>
   </div>
+  -->
+  <div class="mt-4 flex justify-center space-x-4 w-full">
+    <button id="generateResultBtn" 
+            class="flex-1 px-6 py-8 bg-white text-black lg:text-2xl sm:text-4xl rounded-lg shadow">
+      결과 생성
+    </button>
+
+    <button id="gameStartBt" 
+            class="flex-1 px-4 py-6 bg-blue-500 text-white rounded-lg sm:text-4xl lg:text-2xl">
+      ???:진행시켜
+    </button>
+  </div>
+  
   <!-- 하단 바 -->
   <div class="mt-4 text-center">
     <p class="text-gray-500 text-2xl lg:text-sm"> <span id="version-text"></span> | 제작자: K0KK0R0 |
@@ -118,29 +132,16 @@
 
   <!-- 모달 (처음엔 hidden) -->
   <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-2xl p-6 relative">
+    <div id="noticeTxt" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-2xl p-6 relative">
       <!-- 닫기 버튼 -->
       <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl sm:text-4xl">
         ✕
       </button>
       
       <h2 class="text-4xl lg:text-xl  font-bold mb-4">공지사항 </h2>
-      <p class="mb-2 text-3xl md:text-lg"> 📢 <span id="version-text2"></span> 업데이트 안내</p>
-      
-      <p class="mb-1 text-3xl lg:text-xl">- 미니게임을 준비했습니다(추후 결과값 연동예정)</p>
+      <!--<p class="mb-2 text-3xl md:text-lg"> 📢 <span id="version-text2"></span> 업데이트 안내</p>-->
+      <div id="noticeContent" class="text-lg"></div>
 
-      <p class="mb-1 text-2xl lg:text-lg">- 어둠의 Dark모드 적용(시스템 기본값을 따라갑니다) </p>
-      <p class="mb-1 text-2xl lg:text-lg">- 결과값을 png파일로 저장 할 수 있도록 작업 </p>
-      <p class="mb-1 text-2xl lg:text-lg">- 중복으로 선택 불가능한 트레잇 작업</p>    
-      <p class="mb-1 text-2xl lg:text-lg">- Crafty(재주꾼) 특성 추가</p>
-      <p class="mb-1 text-2xl lg:text-lg">** 본 항목은 정확하지 않을 수 있습니다. ** </p>
-      <p class="mb-1 text-2xl lg:text-lg"> 자세한 내용은 공식 위키와 프좀갤을 참고하세요</p>
-      
-      <!--
-      <div class="mt-4 text-right">
-        <button id="closeModalBtn2" class="px-4 py-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">닫기</button>
-      </div>
-      -->
     </div>
   </div>
   <!-- 게임 모달 -->
@@ -155,67 +156,81 @@
       <div class="flex items-center bg-gray-600 px-3 py-2">
         <div class="flex gap-2 space-x-1">
           <!-- 지역 설비들 -->
-          <div id="storage" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <div id="Icon_storage" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/storage.png" alt="보관함" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_storage" class="absolute inset-0 w-full h-full object-contain">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               보관함
             </span>
           </div>
-          <div id="generatorOn" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/generator.png" alt="발전기(켜짐)" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              발전기
-            </span>
-          </div>
-          <div id="generatorOff" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/generatorOff.png" alt="발전기(꺼짐)" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              (꺼짐)
-            </span>
-          </div>
-          <div id="bed" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/bed.png" alt="침대" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              침대
-            </span>
-          </div>
-          <div id="sofa" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/sofa.png" alt="소파" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              소파
-            </span>
-          </div>
-          <div id="faucet" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/faucet.png" alt="수전" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              수전
-            </span>
-          </div>
-          <div id="oven" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/oven.png" alt="오븐" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              오븐
-            </span>
-          </div>
-          <div id="micro" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/micro.png" alt="전자렌지" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              전자렌지
-            </span>
-          </div>
-          <div id="fridge" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/fridge.png" alt="냉장고" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              냉장고
-            </span>
-          </div>
           <!--라이브스톡 관리-->
-          <div id="livestock" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <div id="Icon_livestock" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/livestock.png" alt="가축 관리" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_livestock" class="w-full h-full">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               가축 관리
             </span>
           </div>
+
+
+          <div id="Icon_generator" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/generator.png" alt="발전기(켜짐)" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_generator" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              발전기
+            </span>
+          </div>
+         
+          <div id="Icon_bed" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/bed.png" alt="침대" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_bed" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              침대
+            </span>
+          </div>
+          <div id="Icon_sofa" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/sofa.png" alt="소파" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_sofa" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              소파
+            </span>
+          </div>
+          <div id="Icon_faucet" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/faucet.png" alt="수전" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_faucet" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              수전
+            </span>
+          </div>
+          <div id="Icon_oven" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/oven.png" alt="오븐" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_oven" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              오븐
+            </span>
+          </div>
+          <div id="Icon_micro" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/micro.png" alt="전자렌지" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_micro" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              전자렌지
+            </span>
+          </div>
+          <div id="Icon_fridge" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/fridge.png" alt="냉장고" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_fridge" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              냉장고
+            </span>
+          </div>
+          <div id="Icon_radio" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/radio.png" alt="라디오" class="w-14 h-14">
+            <img src="images/Enabled.png" id="Enable_radio" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              라디오
+            </span>
+          </div>
+          
         </div>
       </div>
 
@@ -269,25 +284,27 @@
 
 
            <!-- 좀비들 (오른쪽 아래 배치) -->
-          <img src="images/zb.png" 
-              id="zombie0" 
-              class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
-          <img src="images/zb.png" 
-              id="zombie1"
-              class="absolute bottom-4 right-40 w-16 h-32 z-20 transition-all duration-100">
-          <img src="images/zb.png" 
-              id="zombie2"
-              class="absolute bottom-4 right-20 w-16 h-32 z-20 transition-all duration-100">
+          <div id="zombie0" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
+            <img src="images/zb.png" id="zombieImg0" class="absolutew-full h-full">
+            <span id="damage0" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10  w-16 h-32 z-20 transition-all duration-100">
+            -10
+           </span>
+          </div>
+          
+         <div id="zombie1" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
+            <img src="images/zb.png" id="zombieImg1" class="absolutew-full h-full">
+            <span id="damage1" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10 w-16 h-32 z-20 transition-all duration-100">
+            -10
+           </span>
+          </div>
+          <div id="zombie2" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
+            <img src="images/zb.png" id="zombieImg2" class="absolutew-full h-full">
+            <span id="damage2" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10 left-0 w-16 h-32 z-20 transition-all duration-100">
+            -10
+           </span>
+          </div>
+           
 
-          <span id="damage0" class="hidden font-bold text-green-600 text-4xl absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
-            -10
-          </span>
-           <span id="damage1" class="hidden font-bold text-green-600 text-4xl absolute bottom-4 right-40 w-16 h-32 z-30 transition-all duration-100">
-            -10
-          </span>
-           <span id="damage2" class="hidden font-bold text-green-600 text-4xl absolute bottom-4 right-20 w-16 h-32 z-10 transition-all duration-100">
-            -10
-          </span>
 
           <!-- 무기창 아이콘 (숨김) -->
           <div id="weaponIcon" class="absolute top-16 left-4 z-50 w-20 h-20 rounded bg-gray-200 hidden">
@@ -306,27 +323,31 @@
           <!-- 무들 아이콘들 -->
           <div class="flex flex-col items-center gap-2 absolute top-12 right-2 ">
             <div id="Moodle_Icon_Tired" class="w-16 h-12 rounded bg-gray-600/80">      
-              <img src="uxicons/Moodle_Icon_Tired.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Tired.png" alt="Tired" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Tired" src="uxicons/pgbar-1.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
             <div id="Moodle_Icon_Endurance" class="w-16 h-12 rounded bg-gray-600/80">      
-              <img src="uxicons/Moodle_Icon_Endurance.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Endurance.png" alt="Endurance" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Endurance" src="uxicons/pgbar-3.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
             <div id="Moodle_Icon_Panic" class="w-16 h-12 rounded bg-gray-600/80">  
-              <img src="uxicons/Moodle_Icon_Panic.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Panic.png" alt="Panic" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Panic" src="uxicons/pgbar-2.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
             <div id="Moodle_Icon_Sick" class="w-16 h-12 rounded bg-gray-600/80">   
-              <img src="uxicons/Moodle_Icon_Sick.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Sick.png" alt="Sick" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Sick" src="uxicons/pgbar-1.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
             <div id="Moodle_Icon_Stressed" class="w-16 h-12 rounded bg-gray-600/80">  
-              <img src="uxicons/Moodle_Icon_Stressed.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Stressed.png" alt="Stressed" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Stressed" src="uxicons/pgbar-2.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
+            <div id="Moodle_Icon_Bleeding" class="w-16 h-12 rounded bg-gray-600/80">  
+              <img src="uxicons/Moodle_Icon_Bleeding.png" alt="Bleeding" class="absolute w-12 h-12 z-50" >
+              <img id="pgBar_Bleeding" src="uxicons/pgbar-2.png" alt="" class="absolute w-16 h-12 z-50" > 
+            </div>
             <div id="Moodle_Icon_Zombie" class="w-16 h-12 rounded bg-gray-600/80">  
-              <img src="uxicons/Moodle_Icon_Zombie.png" alt="무들" class="absolute w-12 h-12 z-50" >
+              <img src="uxicons/Moodle_Icon_Zombie.png" alt="Zombie" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Zombie" src="uxicons/pgbar-2.png" alt="" class="absolute w-16 h-12 z-50" > 
             </div>
           </div>
@@ -343,7 +364,7 @@
               밀치기
             </span>
           </div>
-          <div id="attackBt" class="lg:w-48 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <div id="attackBt" class="lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/attackBt.png" alt="공격하기" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               공격하기
@@ -356,10 +377,16 @@
               휴식
             </span>
           </div>
-          <div id="sleepBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <div id="sleepBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white hidden">
             <img src="images/sleepBt.png" alt="잠자기" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               잠자기
+            </span>
+          </div>
+          <div id="skillBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              스킬 창
             </span>
           </div>
           <div id="bandingBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
@@ -394,7 +421,18 @@
 
     </div>
   </div>
-
+  <!-- 스킬 모달 -->
+  <div id="skillModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative">
+      <!-- 닫기 버튼 -->
+      <!--<button id="closeSkillModal" class="absolute top-2 right-4 text-gray-600 hover:text-black text-2xl font-bold">✕</button>
+    -->
+      <h2 class="text-2xl font-bold mb-4 text-center">🎯 플레이어 스킬</h2>
+      
+      <!-- 스킬 목록이 여기에 자동으로 추가됨 -->
+      <div id="skillList" class="grid grid-cols-2 gap-3"></div>
+    </div>
+  </div>
   <!-- 결과값 모달-->
   <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
@@ -412,8 +450,9 @@
       <div class="mt-4 text-center space-x-4">
         <button id="saveImgBt" class="px-4 py-6 mg-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>  
         
+        <!--
         <button id="gameStartBt" class="px-4 py-6 mg-4 bg-blue-500 text-white rounded-lg sm:text-4xl lg:text-2xl"> ???:진행시켜 </button>
-        
+        -->
       </div>
      
     </div>
@@ -421,9 +460,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const version = "0.4.12.12"; // ← 버전 숫자 변수
+    const version = "0.4.12.15"; // ← 버전 숫자 변수
     document.getElementById("version-text").textContent = `ver ${version}`;
-    document.getElementById("version-text2").textContent = `ver ${version}`;
+    //document.getElementById("version-text2").textContent = `ver ${version}`;
     //다크모드 버튼
     document.getElementById("toggleDark").addEventListener("click", () => {
       document.body.classList.toggle("dark");
@@ -443,6 +482,27 @@
     closeBtn.addEventListener("click", () => {
       modal.classList.add("hidden");
     });
+    document.addEventListener("DOMContentLoaded", () => {
+    const noticeContent = document.getElementById("noticeContent");
+
+    fetch("notice.json")
+      .then(res => res.json())
+      .then(data => {
+        let html = `<p class="mb-2 text-xl">📢 ${data.version} 업데이트 안내</p>`;
+        html += "<ul>";
+        data.changes.forEach(item => {
+          html += `<li class="mb-1 lg:text-2xl sm:text-2xl ">- ${item}</li>`;
+        });
+        html += "</ul><p class='mt-2 text-2xl lg:text-lg text-gray-600'>" + data.note + "</p>";
+        noticeContent.innerHTML = html;
+      })
+      .catch(err => {
+        noticeContent.innerHTML = `<p style="color:red">공지사항을 불러오지 못했습니다.</p>`;
+        console.error(err);
+      });
+    });
+
+
     //게임시작버튼
     const gameStartBtn = document.getElementById("gameStartBt");
     gameStartBtn.addEventListener("click", () => {
@@ -527,7 +587,7 @@
 
   <script src="core.js">ㅤ</script>
   <script src="gameManager.js"></script>
-  
+  <script src="gameUI.js"></script>
   <script src="game_zombie.js"></script>
   <script src="game_player.js"></script> 
 </body>

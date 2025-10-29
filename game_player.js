@@ -2,13 +2,13 @@
 function playerStat(){
     //4~-4, 무조건표시값은 100;
     if(health<=0){
-        setMoodleValue('Moodle_Icon_Zombie',100);
-        setMoodleValue('Moodle_Icon_Panic',0);
-        setMoodleValue('Moodle_Icon_Endurance',0);
+        setMoodleValue('Zombie',100);
+        setMoodleValue('Panic',0);
+        setMoodleValue('Endurance',0);
         return;
     }
 
-    let panicMd = findMoodle('Moodle_Icon_Panic');
+    let panicMd = findMoodle('Panic');
     //패닉수치 계산(임시)
     if(zombies.length>2){
         const panic = Math.floor(zombies.length/3);
@@ -34,15 +34,44 @@ function playerStat(){
     if(stamina<=50){enduValue--};
     if(stamina<=25){enduValue--};
     if(stamina<=10){enduValue--};
-    setMoodleValue('Moodle_Icon_Endurance', enduValue);
+    setMoodleValue('Endurance', enduValue);
 
 
-    let str = findPlayerTrait("strength");
-    let fit= findPlayerTrait("fitness");
+    let str = findPlayerSkill('strength').lv;
+    let fit= findPlayerSkill('fitness').lv;
     //데이터반환
-    return {strength:str.lv, fitness:fit.lv, panic:-panicMd.value, endurance: enduValue };
+    return {strength:str, fitness:fit, panic:-panicMd.value, endurance: enduValue };
 }
-
+function addSkillXp(name, value){
+    let data = findPlayerSkill(name);
+    if(data !=null){
+        //현자, 느린학습, 피공포증 등 적용
+        let xpvalue = 1;
+        if(playerHasTrait('fastlearner')){ xpvalue *= 1.3}
+        if(playerHasTrait('slowlearner')){ xpvalue *= 0.7}
+        if(playerHasTrait('pacifist')){
+            if(name == 'Axe' || name=='ShortBlade' || name=='LongBlade' || name=='ShortBlunt' || name=='LongBlunt'){
+                xpvalue *= 0.75;
+            }
+        }
+        data.xp += Math.ceil((value*xpvalue)*10)/10;
+        console.log(xpvalue);
+        while(data.xp>data.maxXp){
+            if(data.lv==10){
+                data.xp = data.maxXp;
+                break;
+            }else{
+                data.lv ++;
+                data.xp -= data.maxXp;
+                data.maxXp = xpData[ data.lv ];
+                log(`[${translations[currentLang][name]}] Level ${data.lv}로 레벨업!`);
+            }
+        }
+       
+    }else{
+        return null;
+    }
+}
 
 //캐릭터움직임
 function playerMove(distance=40) {
@@ -91,9 +120,11 @@ function playerAttack(multiHit){
 
     log(`${translations[currentLang][weapon.name]}으로 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
+
+    let skillLv = findPlayerSkill(weapon.type).lv;
     for(let i =0 ; i< num; i++){
         //대미지 계산
-        let damage = weapon.damage/2 + randomInt(0,weapon.damage/2);
+        let damage = (weapon.damage/2 + randomInt(0,weapon.damage/2))*(skillLv+1);
         if(zombies[i].isStunning>0){
             damage = damage*2;
         }
@@ -111,6 +142,8 @@ function playerAttack(multiHit){
         damage = Math.ceil(damage);
         // zombies[i].hp -= damage;
         zombieIsDamaged(i, damage);
+        addSkillXp( weapon.type, damage);
+
         damageTxt[i].textContent = `-${damage}`;
         damageTxt[i].classList.remove('hidden');
         setTimeout(() => {
@@ -159,7 +192,7 @@ function playerPush(multiHit){
         }else{
             zombieMove(i,10);
             zombieStun(i,1);//zombies[i].isStunning = 1; //한 턴 공격 못하게 미루기
-            log(`넘어트리지 못했지만 좀비가 움찔했다.`,rng)
+            //log(`넘어트리지 못했지만 좀비가 움찔했다.`,rng)
             
         }
     }
@@ -193,67 +226,75 @@ function playerIsDamaged(value){
         healer = 5;
     }
     //slowhealer, fasthealer, thinskinned, thickskinned
-    if(rng< 0.15 +per){
+    if(rng< 0.1 +per){
         //물림
-        wound.push( {tag:"bitten", turn:(50+healer)} );
-        wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
-        log(`${ ((0.15 +per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+        wound.push( {tag:"bitten", turn:(100+healer*4)} );
+        wound.push({tag:"zombie", turn:(100+healer*4) , turn0:(100+healer*4)}); 
+        log(`${ ((0.1+per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.`, `${rng} < ${0.1} ${ per>0? '+':'' }${per!=0?per:''}` );
     }else if(rng<0.4+per){
         //찢어진상처
-        wound.push( {tag:"scratched", turn:randomInt(10+healer,20+healer)} );
-        log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+        wound.push( {tag:"scratched", turn:randomInt(20+healer,40+healer)} );
+        log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.`, `${rng} < ${0.4} ${ per>0? '+':''}${per!=0?per:''}` );
         if(zbrng<0.25){
             //감염
-            wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
+            wound.push({tag:"zombie", turn:(100+healer*4) , turn0:(100+healer*4)}); 
         }
     }else if(rng<0.6+per){
         //긁힘
-        wound.push( {tag:"lacerated", turn:randomInt(7+healer,15+healer)} );
-        log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`, `${rng} < ${0.2}  ${ per>0? '+':'' }${per!=0?per:per}` );
+        wound.push( {tag:"lacerated", turn:randomInt(17+healer,25+healer)} );
+        log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`, `${rng} < ${0.6} ${ per>0? '+':'' }${per!=0?per:''}` );
         if(zbrng<0.07){
             //감염
-            wound.push({tag:"zombie", turn:(50+healer) , turn0:(50+healer)}); 
+            wound.push({tag:"zombie", turn:(100+healer*4) , turn0:(100+healer*4)}); 
         }
     }
     
     renderGameUI();
 }
 function woundHealingCalculate(){
+    let wndCount=0;
     for(let i=0;i<wound.length;i++){
         let data = wound[i];
         data.turn--;
         if(data.tag =="zombie"){
             if(data.turn/data.turn0  <= 0.2){
-                setMoodleValue('Moodle_Icon_Sick',-2);
-                setMoodleValue('Moodle_Icon_Stressed',-4);
+                setMoodleValue('Sick',-2);
+                setMoodleValue('Stressed',-4);
             }else  if(data.turn/data.turn0  <= 0.3){
-                setMoodleValue('Moodle_Icon_Sick',-1);
-                setMoodleValue('Moodle_Icon_Stressed',-3);
+                setMoodleValue('Sick',-1);
+                setMoodleValue('Stressed',-3);
             }else if(data.turn/data.turn0  <= 0.5){
-                setMoodleValue('Moodle_Icon_Stressed',-2);
+                setMoodleValue('Stressed',-2);
             }else if(data.turn/data.turn0  <= 0.8){
-                setMoodleValue('Moodle_Icon_Stressed',-1);
+                setMoodleValue('Stressed',-1);
             }
         }
         if(data.tag=="scratched" || data.tag == "bitten"){
             health -=3;
+            wndCount++;
         }
         if(data.tag=="lacerated"){
             health -=2;
+            wndCount++;
         }
         if(data.turn<=0){
             if( data.tag =="zombie"){
                 //좀비화 상태의 경우 즉시 게임오버
                 health=0;
-                setMoodleValue('Moodle_Icon_Sick',0);
-                setMoodleValue('Moodle_Icon_Stressed',0);
                 checkGameOver();
             }
             wound.splice(i,1);
             i--;
+            wndCount--;
         }
-
-
+    }
+    if(wndCount>0){
+        if(wndCount>=4){
+            wndCount = 4;
+        }
+        setMoodleValue('Bleeding',-wndCount);
+    }else{
+        setMoodleValue('Bleeding',0);
     }
 }
 function playerBanding(){
@@ -262,6 +303,7 @@ function playerBanding(){
         let data = wound[i];
         if(data.tag =="lacerated" || data.tag =="scratched" || data.tag=="bitten"){
             log( `[${translations[currentLang][data.tag]}]에 붕대 감음.`);
+
             wound.splice(i,1);
             i--;
             bool = true;

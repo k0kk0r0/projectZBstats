@@ -1,6 +1,6 @@
 //좀비생성함수
 function spawnZombie(num){
-    zombies.push( { id:num, hp: 40, isAnimating: false ,isStunning:0}) ;
+    zombies.push( {  hp: 40, isAnimating: false ,isStunning:0}) ;
 }
 function spawnZombies(num, min=0){
     const rng = randomInt(0,num);
@@ -12,6 +12,7 @@ function spawnZombies(num, min=0){
             zombieElements[i].style.right =(200- 60*i)+ "px";
             zombieElements[i].classList.remove('hidden');
             zombieElements[i].classList.remove(stunClass);
+            zombieMove(i);
         }
     }
 }
@@ -21,12 +22,12 @@ function callZombies(num, addPer=0){
     const rng = Math.random();
     let per = 0.05 + zombies.length*0.01 + addPer + stack.zombieSpawn* 0.01;
     let txt =""
-    if(findPlayerTrait("conspicuous")!=null){
+    if(playerHasTrait("conspicuous")){
         //넘치는존재감
         txt = "<넘치는 존재감>으로 ";
         per = per*2;
     }
-    if(findPlayerTrait("inconspicuous")!=null){
+    if(playerHasTrait("inconspicuous")){
         //부족한존재감
         txt = "<부족한 존재감>에도 불구하고 ";
         per = per/2;

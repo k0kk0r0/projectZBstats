@@ -11,7 +11,12 @@
 
     let selectedItems=[];
     function addSelectedItem(_name, _value, _imgsrc=null){
-      selectedItems.push({name:_name, value:_value, imgsrc:_imgsrc});
+      let data = selectedItems.find(n => n.name ===_name);
+        if(data!=null){
+          data.value += _value;
+        }else{
+          selectedItems.push({name:_name, value:_value, imgsrc:_imgsrc});
+        }
     }
     function clearSelectedItemList(){
       selectedItems = [];

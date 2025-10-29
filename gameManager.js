@@ -13,17 +13,87 @@ const staminaBar = document.getElementById("staminaBar");
 const staminaTxt = document.getElementById("staminaTxt");
 
 //장소의 상단 설비 아이콘들
-const generatorIcon = document.getElementById('generatorOn');
-const generatorOffIcon = document.getElementById('generatorOff');
-const bedIcon = document.getElementById('bed');
-const sofaIcon = document.getElementById('sofa');
-const faucetIcon = document.getElementById('faucet');
-const frigeIcon = document.getElementById('fridge');
-const ovenIcon = document.getElementById('oven');
-const microIcon = document.getElementById('micro');
-const storageIcon = document.getElementById('storage'); 
-const livestockIcon = document.getElementById("livestock");
-const facilityIconsList = [generatorIcon, generatorOffIcon, bedIcon, sofaIcon, faucetIcon, frigeIcon, ovenIcon, microIcon, storageIcon,livestockIcon];
+const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock"];
+const facilityIcons = facilityNames.map(name =>({
+    name:name,
+    icon: document.getElementById(`Icon_${name}`),    
+    enabledIcon: document.getElementById(`Enable_${name}`),
+    enabled:false,
+    visible:false,
+    needs:[]
+ }));
+ getFacilityIcon('generator').needs.push({name:'fuel', amount:0});
+ getFacilityIcon('radio').needs.push({name:'battery', amount:10});
+ getFacilityIcon('fridge').needs.push( {name:'generator'});
+ getFacilityIcon('oven').needs.push( {name:'generator'});
+ getFacilityIcon('micro').needs.push( {name:'generator'});
+ getFacilityIcon('faucet').needs.push( {name:'water', amount:10});
+ console.log(facilityIcons);
+
+ for(let i=0;i<facilityIcons.length;i++){
+    const data = facilityIcons[i];
+    if(data.needs.length==0){
+        data.enabled=true;
+    }
+
+    data.icon.addEventListener('click', ()=>{
+        if(data.needs.length>0 ){
+            const needs = data.needs[0];
+                stopResting();
+                if(needs.name=='generator'){
+                    //필요로 하는 물품이 발전기인 경우
+                    if(powerEndTurn>0){
+                        setFacilityEnable( data.name, !data.enabled);
+                        log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
+
+                    }else if(getFacilityIconVisiblity(needs.name) ){
+                        //발전기가 있으면
+                        if(getFacilityEnable(needs.name)  ){
+                            //발전기가 켜져있으면
+                            setFacilityEnable( data.name, !data.enabled);
+                            log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
+                        }else{
+                            log(`전력 공급이 중단되었거나 발전기가 꺼져있습니다.`);
+                        }
+                    }
+                    else{
+                        //발전기가 없음
+                        log(`전력 공급 혹은 발전기가 필요합니다.`);
+                    }
+                }else if(needs.name=='water'){
+                    //물이 필요한 경우
+                    if(waterEndTurn>0){
+                        //물 끊기기 전
+                        log(`물을 마셨습니다.`);
+                    }else{
+                        if(needs.amount>0){
+                            needs.amount--;
+                            log(`물을 마셨습니다. 남은 물: ${needs.amount}`)
+                        }else{
+                            log('물이 없습니다');
+                        }
+                    }
+                }
+                else if(needs.name=='fuel' || needs.name=='battery'){
+                    if(needs.amount<=0){
+                         //자원이 없는 경우
+                        log(`${needs.name}가 필요합니다.`);
+                    }else{
+                        //자원이 있는 경우 작동
+                        setFacilityEnable( data.name, !data.enabled);
+                        log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
+                    }
+                }else{
+                    setFacilityEnable( data.name, !data.enabled);
+                    log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
+                }
+      
+           
+        }else{
+
+        }
+    });
+ }
 
 //게임 매니저 객체
 const player = document.getElementById('player');
@@ -33,39 +103,32 @@ const equipWp = document.getElementById('equipWp');
 const zombie0 = document.getElementById('zombie0');
 const zombie1 = document.getElementById('zombie1');
 const zombie2 = document.getElementById('zombie2');
+const zombieImg0 = document.getElementById('zombieImg0');
+const zombieImg1 = document.getElementById('zombieImg1');
+const zombieImg2 = document.getElementById('zombieImg2');
 const zombieElements = [zombie0,zombie1,zombie2];
+const zombieImgs = [zombieImg0, zombieImg1, zombieImg2];
 const damage0 = document.getElementById('damage0');
 const damage1 = document.getElementById('damage1');
 const damage2 = document.getElementById('damage2');
 const damageTxt = [damage0, damage1, damage2];
 
 //무들 아이콘
-const Moodle_Tired = document.getElementById("Moodle_Icon_Tired");
-const Moodle_Endurance= document.getElementById("Moodle_Icon_Endurance");
-const Moodle_Panic = document.getElementById("Moodle_Icon_Panic");
-const Moodle_Sick = document.getElementById("Moodle_Icon_Sick");
-const Moodle_Stressed = document.getElementById("Moodle_Icon_Stressed");
-const Moodle_Zombie = document.getElementById("Moodle_Icon_Zombie");
+const moodleNames = ["Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
+const moodles = moodleNames.map(name => ({
+  name: name,
+  icon: document.getElementById(`Moodle_Icon_${name}`),
+  bar: document.getElementById(`pgBar_${name}`),
+  value: 0
+}));
 
-const bar_Tired = document.getElementById("pgBar_Tired");
-const bar_Endurance= document.getElementById("pgBar_Endurance");
-const bar_Panic = document.getElementById("pgBar_Panic");
-const bar_Sick = document.getElementById("pgBar_Sick");
-const bar_Stressed = document.getElementById("pgBar_Stressed");
-const bar_Zombie = document.getElementById("pgBar_Zombie");
-const moodles = [
-    {icon:Moodle_Tired,bar:bar_Tired , value:0 },
-    {icon:Moodle_Endurance , bar:bar_Endurance , value:0 },
-    {icon:Moodle_Panic , bar:bar_Panic , value:0 },
-    {icon:Moodle_Sick , bar:bar_Sick , value:0 },
-    {icon:Moodle_Stressed , bar:bar_Stressed , value:0 },
-    {icon:Moodle_Zombie, bar:bar_Zombie, value:0}
-];
 //명령 버튼
 const pushBt = document.getElementById('pushBt');
 const attackBt = document.getElementById('attackBt');
 const restBt = document.getElementById('restBt');
 const sleepBt = document.getElementById('sleepBt');
+
+const skillBt = document.getElementById('skillBt');
 const bandingBt = document.getElementById('bandingBt');
 const atHomeBt = document.getElementById('atHomeBt');
 const nextMapBt = document.getElementById('nextMapBt');
@@ -80,154 +143,12 @@ const backpackIcon = document.getElementById(`backpackIcon`);
 const backpackImg = document.getElementById(`backpackImg`);
 const backpackName = document.getElementById('backpackName');
 
-const commandBts = [pushBt,attackBt,restBt,sleepBt,bandingBt, atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
+const commandBts = [pushBt,attackBt,restBt,skillBt,bandingBt, atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
 
 //로그텍스트 추가
 const logtxt = document.getElementById("logText");
 
-//버튼함수
-pushBt.addEventListener('click', () => {
-    //캐릭터 밀치기(좀비 넘어트리기)
-     if(gameOver)return;
-    if(delaying) return; //딜레이 중이면 무시
-    stopResting();
-    if(!isAnimating){
-        //console.log(parseInt(weapon.multiHit)+1);
-        playerPush(parseInt(weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
-    }
-    
-    playerMove();
-    advanceTurn();
-});
-attackBt.addEventListener('click', () => {
-    //캐릭터 공격
-     if(gameOver)return;
-    if(delaying) return;//딜레이 중이면 무시
-    stopResting();
-    if(!isAnimating){
-        playerAttack(weapon.multiHit);    
-    }
-    
-    playerMove();
-    advanceTurn();
-    callZombies(1);//좀비추가
-});
 
-restBt.addEventListener('click', () => {
-    //휴식 및 턴 넘기기
-     if(gameOver)return;
-    if(delaying) return; //딜레이 중이면 무시
-    if(isResting){
-        stopResting();
-        return;
-    }
-    isResting = true;
-    log("휴식중...");
-    renderGameUI();
-    interval =  setInterval(() => {
-        //스태미나, 체력 회복
-        if(stamina<100 || health < 100){
-             stamina += 10;
-             health += 5;
-            if(stamina>=100)stamina=100;
-            if(health>=100)health=100;
-            if(stamina>=100 && health>=100){
-                //회복하다가 한 번 멈춤
-                stopResting();
-            }
-        }
-        
-       
-        advanceTurn();
-        renderGameUI();
-    },400); 
-});
-nextMapBt.addEventListener('click',() =>{
-     if(gameOver)return;
-    if(delaying)return;//딜레이 중이면 무시
-    //다음 맵 이동
-    mapNum++;
-    let rng = Math.random();
-    if(mapNum==mapData.length){
-        if(currentMapData.name =="road"){
-            //현재 길거리에 있을 때에만
-            if(rng<0.15){
-                mapData.push( findMapData('store_tool'));
-            }else if(rng<0.35){
-                mapData.push( findMapData("livestock"));
-            }else if(rng<0.6){
-                mapData.push( findMapData("house"));
-            }else{
-                mapData.push( findMapData('road'));
-            }
-        }else{
-             mapData.push( findMapData('road'));
-        }
-       
-        
-    }else{
-        rng =0;
-    }
-    let timedelay = 0;
-    if(zombies.length>0){
-        timedelay = 900;
-        delaying=true;
-        renderGameUI();
-    }
-     zombieAttack(0); //맵 이동 시 좀비 공격
-     setTimeout(() => { 
-        if(gameOver)return;
-        mapSetting(mapData[mapNum]);
-        delaying=false;
-        renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`,rng);
-     },timedelay);
-    
-    //TurnEnd();
-    
-    
-})
-atHomeBt.addEventListener('click', ()=>{
-     if(gameOver)return;
-    if(delaying)return;//딜레이 중이면 무시
-    //이전 맵 이동
-    mapNum--;
-    if(mapNum<0){
-        mapNum=0
-        return;
-    }
-
-    let timedelay = 0;
-    if(zombies.length>0){
-        timedelay = 900;
-        delaying=true;
-        renderGameUI();
-    }
-     zombieAttack(0); //맵 이동 시 좀비 공격
-     setTimeout(() => { 
-        if(gameOver)return;
-        mapSetting(mapData[mapNum]);
-        delaying=false;
-        renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 돌아왔다. - 진행도[${mapNum+1}/${mapData.length}]`);
-     },timedelay);
-    
-    //TurnEnd();
-
-})
-//치료버튼
-bandingBt.addEventListener('click', ()=>{
-    if(gameOver)return;
-    if(delaying) return; //딜레이 중이면 무시
-
-    let bool =  playerBanding();
-    if(bool){
-        advanceTurn();
-    }else{
-        log(`치료할 상처가 없습니다`);
-    }
-})
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //배경
 const bg = document.getElementById('mainBg');
 
@@ -251,6 +172,8 @@ let isResting = false; //휴식 상태 여부
 let hour= 7; //게임 시간 (시간단위)
 let min = 0; //게임 시간 (분단위)
 let day = 1; //현재 날짜
+let waterEndTurn;
+let powerEndTurn;
 let mapData = [];
 let currentMapData;
 let mapNum = 0;
@@ -262,25 +185,30 @@ const stunClass = 'rotate-90';
 
 //플레이어 데이터
 let weapon;
-let backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
+let backpack;
+let inventory;
 let stamina;
 let health;
 let wound = [];//상처 배열
 let skills = {};
 let job;
 let zombieKillCount;
-let playerTraitDatas;
-const xpData = [0, 100,200,400,600,800, 1000,1200,1400,1800,2000 ];
+let traits =[]; 
+const xpData = [100, 200,400,600,800,1000, 1200,1400,1600,1800,2000 ];
 function setPlayerTrait(){
     //선택한 플레이어 데이터 수집
     let data = getSelectedItemList();
-      //console.log( data );
-      /*
-      addSelectedItem("strength", strength);
-    addSelectedItem("fitness", fitness);
-    addSelectedItem("maxStrength", maxstrength);
-    addSelectedItem("maxFitenss",maxfitness);
-    */
+
+    skills = {};
+    skills.strength = {lv:5, xp:0, maxXp: xpData[5]};
+    skills.fitness = {lv:5, xp:0, maxXp:xpData[5]};
+    skills.Axe = {lv:0, xp:0, maxXp: xpData[0]};
+    skills.ShortBlade = {lv:0, xp:0, maxXp: xpData[0]};
+    skills.LongBlade = {lv:0, xp:0, maxXp: xpData[0]};
+    skills.ShortBlunt = {lv:0, xp:0, maxXp: xpData[0]};
+    skills.LongBlunt = {lv:0, xp:0, maxXp: xpData[0]};
+
+
     for(let i =0 ; i< data.length; i++){
         let value = data[i].value;
        if(data[i].name =="strength"){
@@ -293,15 +221,16 @@ function setPlayerTrait(){
             job = {name:value, src:data[i].imgsrc};
        }
        else if(data[i].name=="Trait"){
-            skills[value] = true;
+            traits.push( {name:value} );
+            
        }else{
             skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
        }
     }
-    //console.log(skills.strength);
+    console.log(skills);
 }
 function findPlayerTrait(name) {
-  return skills[name];
+  return traits.find(v=> v.name === name);
 }
 function playerHasTrait(name){
     if(findPlayerTrait(name) != null){
@@ -310,8 +239,13 @@ function playerHasTrait(name){
         return false;
     }
 }
-
-
+function findPlayerSkill(name){
+    return skills[name];
+}
+function playerHasSkill(name){
+    if(findPlayerSkill(name) !=null){return true}
+    else{return false}
+}
 //무기아이콘 클릭 시 무기변경
 weaponImg.addEventListener('click', ()=>{ 
    changeWeapon();
@@ -358,7 +292,8 @@ function findWeapon(itemName ){
         multiHit: parseInt(data.multiHit),
         durability: parseInt(data.durability),
         stamina: parseInt(data.stamina),
-        damage: parseInt(data.damage)
+        damage: parseInt(data.damage),
+        type: data.type.toString()
     }
     return data0;
 }
@@ -404,6 +339,7 @@ function findMapData(itemName){
         thisFacilities: data.thisFacilities.split(";"),
         dropItems:dropItemsArray
     }
+    data0.thisFacilities.push('storage','livestock');//항상 추가
     return data0
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +349,8 @@ async function ResetAllGame(){
     hour= 7; //게임 시간 (시간단위)
     min = 0; //게임 시간 (분단위)
     day = 1; //현재 날짜
-
+    powerEndTurn = randomInt(0,14*6);
+    waterEndTurn = randomInt(0,14*6);
     zombies = [];
 
     
@@ -421,7 +358,11 @@ async function ResetAllGame(){
     gameOver=false;
     isResting = false;
     delaying = false;    
+
+    
     weapon =null;
+    backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
+    inventory = [];
     wound = [];
     health = 100;
     stamina = 100;
@@ -437,17 +378,20 @@ async function ResetAllGame(){
     mapSetting(mapData[0]);
     
     stack = {
-        climate:"sunny",
-        nextClimate:"rain",
-        prevClimate:"sunny",
-        climateTime:3,
+        weather:"sunny",
+        nextWeather:"rain",
+        prevWeather:"sunny",
+        weatherTime:randomInt(5,10),
 
         zombieSpawn:0
     };
-
+    for(let i=0;i<moodles.length;i++){
+        moodles[i].value =0;
+    }
 
     playerMove();
-   
+    resetAllMoodleValue();
+    //resetFacilityIcons();
 
     //renderGameUI();
     changeWeapon();
@@ -456,13 +400,29 @@ async function ResetAllGame(){
     //준비완료
     logtxt.innerHTML='';
     log(translations[currentLang].ment);
+
+    radioAction(0);
 }
 //맵 이동 갱신
 function mapSetting(data) {
     currentMapData = data;
     clearInterval(interval );
     interval = null;
-    spawnZombies(currentMapData.zombieNum); //좀비소환
+    let zombieNum = parseInt(currentMapData.zombieNum);
+    let txt='';
+    if(playerHasTrait("conspicuous")){
+        //넘치는존재감
+        txt = "<넘치는 존재감>으로";
+        zombieNum++;
+        log(`${txt} 좀비가 더 소환되었습니다`)
+    }
+    if(playerHasTrait("inconspicuous")){
+        //부족한존재감
+        txt = "<부족한 존재감>으로";
+        zombieNum--;
+        log(`${txt} 좀비가 덜 소환되었습니다`)
+    }
+    spawnZombies(zombieNum); //좀비소환
     bgLightDark( currentMapData );
 
 
@@ -473,35 +433,58 @@ function mapSetting(data) {
    renderGameUI();
 }
 //날씨변경
-function changeClimate(){
-    stack.climateTime--;
-    if(stack.climateTime<=0){
+function changeweather(){
+    stack.weatherTime--;
+    if(stack.weatherTime<=0){
         let txt ="";
-        if(stack.climate != stack.nextClimate){
+        let txt0="";
+        if(stack.weather != stack.nextWeather){
+            if(stack.weather =="rain"){    txt0 = '비가 그치고'  }
+            if(stack.weather =="windy"){    txt0 = '바람이 그치고'  }
+            if(stack.weather =="sunny"){    txt0 = '맑은 날씨가 끝나고'  }
             //날씨변경 시 알림
-            if(stack.climate=="rain"){  txt="비가 옵니다.";   }
-            if(stack.climate=="windy"){ txt="바람이 붑니다."   }
-            if(stack.climate=="sunny"){ txt="날씨가 잔잔해졌습니다."  }
+            if(stack.nextWeather=="rain"){  txt="비가 옵니다."  }
+            if(stack.nextWeather=="windy"){ txt="바람이 붑니다."   }
+            if(stack.nextWeather=="sunny"){ txt="날씨가 잔잔해졌습니다."  }
             
-            log(txt);
+            log(`${txt0} ${txt}`);
         }
-        stack.climate = stack.nextClimate;
+        stack.weather = stack.nextWeather;
         const rng = Math.random();
          if(rng < 0.3){
-            nextClimate = "rain";
-            stack.climateTime = randomInt(4,20);
+            stack.nextWeather = "rain";
+            stack.weatherTime = randomInt(4,20);
             
         }else if(rng < 0.7){
-            nextClimate = "windy";
-            stack.climateTime = randomInt(2,8);
+            stack.nextWeather = "windy";
+            stack.weatherTime = randomInt(2,8);
             
         }else{
-            nextClimate = "sunny";
-            stack.climateTime = randomInt(10,10);
+            stack.nextWeather = "sunny";
+            stack.weatherTime = randomInt(10,10);
            
         }
     }
 }
+function radioAction(num){
+    //라디오 작동
+    let txt = '';
+    if(getFacilityEnable('radio')){
+        if(num==0){ 
+            log(`pzzz.. ABS 비상방송...pzzz... 날씨는... <${translations[currentLang][stack.weather]}> pzzz...`);
+        }
+        if(num==10){
+            log(`pzzz... 앞으로 ${stack.weatherTime}턴 동안 ...날씨가 지속된 후... pzzz... <${translations[currentLang][stack.nextWeather]}>.. pzzz...`)
+        }
+        if(num==20){
+            if(powerEndTurn>0){
+                 log(`pzzz... 비상전력 시스템...pzz... ${powerEndTurn}턴 뒤... pzzz... 전력 끊김... pzzz...`)
+            }
+           
+        }
+    }    
+}
+
 //배경 밤낮
 function bgLightDark(data){
     let editsrc =data.src;
@@ -517,8 +500,8 @@ function bgLightDark(data){
         }
     }else{
         //실내의 경우
-        if(  data.thisFacilities.includes("generatorOn")){
-            //발전기가 있으면
+        if( getFacilityEnable("generator") || powerEndTurn>0){
+            //발전기가 켜져 있으면
             dark = false;
         }else{
             dark = true;
@@ -538,7 +521,7 @@ function bgLightDark(data){
 function log(text, value="") {
   const p = document.createElement("p"); // 한 줄씩 추가
   p.textContent = `${hour}:${min.toString().padStart(2, '0') } : ` + text + (debug? (value.length>0? `(${value})`:"" ):"");
-  p.className = "text-white text-left text-md"; // Tailwind 스타일 적용
+  p.className = "text-white text-left text-lg"; // Tailwind 스타일 적용
   logtxt.appendChild( p);
   // 자동 스크롤: 맨 아래로
   requestAnimationFrame(() => {
@@ -580,13 +563,32 @@ function TurnEnd() {
         if(stamina>100){stamina=100}
         if(health>100){health=100}
 
-        changeClimate();//날씨변경
+        changeweather();//날씨변경
         
         woundHealingCalculate(); //부상계산
 
+        //물, 전기끊김
+        if(powerEndTurn>0){
+            powerEndTurn--;
+            if(powerEndTurn<=0){
+                log(`⚡쿠궁! 전기가 끊겼습니다⚡`);
+                bgLightDark(currentMapData);
+                resetFacilityIcons();//
+                stopResting();
+            }
+        }
+        if(waterEndTurn>0){
+            waterEndTurn--;
+            if(waterEndTurn<=0){
+                //log(`물이 끊겼습니다.`); //물은 언제 끊겼는지 몰루
 
+            }
+        }
+        
+        
         min += 10; //15분씩 증가
         // 분이 60이 넘으면 시간 증가
+        
         if(min >= 60) {
             min = 0;
             hour++;
@@ -597,6 +599,10 @@ function TurnEnd() {
             hour = 0;
             day++;
         }
+        
+        if(min<= 20){
+            radioAction(min);
+        }
     }
     
 
@@ -604,7 +610,7 @@ function TurnEnd() {
 }
 
 function findMoodle(_moodleName){
-    return moodles.find(m => m.icon.id == _moodleName);
+    return moodles.find(m => m.name == _moodleName);
 }
 function setMoodleValue(_moodleName, _value){
     let moodle = findMoodle(_moodleName);
@@ -613,6 +619,12 @@ function setMoodleValue(_moodleName, _value){
 }
 function getMoodleValue(_moodleName){
     return findMoodle(_moodleName).value;
+}
+function resetAllMoodleValue(){
+    for(let i =0 ;i <moodles.length; i++){
+        moodles[i].value=0;
+    }
+    renderMoodles();
 }
 function renderPlayer(){
     //플레이어 동작
@@ -637,13 +649,13 @@ function renderZombie(){
         }
         if(zombies[i].isStunning>0){
             //스턴 된 경우
-            if(zombieElements[i].classList.contains(stunClass)){
+            if(zombieImgs[i].classList.contains(stunClass)){
                 //넘어짐이 있는 경우
             }else{
-                zombieElements[i].classList.add(stunClass);
+                zombieImgs[i].classList.add(stunClass);
             }
         }else{
-            zombieElements[i].classList.remove(stunClass);
+            zombieImgs[i].classList.remove(stunClass);
         }
         if(zombies[i].hp <=0){
             //체력 감소 시 좀비 숨김, 좀비 사망
@@ -684,16 +696,32 @@ function renderGameUI(){
 
 
     //시설 표시
-    for(let i=0; i<facilityIconsList.length; i++){
-        const icon = facilityIconsList[i];
-        if(currentMapData.thisFacilities.includes(icon.id)){
-            setFacilityIconVisibility(icon.id, true);
+    for(let i=0; i<facilityNames.length; i++){
+        const data= getFacilityIcon( facilityNames[i] );
+        let found = currentMapData.thisFacilities.find(item => item.includes(data.name)); 
+        if (found) {
+            if (found.endsWith("_off")) {
+                //console.log(data.name + "는 꺼져 있습니다.");
+                 setFacilityIconVisiblity(data.name, true);
+                 setFacilityEnable(data.name, false);
+            } else if (found.endsWith("_on")) {
+                //console.log(data.name + "는 켜져 있습니다.");
+                 setFacilityIconVisiblity(data.name, true);
+                 setFacilityEnable(data.name, true);
+            } else {
+                setFacilityIconVisiblity(data.name, true);
+                setFacilityEnable(data.name, true);
+            }
         }else{
-            setFacilityIconVisibility(icon.id, false);
+            //못 찾은 경우
+            setFacilityIconVisiblity(data.name, false);
+            //setFacilityEnable(data.name, null);
         }
+
     }
+    //console.log(currentMapData.thisFacilities);
     renderMoodles();
-   
+
     renderZombie();
 
     //타이머 표시
@@ -713,6 +741,7 @@ function renderGameUI(){
 }
 function checkGameOver(){
     if(!gameOver && health<=0){
+        resetAllMoodleValue();
         playerStat();
         stopResting();
         commandBtsVisible(false);
@@ -735,11 +764,84 @@ function commandBtsVisible(value){
 
 
 //상단설비 호출 함수
-function getFacilityIcons(name) {
-    return facilityIconsList.find(icon => icon.id === name);
+function getFacilityIcon(name) {
+    return facilityIcons.find(m => m.name == name);
 }
-function setFacilityIconVisibility(name, visible) {
-    const icon = getFacilityIcons(name);
-    icon.classList.toggle('hidden', !visible);
+function getFacilityIconVisiblity(name){
+    return getFacilityIcon(name).visible;
 }
+function setFacilityIconVisiblity(name, value) {
+    const icon = getFacilityIcon(name).icon;
+    icon.classList.toggle('hidden', !value);
+    icon.visible = value;
+}
+function getFacilityEnable(name){
+    const enabled = getFacilityIcon(name).enabled;
+    if(enabled==true){
+        return true;
+    }else {
+        return false;
+    }
+}
+function setFacilityEnable(name, value){
+    const icon = getFacilityIcon(name);
+    if(value==null){
+        icon.enabledIcon.classList.toggle( 'hidden', true);
+        icon.value =null;
+    }
+    else{
+       
+        icon.enabled = value;
+        let index = currentMapData.thisFacilities.findIndex(item => item.includes(name));
 
+        if(value==false){
+            //작동중단
+            icon.enabledIcon.classList.toggle( 'hidden', false);
+            if (index !== -1) {
+                currentMapData.thisFacilities[index] = currentMapData.thisFacilities[index].replace('_on', '_off');
+            }
+        }else{
+            icon.enabledIcon.classList.toggle( 'hidden', true);
+            if (index !== -1) {
+                currentMapData.thisFacilities[index] = currentMapData.thisFacilities[index].replace('_off', '_on');
+            }   
+        }
+        //console.log(currentMapData.thisFacilities);
+            
+        
+    }
+}
+function resetFacilityIcons(){
+    for(let i=0;i<facilityIcons.length;i++){
+        const data = facilityIcons[i];
+        if(data.needs.length>0){
+            if(data.needs[0].name=='generator'){
+                  if(powerEndTurn>0 || getFacilityEnable('generator')){
+                    //전력공급중이거나 generator 가 있다면
+                    setFacilityEnable(data.name, true);
+
+                }else{
+                    if(data.needs.length>0){
+                        if(data.needs[0].name=='generator'){
+                            //발전기가 필요한 경우 전원 내리기
+                            if(getFacilityEnable('generator') ==false){
+                                //발전기가 꺼져있는 경우
+                                setFacilityEnable(data.name, false);
+                            }
+                        }
+                    }
+                }
+            }
+            else if(data.needs[0].name=='water'){
+                if(waterEndTurn>0){
+                    //물이 안 끊긴 경우, (빗물받이통?)
+                    setFacilityEnable(data.name, true);
+                }else{
+                    setFacilityEnable(data.name, false);
+                }
+            }
+        }
+      
+    }
+    
+}
