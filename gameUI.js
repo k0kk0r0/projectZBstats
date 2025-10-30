@@ -126,7 +126,7 @@ nextMapBt.addEventListener('click',() =>{
         delaying=true;
         renderGameUI();
     }
-     zombieAttack(0); //맵 이동 시 좀비 공격
+     advanceTurn();
      setTimeout(() => { 
         if(gameOver)return;
         mapSetting(mapData[mapNum]);
@@ -155,7 +155,7 @@ atHomeBt.addEventListener('click', ()=>{
         delaying=true;
         renderGameUI();
     }
-     zombieAttack(0); //맵 이동 시 좀비 공격
+     advanceTurn();
      setTimeout(() => { 
         if(gameOver)return;
         mapSetting(mapData[mapNum]);
@@ -180,3 +180,65 @@ bandingBt.addEventListener('click', ()=>{
     }
 })
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//인벤토리
+
+const storageModal = document.getElementById("storageModal");
+const storage_player = document.getElementById("storage_player");
+const storage_storage = document.getElementById("storage_storage");
+ // 모달 바깥 클릭 시 닫기
+storageModal.addEventListener("click", (e) => {
+    if (e.target === storageModal) {
+        storageModal.classList.add("hidden");
+    }
+});
+document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
+function openStorageModal(){
+    storageModal.classList.remove('hidden');
+    renderStorageModal();
+}
+function renderStorageModal(){
+    storage_player.innerHTML = '';
+    storage_storage.innerHTML = '';
+    for(let i =0;i<inventory.length; i++){
+        addInventoryItem( inventory[i], storage_player, i);
+    }
+    for(let i =0;i<currentMapData.dropItems.length; i++){
+        addInventoryItem( currentMapData.dropItems[i], storage_storage, i);
+    }
+}
+function addInventoryItem(data , route, index){
+    //
+    const div = document.createElement('div');
+    div.id = `item_${data}`;
+    div.className = "relative w-24 lg:w-16 h-24 lg:h-16 bg-white rounded aspect-square";
+    div.dataset.data = JSON.stringify(data);
+    div.dataset.route = route.id;
+    div.dataset.index = index;
+
+    const img = document.createElement('img');
+    img.src = data.path;
+    img.className = "w-full h-full object-contain p-2";
+    div.appendChild(img);
+    
+    const namespan = document.createElement('span');
+    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b z-50";
+    namespan.innerText = translations[currentLang][data.name];
+    div.appendChild(namespan);
+    div.addEventListener('click', storageItemMove);
+    route.appendChild(div);
+}
+function storageItemMove(e){
+    const dataset = e.currentTarget.dataset;
+    const data = JSON.parse( dataset.data);
+    if(dataset.route == storage_player.id){
+        //가방으로 이동
+        currentMapData.dropItems.push( data);
+        inventory.splice(dataset.index,1);
+    }
+    else if(dataset.route == storage_storage.id ){
+        //인벤으로 이동
+        inventory.push( data);
+        currentMapData.dropItems.splice(dataset.index,1);
+    }
+    renderStorageModal();
+}

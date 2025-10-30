@@ -28,7 +28,7 @@ const facilityIcons = facilityNames.map(name =>({
  getFacilityIcon('oven').needs.push( {name:'generator'});
  getFacilityIcon('micro').needs.push( {name:'generator'});
  getFacilityIcon('faucet').needs.push( {name:'water', amount:10});
- console.log(facilityIcons);
+ //console.log(facilityIcons);
 
  for(let i=0;i<facilityIcons.length;i++){
     const data = facilityIcons[i];
@@ -155,6 +155,7 @@ const bg = document.getElementById('mainBg');
 //아이템리스트
 let weaponsData = []; //무기리스트
 let mapDatas = [];//맵리스트
+let miscs = [];//기타 아이템 리스트
 
 //게임 상태 변수
 //턴 진행 함수
@@ -264,6 +265,18 @@ function loadWeapons() {
     });
   });
 }
+//기타 아이템 호출
+function loadMiscs() {
+  return new Promise((resolve) => {
+    Papa.parse("miscs.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        resolve(results.data);
+      }
+    });
+  });
+}
 //맵 데이터 호출
 function loadMapDatas(){
     return new Promise((resolve) => {
@@ -279,12 +292,20 @@ function loadMapDatas(){
 async function init() {
   weaponsData = await loadWeapons();
   mapDatas = await loadMapDatas();
+  miscsData = await loadMiscs();
 }
 init();
-
+function findItem(itemName){
+    let item = findWeapon(itemName);
+    if(item!=null){ return item }
+    item = findMisc(itemName);
+    if(item!=null){ return item }
+    //방어구, 잡템 등등 추가
+}
 function findWeapon(itemName ){
     //무기데이터 검색 및 가공해서 반환
     const data = weaponsData.find(w => w.name === itemName);
+    if(data==null){ return null }
     let data0 ={
         path: data.path.toString(),
         rotate: parseInt(data.rotate),
@@ -293,6 +314,17 @@ function findWeapon(itemName ){
         durability: parseInt(data.durability),
         stamina: parseInt(data.stamina),
         damage: parseInt(data.damage),
+        type: data.type.toString()
+    }
+    return data0;
+}
+function findMisc(itemName ){
+    //기타 아이템 데이터 검색 및 가공해서 반환
+    const data = miscsData.find(w => w.name === itemName);
+    if(data==null){ return null }
+    let data0 ={
+        path: data.path.toString(),
+        name: data.name.toString(),
         type: data.type.toString()
     }
     return data0;
@@ -327,7 +359,7 @@ function findMapData(itemName){
         let rng = Math.random();
         if(rng < parseFloat(item[1])){
            // console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
-            dropItemsArray.push(item[0]);
+            dropItemsArray.push( findItem( item[0]) );
         }
     }
 
@@ -427,9 +459,9 @@ function mapSetting(data) {
 
 
     //맵 보관함 아이템 출력(임시)
-    if(currentMapData.dropItems.length>0){
-        console.log(currentMapData.dropItems);
-    }
+   // if(currentMapData.dropItems.length>0){
+        //console.log(currentMapData.dropItems);
+    //}
    renderGameUI();
 }
 //날씨변경
@@ -715,7 +747,7 @@ function renderGameUI(){
         }else{
             //못 찾은 경우
             setFacilityIconVisiblity(data.name, false);
-            //setFacilityEnable(data.name, null);
+            setFacilityEnable(data.name, false);
         }
 
     }

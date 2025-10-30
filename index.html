@@ -140,7 +140,9 @@
       
       <h2 class="text-4xl lg:text-xl  font-bold mb-4">공지사항 </h2>
       <!--<p class="mb-2 text-3xl md:text-lg"> 📢 <span id="version-text2"></span> 업데이트 안내</p>-->
-      <div id="noticeContent" class="text-lg"></div>
+      <div id="noticeContent" class="text-lg max-h-[480px] overflow-y-auto"></div>
+      <p> ** 본 항목은 정확하지 않을 수 있습니다. </p>
+      <p> ** 자세한 내용은 공식 위키를 참고하세요. </p>
 
     </div>
   </div>
@@ -264,6 +266,18 @@
             </span>
           </div>
 
+          <div id="atHomeBt" class="absolute w-24 h-24 top-36 left-12 z-50 w-20 h-20 rounded">
+            <img src="images/prevBt.png" alt="" class="w-full h-full">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              집으로
+            </span>
+          </div>
+          <div id="nextMapBt" class="absolute w-24 h-24 top-36 right-12 z-50 w-20 h-20 rounded">
+            <img src="images/nextBt.png" alt="" class="w-full h-full">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              다음 지역으로
+            </span>
+          </div>
 
           <!-- 플레이어 (왼쪽 아래 배치) -->
            <!--
@@ -395,18 +409,9 @@
               붕대감기
             </span>
           </div>
-          <div id="atHomeBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="icons/default.png" alt="" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              집으로
-            </span>
-          </div>
-          <div id="nextMapBt" class="lg:w-24 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="icons/default.png" alt="" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              다음 지역으로
-            </span>
-          </div>
+          <!--
+          
+          -->
           <div class="w-[0px] lg:h-16 sm:h-24 rounded relative flex items-center justify-center bg-white">
            
           </div>
@@ -433,6 +438,58 @@
       <div id="skillList" class="grid grid-cols-2 gap-3"></div>
     </div>
   </div>
+  <!-- 인벤토리 모달 -->
+  <div id="inventoryModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+   <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[50vh] max-w-[960px] p-6
+              grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
+
+      <!-- 플레이어 인벤토리 -->
+      <div class="flex-1 border border-gray-500 rounded-xl p-4">
+        <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리</h2>
+        <div id ="playerInventory"
+          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+          <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
+          
+          
+        </div>
+      </div>
+
+      <!-- 보관함 -->
+      <div class="flex-1 border border-gray-500 rounded-xl p-4">
+        <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
+        <div id="storageInventory"
+          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+          <div class="w-24 lg:w-16 bg-white rounded aspect-square"></div>
+        </div>
+      </div>
+
+    </div>
+   </div>
+    <!--보관함 모달-->
+    <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+      <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[50vh] max-w-[960px] p-6
+                  grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
+          <!-- 보관함 -->
+          <div class="flex-1 border border-gray-500 rounded-xl p-4">
+            <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
+            <div id="storage_storage"
+              class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+              <div class="w-24 lg:w-16 bg-white rounded aspect-square"></div>
+            </div>
+          </div>
+
+          <!-- 플레이어 인벤토리 -->
+          <div class="flex-1 border border-gray-500 rounded-xl p-4">
+            <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리</h2>
+            <div id ="storage_player"
+              class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+              <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
+            </div>
+          </div>
+
+        </div>
+      </div>
+      </div>
   <!-- 결과값 모달-->
   <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
@@ -493,7 +550,7 @@
         data.changes.forEach(item => {
           html += `<li class="mb-1 lg:text-2xl sm:text-2xl ">- ${item}</li>`;
         });
-        html += "</ul><p class='mt-2 text-2xl lg:text-lg text-gray-600'>" + data.note + "</p>";
+        //html += "</ul><p class='mt-2 text-2xl lg:text-lg text-gray-600'>" + data.note + "</p>";
         noticeContent.innerHTML = html;
       })
       .catch(err => {
