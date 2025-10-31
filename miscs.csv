@@ -1,2 +1,2 @@
-type,path,name
-Misc,miscs/ToiletPaper.png,ToiletPaper
+type,subType,path,name,weight
+Misc,misc,miscs/ToiletPaper.png,ToiletPaper,0.1

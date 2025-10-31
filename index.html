@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  
   <meta charset="UTF-8">
+  <!--
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  -->
     <title>Project Zomboid B42 stats</title>
     <script>    // 배경색 기본값
       window.bgColorClass = "bg-white";
@@ -438,58 +442,165 @@
       <div id="skillList" class="grid grid-cols-2 gap-3"></div>
     </div>
   </div>
-  <!-- 인벤토리 모달 -->
-  <div id="inventoryModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-   <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[50vh] max-w-[960px] p-6
-              grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
+  <!-- 
+  <div id="inventoryModal"
+  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
 
-      <!-- 플레이어 인벤토리 -->
-      <div class="flex-1 border border-gray-500 rounded-xl p-4">
-        <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리</h2>
-        <div id ="playerInventory"
-          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
-          <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
-          
-          
-        </div>
-      </div>
+  <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[70vh] max-w-[960px] p-6 flex flex-col gap-6">
 
-      <!-- 보관함 -->
-      <div class="flex-1 border border-gray-500 rounded-xl p-4">
-        <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
-        <div id="storageInventory"
-          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
-          <div class="w-24 lg:w-16 bg-white rounded aspect-square"></div>
-        </div>
+    
+
+    <div class="flex-1 border border-gray-600 rounded-xl p-4">
+      <h2 class="text-lg font-bold mb-2 text-center">🎒 플레이어 인벤토리</h2>
+
+      <div id="inventory_player" class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(64px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
+       
+        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
+        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
+        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
       </div>
+    </div>
 
     </div>
-   </div>
-    <!--보관함 모달-->
-    <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-      <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[50vh] max-w-[960px] p-6
-                  grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
-          <!-- 보관함 -->
-          <div class="flex-1 border border-gray-500 rounded-xl p-4">
-            <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
-            <div id="storage_storage"
-              class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
-              <div class="w-24 lg:w-16 bg-white rounded aspect-square"></div>
-            </div>
-          </div>
+  </div>
+  
+  인벤토리 모달 -->
 
-          <!-- 플레이어 인벤토리 -->
-          <div class="flex-1 border border-gray-500 rounded-xl p-4">
-            <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리</h2>
-            <div id ="storage_player"
-              class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
-              <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
+  <!--보관함 모달-->
+  <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6 h-[60vh] lg:h-[50vh]">
+      <!--
+      <div class="bg-gray-800 border border-gray-500 rounded-2xl p-2">
+        <h2 class="text-xl font-bold mb-2">🦺 장비 슬롯 </h2>
+            
+        <div id="equipmentSlots" class="grid grid-cols-5 gap-4 justify-items-center">
+          
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-32 h-32 lg:w-24 lg:h-24 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_weapon" src="weapons/Axe.png" class="w-full h-full object-contain" alt="무기">
+              <span id="equipName_weapon" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              
+              </span>
             </div>
+            <span class="text-sm mt-1">⚔무기</span>
           </div>
-
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-32 h-32 lg:w-24 lg:h-24 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_hat" src="icons/default.png" class="w-full h-full object-contain" alt="모자">
+              <span id="equipName_hat" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              
+              </span>
+            </div>
+            <span class="text-sm mt-1">🎩모자</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-32 h-32 lg:w-24 lg:h-24 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_armor" src="icons/default.png" class="w-full h-full object-contain" alt="방어구">
+              <span id="equipName_armor" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              
+              </span>
+            </div>
+            <span class="text-sm mt-1">👚방어구</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-32 h-32 lg:w-24 lg:h-24 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_pants" src="icons/default.png" class="w-full h-full object-contain" alt="바지">
+              <span id="equipName_pants" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              
+              </span>
+            </div>
+            <span class="text-sm mt-1">👖바지</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-32 h-32 lg:w-24 lg:h-24 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_shoes" src="icons/default.png" class="w-full h-full object-contain" alt="신발">
+              <span id="equipName_shoes" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              
+              </span>
+            </div>
+            <span class="text-sm mt-1">👟신발</span>
+          </div>
         </div>
       </div>
+    -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] max-w-[960px] 
+              
+              
+                grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
+      <!-- 보관함 -->
+      <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
+        <h2 id="storage_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
+        <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
+        <div id="storage_storage"
+          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+          
+        </div>
       </div>
+      
+      <!-- 플레이어 인벤토리 -->
+      <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
+        <h2 class="text-xl font-bold mb-2">🦺 장비 슬롯 </h2>
+            <!-- 장비 슬롯 -->
+        <div id="equipmentSlots" class="grid grid-cols-5 gap-4 justify-items-center">
+          <!-- 무기 -->
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-24 h-24  lg:w-20 lg:h-20 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_weapon" src="weapons/Axe.png" class="w-full h-full object-contain" alt="무기">
+              <span id="equipName_weapon" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              ⚔무기
+              </span>
+            </div>
+          </div>
+          <!-- 모자 -->
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-24 h-24  lg:w-20 lg:h-20 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_hat" src="icons/default.png" class="w-full h-full object-contain" alt="모자">
+              <span id="equipName_hat" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              🎩모자
+              </span>
+            </div>
+          </div>
+          <!-- 방어구 -->
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-24 h-24  lg:w-20 lg:h-20 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_armor" src="icons/default.png" class="w-full h-full object-contain" alt="방어구">
+              <span id="equipName_armor" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              👚방어구
+              </span>
+            </div>
+          </div>
+          <!-- 바지 -->
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-24 h-24  lg:w-20 lg:h-20 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_pants" src="icons/default.png" class="w-full h-full object-contain" alt="바지">
+              <span id="equipName_pants" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              👖바지
+              </span>
+            </div>
+          </div>
+           <!-- 신발 -->
+          <div class="flex flex-col items-center">
+            <div class="relative p-4 w-24 h-24  lg:w-20 lg:h-20 bg-gray-700 rounded flex items-center justify-center">
+              <img id="equipIcon_shoes" src="icons/default.png" class="w-full h-full object-contain" alt="신발">
+              <span id="equipName_shoes" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              👟신발
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <h2 id="inventory_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
+        <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리 </h2>
+        <div id ="storage_player"
+          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+          <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
+        </div>
+        <h3 > 아이템을 꾹 누르면 장착합니다 </h3>
+      </div>
+      
+    </div>
+     </div>
+  </div>
   <!-- 결과값 모달-->
   <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">

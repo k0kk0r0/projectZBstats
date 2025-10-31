@@ -39,9 +39,13 @@ pushBt.addEventListener('click', () => {
      if(gameOver)return;
     if(delaying) return; //딜레이 중이면 무시
     stopResting();
-    if(!isAnimating){
-        //console.log(parseInt(weapon.multiHit)+1);
-        playerPush(parseInt(weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
+    if(!isAnimating){    
+         if(weapon!=null){
+            playerPush(parseInt(weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
+        }else{
+            //무기가 없는 경우
+            playerPush(2);
+        }
     }
     
     playerMove();
@@ -53,7 +57,13 @@ attackBt.addEventListener('click', () => {
     if(delaying) return;//딜레이 중이면 무시
     stopResting();
     if(!isAnimating){
-        playerAttack(weapon.multiHit);    
+        if(weapon!=null){
+            playerAttack(weapon.multiHit);  
+        }else{
+            //무기가 없는 경우
+            playerAttack(1);
+        }
+          
     }
     
     playerMove();
@@ -98,6 +108,7 @@ nextMapBt.addEventListener('click',() =>{
      if(gameOver)return;
     if(delaying)return;//딜레이 중이면 무시
     //다음 맵 이동
+    stopResting();
     mapNum++;
     let rng = Math.random();
     if(mapNum==mapData.length){
@@ -142,6 +153,7 @@ nextMapBt.addEventListener('click',() =>{
 atHomeBt.addEventListener('click', ()=>{
      if(gameOver)return;
     if(delaying)return;//딜레이 중이면 무시
+    stopResting();
     //이전 맵 이동
     mapNum--;
     if(mapNum<0){
@@ -180,31 +192,83 @@ bandingBt.addEventListener('click', ()=>{
     }
 })
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//인벤토리
 
+//스토리지
 const storageModal = document.getElementById("storageModal");
 const storage_player = document.getElementById("storage_player");
 const storage_storage = document.getElementById("storage_storage");
+const storage_weightTxt = document.getElementById("storage_weightTxt");
+const inventory_weightTxt = document.getElementById("inventory_weightTxt");
+
+const equipNames = ["weapon", "hat", "armor", "pants", "shoes"];
+const equipIcons = {};
+equipNames.forEach(name => {
+  equipIcons[name] = {
+    icon: document.getElementById(`equipIcon_${name}`),
+    nameTxt: document.getElementById(`equipName_${name}`)
+  };
+});
  // 모달 바깥 클릭 시 닫기
+ /*
+ //인벤토리
+const inventoryModal = document.getElementById("inventoryModal");
+const inventory_player = document.getElementById("inventory_player");
+
+function openInventoryModal(){
+    inventoryModal.classList.remove('hidden');
+    renderInventoryModal();
+}
+function renderInventoryModal(){
+    inventory_player.innerHTML = '';
+    //storage_storage.innerHTML = '';
+    for(let i =0;i<inventory.length; i++){
+        addInventoryItem( inventory[i], inventory_player, i);
+    }
+    
+}
+    inventoryModal.addEventListener("click", (e) => {
+    if (e.target === inventoryModal) {
+        inventoryModal.classList.add("hidden");
+    }
+});
+    */
+
+
+
 storageModal.addEventListener("click", (e) => {
     if (e.target === storageModal) {
         storageModal.classList.add("hidden");
     }
 });
+backpackIcon.addEventListener('click', openStorageModal);
 document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
 function openStorageModal(){
     storageModal.classList.remove('hidden');
     renderStorageModal();
 }
 function renderStorageModal(){
+    
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
+    let weight ={
+       storage:0,
+       inventory:0,
+       bagWeight:playerStat().bagWeight
+    }
     for(let i =0;i<inventory.length; i++){
         addInventoryItem( inventory[i], storage_player, i);
+        weight.inventory+= parseFloat(inventory[i].weight);
     }
     for(let i =0;i<currentMapData.dropItems.length; i++){
         addInventoryItem( currentMapData.dropItems[i], storage_storage, i);
+        weight.storage+= parseFloat(currentMapData.dropItems[i].weight);
     }
+    //무게 더하기
+    if(weapon!=null){ weight.inventory+= parseFloat(weapon.weight)*0.3}
+    
+    storage_weightTxt.innerText = `${weight.storage.toFixed(1)}/50`;
+    inventory_weightTxt.innerText = `${weight.inventory.toFixed(1)}/${weight.bagWeight}`;
+    renderEquipment();
 }
 function addInventoryItem(data , route, index){
     //
@@ -224,21 +288,120 @@ function addInventoryItem(data , route, index){
     namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b z-50";
     namespan.innerText = translations[currentLang][data.name];
     div.appendChild(namespan);
-    div.addEventListener('click', storageItemMove);
+
+    //div.addEventListener('click', itemMove);
+    div.addEventListener('pointerdown', itemMove_mouseDown);
+    div.addEventListener('pointerup', itemMove_mouseUp);
     route.appendChild(div);
 }
-function storageItemMove(e){
-    const dataset = e.currentTarget.dataset;
-    const data = JSON.parse( dataset.data);
-    if(dataset.route == storage_player.id){
-        //가방으로 이동
-        currentMapData.dropItems.push( data);
-        inventory.splice(dataset.index,1);
+let mousedown = false;
+let equipBool =false;
+let equipSetTimeout;
+function itemMove_mouseDown(e){
+    if(mousedown==false){
+        mousedown =true;
+         const dataset = e.currentTarget.dataset;
+        const data = JSON.parse( dataset.data);
+        equipBool=false;
+        if(dataset.route == storage_player.id){
+            equipSetTimeout = setTimeout(() => {
+
+                equipBool = true;
+                equipSetTimeout = null;
+                
+                setEquipment(data,dataset);
+            }, 250); // 0.25초 누르면 장비
+        }
     }
-    else if(dataset.route == storage_storage.id ){
-        //인벤으로 이동
-        inventory.push( data);
-        currentMapData.dropItems.splice(dataset.index,1);
+   
+    
+}
+function itemMove_mouseUp(e){
+    if(mousedown){
+        mousedown=false;
+        clearInterval(equipSetTimeout);
+        const dataset = e.currentTarget.dataset;
+        const data = JSON.parse( dataset.data);
+        if(equipBool ){
+            //200ms 이상 장기 터치일 때 
+            equipBool=false;
+            return;
+        }else{
+            //짧은 터치
+            if(dataset.route == storage_player.id){
+                //가방으로 이동
+                currentMapData.dropItems.push( data);
+                inventory.splice(dataset.index,1);
+                
+                renderStorageModal();
+            }
+            else if(dataset.route == storage_storage.id ){
+                //인벤으로 이동
+                inventory.push( data);
+                currentMapData.dropItems.splice(dataset.index,1);
+                renderStorageModal();
+            }
+        }
+        equipBool=false;
+    }else{
+        return;
     }
-    renderStorageModal();
+    
+}
+function setEquipment(data, dataset){
+    if(data.type =='Weapon'){
+        //무기인 경우
+        if(weapon!=null){
+            inventory.push(weapon);
+            weapon = null;
+
+        }
+        if(weapon==null){
+            weapon = data;
+            inventory.splice(dataset.index,1);
+            renderStorageModal();
+            
+        }
+    }
+}
+equipIcons.weapon.icon.addEventListener('click', ()=>{
+    if(weapon!=null){
+        inventory.push(weapon);
+        weapon = null;
+        renderStorageModal();
+    }
+});
+
+
+function renderEquipment(){
+
+    //플레이어가 들고있는 무기 랜더링
+    if(weapon!=null){
+        
+        equipWp.src = weapon.path;
+        equipWp.classList.remove("rotate-90", 'rotate-180',"-rotate-90");
+        if(weapon.rotate>0){ 
+            if(weapon.rotate<=180){
+                equipWp.classList.add('rotate-'+weapon.rotate); 
+            }else{
+                equipWp.classList.add('-rotate-'+(weapon.rotate-180)); 
+            }
+            
+        }
+        weaponImg.src = weapon.path;
+        weaponName.textContent = translations[currentLang][weapon.name];
+
+        //storageModal 안의 장비창
+        equipIcons.weapon.icon.src = weapon.path;
+         equipIcons.weapon.nameTxt.innerText =  translations[currentLang][weapon.name];
+    }
+    if(weapon == null){
+        equipWp.src = 'icons/default.png';
+        weaponImg.src = 'icons/default.png';
+        weaponName.textContent ='';
+
+        equipIcons.weapon.icon.src = 'icons/default.png';
+        equipIcons.weapon.nameTxt.innerText='⚔무기';
+    }
+    
 }

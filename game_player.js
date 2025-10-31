@@ -39,8 +39,13 @@ function playerStat(){
 
     let str = findPlayerSkill('strength').lv;
     let fit= findPlayerSkill('fitness').lv;
+    let _bagWeight = 8+str;
+    if(playerHasTrait("disorganized")){ _bagWeight = Math.floor((_bagWeight*0.7)*10)/10 }
+    if(playerHasTrait("organized")){ _bagWeight = Math.floor((_bagWeight*1.3)*10)/10 }
+
+
     //데이터반환
-    return {strength:str, fitness:fit, panic:-panicMd.value, endurance: enduValue };
+    return {bagWeight:_bagWeight, strength:str, fitness:fit, panic:-panicMd.value, endurance: enduValue };
 }
 function addSkillXp(name, value){
     let data = findPlayerSkill(name);
@@ -55,7 +60,7 @@ function addSkillXp(name, value){
             }
         }
         data.xp += Math.ceil((value*xpvalue)*10)/10;
-        console.log(xpvalue);
+        //console.log(xpvalue);
         while(data.xp>data.maxXp){
             if(data.lv==10){
                 data.xp = data.maxXp;
@@ -108,23 +113,51 @@ function stopResting(){
     log("휴식 끝");
 }
 function playerAttack(multiHit){
-    
+    const stat = playerStat();
+    if(weapon ==null){
+        if(zombies.length>0){
+            //좀비가 1명 이상
+            if(zombies[0].isStunning>0){
+                stamina -= pushStamina;
+                if(stamina<=0){
+                    stamina = 0;
+                }
+                let damage = (stat.strength*4+ randomInt(0,stat.strength ));
+
+                zombieIsDamaged(0, damage);
+                addSkillXp( 'strength', damage);
+
+                damageTxt[0].textContent = `-${damage}`;
+                damageTxt[0].classList.remove('hidden');
+                setTimeout(() => {
+                    damageTxt[0].classList.add('hidden');
+                }, 300);
+                zombieMove(0,10);
+                zombieStun(0,1);
+                log(`플레이어의 밟기 공격! ${damage} 대미지`);
+                return;
+            }
+        }
+        playerPush(2);
+        return;
+    }
     //무기 스태미나 소모
     stamina -= weapon.stamina;
     if(stamina<=0){
         stamina = 0;
     }
     
-    const stat = playerStat();
+    
 
 
-    log(`${translations[currentLang][weapon.name]}으로 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
+    log(`플레이어의 ${translations[currentLang][weapon.name]} 무기 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
 
-    let skillLv = findPlayerSkill(weapon.type).lv;
+    let skillLv = findPlayerSkill(weapon.subType).lv;
     for(let i =0 ; i< num; i++){
         //대미지 계산
-        let damage = (weapon.damage/2 + randomInt(0,weapon.damage/2))*(skillLv+1);
+        
+        let damage = (parseFloat(weapon.damage) /2 + randomInt(0,parseFloat(weapon.damage)/2))*(skillLv+1);
         if(zombies[i].isStunning>0){
             damage = damage*2;
         }
@@ -142,7 +175,8 @@ function playerAttack(multiHit){
         damage = Math.ceil(damage);
         // zombies[i].hp -= damage;
         zombieIsDamaged(i, damage);
-        addSkillXp( weapon.type, damage);
+        addSkillXp( weapon.subType, damage);
+        addSkillXp( 'strength', damage);
 
         damageTxt[i].textContent = `-${damage}`;
         damageTxt[i].classList.remove('hidden');
@@ -173,12 +207,12 @@ function playerAttack(multiHit){
 }
 function playerPush(multiHit){
     const stat = playerStat();
-    stamina -= 5;//고정값?
+    stamina -= pushStamina;//고정값
     if(stamina<=0){
         stamina = 0;
     }
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
-    log(`밀치기!`);
+    log(`플레이어의 밀치기!`);
     for(let i =0 ; i <num ; i++){
         
         //밀치기 계산

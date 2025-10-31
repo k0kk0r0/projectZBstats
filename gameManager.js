@@ -22,6 +22,7 @@ const facilityIcons = facilityNames.map(name =>({
     visible:false,
     needs:[]
  }));
+
  getFacilityIcon('generator').needs.push({name:'fuel', amount:0});
  getFacilityIcon('radio').needs.push({name:'battery', amount:10});
  getFacilityIcon('fridge').needs.push( {name:'generator'});
@@ -195,7 +196,8 @@ let skills = {};
 let job;
 let zombieKillCount;
 let traits =[]; 
-const xpData = [100, 200,400,600,800,1000, 1200,1400,1600,1800,2000 ];
+const xpData = [100, 200,500,800,1200,1500, 2000,3500,5000,7500,10000 ];
+const pushStamina= 5;
 function setPlayerTrait(){
     //선택한 플레이어 데이터 수집
     let data = getSelectedItemList();
@@ -247,10 +249,6 @@ function playerHasSkill(name){
     if(findPlayerSkill(name) !=null){return true}
     else{return false}
 }
-//무기아이콘 클릭 시 무기변경
-weaponImg.addEventListener('click', ()=>{ 
-   changeWeapon();
-});
 
 
 //무기 데이터 호출
@@ -314,7 +312,9 @@ function findWeapon(itemName ){
         durability: parseInt(data.durability),
         stamina: parseInt(data.stamina),
         damage: parseInt(data.damage),
-        type: data.type.toString()
+        type: data.type.toString(),
+        subType: data.subType.toString(),
+        weight: parseFloat(data.weight)
     }
     return data0;
 }
@@ -325,29 +325,24 @@ function findMisc(itemName ){
     let data0 ={
         path: data.path.toString(),
         name: data.name.toString(),
-        type: data.type.toString()
+        type: data.type.toString(),
+        subType: data.subType.toString(),
+        weight: parseFloat(data.weight)
     }
     return data0;
 }
-function changeWeapon( itemName= "random"){
+function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
         weapon = weaponsData[ randomInt(0, weaponsData.length) ];
     }else{
         weapon = findWeapon(itemName); 
     }
-    weaponImg.src = weapon.path;
-    equipWp.src = weapon.path;
-    equipWp.classList.remove("rotate-90", 'rotate-180',"-rotate-90");
-    if(weapon.rotate>0){ 
-        if(weapon.rotate<=180){
-            equipWp.classList.add('rotate-'+weapon.rotate); 
-        }else{
-            equipWp.classList.add('-rotate-'+(weapon.rotate-180)); 
-        }
-        
-    }
-    weaponName.textContent = translations[currentLang][weapon.name];
+    renderEquipment();
+}
+
+function getWeapon(){
+    return weapon;
 }
 function findMapData(itemName){
     //맵 데이터 검색 및 가공해서 반환
@@ -426,7 +421,7 @@ async function ResetAllGame(){
     //resetFacilityIcons();
 
     //renderGameUI();
-    changeWeapon();
+    setWeapon("random");
     commandBtsVisible(true);
     
     //준비완료
