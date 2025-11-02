@@ -152,7 +152,7 @@
   </div>
   <!-- 게임 모달 -->
    <div id="gameModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 hidden">
-    <div class="relative bg-white w-[95vw] lg:w-[960px] lg:max-w-[70vw] sm:min-h-[870px] lg:min-h-[720px] max-h-[800px] sm:max-h-[900px] rounded-2xl shadow-xl bg-gray-600">
+    <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[70vw] sm:min-h-[870px] lg:min-h-[720px] max-h-[800px] sm:max-h-[900px] rounded-2xl shadow-xl bg-gray-600">
       <!-- 닫기 버튼 -->
       <button id="closeGameModalBtn" class="absolute top-2 right-2 z-50 text-white-600 hover:text-black text-2xl sm:text-4xl">
         ✕
@@ -468,7 +468,7 @@
 
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-    <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6 h-[60vh] lg:h-[50vh]">
+    <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
       <!--
       <div class="bg-gray-800 border border-gray-500 rounded-2xl p-2">
         <h2 class="text-xl font-bold mb-2">🦺 장비 슬롯 </h2>
@@ -525,7 +525,7 @@
     -->
     <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] max-w-[960px] 
               
-              
+                h-[50vh] lg:h-[70vh] min-h-[720px]
                 grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
       <!-- 보관함 -->
       <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
@@ -535,6 +535,7 @@
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
         </div>
+        <h3 class="absolute bottom-4 left-4 text-2xl"> 아이템을 꾹 누르면 정보를 확인하거나 장착할 수 있습니다 </h3>
       </div>
       
       <!-- 플레이어 인벤토리 -->
@@ -595,11 +596,19 @@
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
         </div>
-        <h3 > 아이템을 꾹 누르면 장착합니다 </h3>
+        
       </div>
       
     </div>
      </div>
+  </div>
+  <!-- 상세메뉴 팝업 -->
+  <div id="itemSubOption" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute">
+      <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
+        
+    </div>
+      
   </div>
   <!-- 결과값 모달-->
   <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
@@ -628,7 +637,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const version = "0.4.12.15"; // ← 버전 숫자 변수
+    const version = "0.4.12.16"; // ← 버전 숫자 변수
     document.getElementById("version-text").textContent = `ver ${version}`;
     //document.getElementById("version-text2").textContent = `ver ${version}`;
     //다크모드 버튼

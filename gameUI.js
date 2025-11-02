@@ -183,16 +183,21 @@ atHomeBt.addEventListener('click', ()=>{
 bandingBt.addEventListener('click', ()=>{
     if(gameOver)return;
     if(delaying) return; //딜레이 중이면 무시
-
-    let bool =  playerBanding();
-    if(bool){
-        advanceTurn();
-    }else{
-        log(`치료할 상처가 없습니다`);
+    
+    const itemIndex = getInventoryItemIndexType("bandage","subType");
+    if(itemIndex<0){
+        //아이템이 없음
+        log(`붕대 혹은 찢어진 천이 없습니다.`);
+        return;
     }
+    playerHealing(itemIndex);
 })
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//아이템 선택 시 상세메뉴
+const point= {x:0, y:0};
+const itemSubOption = document.getElementById("itemSubOption");
+const optionBoxes = document.getElementById("optionBoxes");
 //스토리지
 const storageModal = document.getElementById("storageModal");
 const storage_player = document.getElementById("storage_player");
@@ -232,14 +237,70 @@ function renderInventoryModal(){
     }
 });
     */
-
-
+function getInventoryItemType(type, typename="subType"){
+    const item = inventory.find( (item) => item[typename]=== type );
+    return item;
+}
+function getInventoryItemIndexType(type, typename="subType"){
+    return inventory.findIndex( (item) => item[typename]=== type );
+}
+itemSubOption.addEventListener("pointerdown", (e) =>{
+    if (e.target === itemSubOption) {
+        closeSubOption();
+    }
+});
+function closeSubOption(){itemSubOption.classList.add("hidden");}
+function itemsubMenu(data, dataset){
+    itemSubOption.classList.remove("hidden");
+    optionBoxes.style.left = `${point.x+20}px`;
+    optionBoxes.style.top = `${point.y-20}px`;
+    optionBoxes.innerHTML='';
+    function makeBox(nameTxt){
+        const box = document.createElement("button");
+        box.className = "bg-gray-500 text-3xl";
+        //box.id = `option${i}`;
+        box.innerText = nameTxt;
+        optionBoxes.appendChild(box);
+        return box;
+    }
+    makeBox("아이템 정보").addEventListener('click', ()=>{
+        //아이템 정보 호출
+        closeSubOption();
+    });
+    if(data.type =='Weapon'){
+        makeBox("장착하기").addEventListener('click', ()=>{
+            setEquipment(data, dataset);
+            closeSubOption();
+        });
+    }  
+    if(dataset.route == storage_player.id){
+         //플레이어 가방에 있을 때
+         
+        if(data.subType =="bandage"){
+             makeBox("붕대 감기").addEventListener('click', ()=>{
+                 playerHealing(dataset.index);
+                closeSubOption();
+            }); 
+        }
+        makeBox("보관함에 넣기").addEventListener('click', ()=>{
+             itemMove(data, dataset);
+             closeSubOption();
+        }); 
+    }
+}
+document.addEventListener("pointerdown", (e) => {
+    point.x = e.clientX;
+    point.y = e.clientY;
+});
 
 storageModal.addEventListener("click", (e) => {
     if (e.target === storageModal) {
-        storageModal.classList.add("hidden");
+       closeStorageModal();
     }
 });
+function closeStorageModal(){
+    storageModal.classList.add("hidden");
+}
 backpackIcon.addEventListener('click', openStorageModal);
 document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
 function openStorageModal(){
@@ -247,7 +308,6 @@ function openStorageModal(){
     renderStorageModal();
 }
 function renderStorageModal(){
-    
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
     let weight ={
@@ -303,15 +363,16 @@ function itemMove_mouseDown(e){
          const dataset = e.currentTarget.dataset;
         const data = JSON.parse( dataset.data);
         equipBool=false;
-        if(dataset.route == storage_player.id){
+        //if(dataset.route == storage_player.id){
             equipSetTimeout = setTimeout(() => {
 
                 equipBool = true;
                 equipSetTimeout = null;
                 
-                setEquipment(data,dataset);
+                //setEquipment(data,dataset);
+                itemsubMenu(data, dataset);
             }, 250); // 0.25초 누르면 장비
-        }
+        //}
     }
    
     
@@ -328,25 +389,26 @@ function itemMove_mouseUp(e){
             return;
         }else{
             //짧은 터치
-            if(dataset.route == storage_player.id){
-                //가방으로 이동
-                currentMapData.dropItems.push( data);
-                inventory.splice(dataset.index,1);
-                
-                renderStorageModal();
-            }
-            else if(dataset.route == storage_storage.id ){
-                //인벤으로 이동
-                inventory.push( data);
-                currentMapData.dropItems.splice(dataset.index,1);
-                renderStorageModal();
-            }
+           itemMove(data, dataset);
         }
         equipBool=false;
     }else{
         return;
     }
-    
+}
+function itemMove(data, dataset){
+     if(dataset.route == storage_player.id){
+        //가방으로 이동
+        currentMapData.dropItems.push( data);
+        inventory.splice(dataset.index,1);
+        renderStorageModal();
+    }
+    else if(dataset.route == storage_storage.id ){
+        //인벤으로 이동
+        inventory.push( data);
+        currentMapData.dropItems.splice(dataset.index,1);
+        renderStorageModal();
+    }
 }
 function setEquipment(data, dataset){
     if(data.type =='Weapon'){
@@ -358,11 +420,15 @@ function setEquipment(data, dataset){
         }
         if(weapon==null){
             weapon = data;
-            inventory.splice(dataset.index,1);
-            renderStorageModal();
+            if(dataset.route == storage_player.id ){
+                inventory.splice(dataset.index,1);
+            }else{
+                currentMapData.dropItems.splice(dataset.index,1);
+            }
             
         }
     }
+    renderStorageModal();
 }
 equipIcons.weapon.icon.addEventListener('click', ()=>{
     if(weapon!=null){

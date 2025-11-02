@@ -188,7 +188,7 @@ const stunClass = 'rotate-90';
 //플레이어 데이터
 let weapon;
 let backpack;
-let inventory;
+let inventory ;
 let stamina;
 let health;
 let wound = [];//상처 배열
@@ -565,6 +565,7 @@ function randomInt(min, max) {
 function advanceTurn() {
      if(gameOver)return;
     //좀비반격
+    closeStorageModal();
     zombieAttack();
     for(let i =0;i<zombies.length;i++){
         //스턴계수 감소,

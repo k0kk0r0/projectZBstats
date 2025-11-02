@@ -1,2 +1,5 @@
 type,subType,path,name,weight
 Misc,misc,miscs/ToiletPaper.png,ToiletPaper,0.1
+FirstAid,bandage,miscs/Bandage.png,Bandage,0.1
+FirstAid,bandage,miscs/Bandaid.png,Bandaid,0.1
+FirstAid,bandage,miscs/Rag.png,Rag,0.1

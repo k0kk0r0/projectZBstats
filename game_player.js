@@ -331,17 +331,31 @@ function woundHealingCalculate(){
         setMoodleValue('Bleeding',0);
     }
 }
-function playerBanding(){
+function playerHealing(itemIndex){
+    let bool =  playerBanding(itemIndex);
+    if(bool){
+        advanceTurn();
+    }else{
+        log(`치료할 상처가 없습니다`);
+    }
+}
+function playerBanding(itemIndex){
     let bool =false;
-     for(let i =0 ; i<wound.length; i++){
+    
+    for(let i =0 ; i<wound.length; i++){
         let data = wound[i];
+
         if(data.tag =="lacerated" || data.tag =="scratched" || data.tag=="bitten"){
-            log( `[${translations[currentLang][data.tag]}]에 붕대 감음.`);
+            log( `${translations[currentLang][inventory[itemIndex].name]}을 소모하여 [${translations[currentLang][data.tag]}]에 붕대 감음.`);
 
             wound.splice(i,1);
             i--;
             bool = true;
+            inventory.splice(itemIndex,1);
+            renderStorageModal();
+            break;
         }
     }
+    
     return bool;
 }
