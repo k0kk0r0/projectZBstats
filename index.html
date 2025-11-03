@@ -602,13 +602,60 @@
     </div>
      </div>
   </div>
-  <!-- 상세메뉴 팝업 -->
+  <!-- 상세메뉴 모달 -->
   <div id="itemSubOption" class="fixed inset-0 flex items-center justify-center z-50 hidden">
     <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute">
       <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
         
     </div>
       
+  </div>
+  <!-- ---------- 아이템 모달 HTML (body 끝부분에 넣으세요) ---------- -->
+  <div id="itemModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 p-4">
+    <div class="w-[60vw] max-w-[480px] bg-white text-black rounded-2xl shadow-xl overflow-hidden">
+      <div class="flex items-center justify-between p-4 border-b">
+        <h3 id="itemModalTitle" class="text-lg font-bold">아이템 정보</h3>
+        <!--<button id="itemModalClose" class="text-2xl leading-none px-2 py-1 hover:text-gray-700 ">✕</button>-->
+      </div>
+
+      <div class="p-4 space-y-3">
+        <!-- 상단 요약(이미지 + name + type) -->
+        <div class="flex gap-3 items-center">
+          <div id="itemModalImg" class="w-20 h-20 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+            <!-- 이미지가 있으면 넣음 -->
+            <img id="itemModalImgTag" src="" alt="" class="w-full h-full object-contain hidden">
+          </div>
+          <div class="flex-1">
+            <div id="itemName" class="text-2xl font-semibold"></div>
+            <div id="itemType" class="text-xl text-gray-500"></div>
+          </div>
+        </div>
+
+        <!-- 상세 테이블 -->
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="text-gray-600 text-xl">Type</div><div id="field-type" class="font-medium text-xl"></div>
+          <div class="text-gray-600 text-xl">SubType</div><div id="field-subType" class="font-medium text-xl"></div>
+          <div class="text-gray-600 text-xl">Multi Hit</div><div id="field-multiHit" class="font-medium text-xl"></div>
+          <div class="text-gray-600 text-xl">Stamina</div><div id="field-stamina" class="font-medium text-xl"></div>
+          <div class="text-gray-600 text-xl">Damage</div><div id="field-damage" class="font-medium text-xl"></div>
+          <div class="text-gray-600 text-xl">Weight</div><div id="field-weight" class="font-medium text-xl"></div>
+        </div>
+
+        <!-- 컨디션 바 -->
+        <div>
+          <div class="text-gray-600  text-sm mb-1">Condition <span id="field-conditionText" class="font-semibold"></span></div>
+          <div class="w-full bg-gray-200  rounded-full h-4 overflow-hidden">
+            <div id="field-conditionBar" class="h-full bg-yellow-400 transition-all" style="width: 0%"></div>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">하락확률: <span id="field-conditionLowerChance"></span></div>
+        </div>
+      </div>
+      <!--
+      <div class="flex items-center justify-end gap-2 p-3 border-t ">
+        <button id="itemModalClose2" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 ">닫기</button>
+      </div>
+      -->
+    </div>
   </div>
   <!-- 결과값 모달-->
   <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
@@ -634,7 +681,7 @@
      
     </div>
   </div>
-
+<!--//////////////////////////////////////////////////////////////////////////////////////////////////////-->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
     const version = "0.4.12.16"; // ← 버전 숫자 변수

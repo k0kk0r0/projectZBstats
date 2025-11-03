@@ -27,7 +27,11 @@ function playerStat(){
         } 
         //setMoodleValue('Moodle_Icon_Panic',0);
     }
-    
+    if(playerHasTrait("brave") || playerHasTrait("Desensitized")){
+        //용감한, 둔감한
+        //console.log("Desensitized");
+        panicMd.value = 0;
+    }
    
     let enduValue = 0;
     if(stamina<=75){enduValue-- };
@@ -177,7 +181,8 @@ function playerAttack(multiHit){
         zombieIsDamaged(i, damage);
         addSkillXp( weapon.subType, damage);
         addSkillXp( 'strength', damage);
-
+        //Maintenance, 물건관리 작
+       
         damageTxt[i].textContent = `-${damage}`;
         damageTxt[i].classList.remove('hidden');
         setTimeout(() => {
@@ -203,6 +208,7 @@ function playerAttack(multiHit){
        
     }
     
+    maintenenceCalculate( weapon);
     renderGameUI();
 }
 function playerPush(multiHit){
@@ -304,11 +310,11 @@ function woundHealingCalculate(){
             }
         }
         if(data.tag=="scratched" || data.tag == "bitten"){
-            health -=3;
+            health -=2;
             wndCount++;
         }
         if(data.tag=="lacerated"){
-            health -=2;
+            health -=1.5;
             wndCount++;
         }
         if(data.turn<=0){

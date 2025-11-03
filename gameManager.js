@@ -205,6 +205,7 @@ function setPlayerTrait(){
     skills = {};
     skills.strength = {lv:5, xp:0, maxXp: xpData[5]};
     skills.fitness = {lv:5, xp:0, maxXp:xpData[5]};
+    skills.Maintenance = {lv:0, xp:0, maxXp:xpData[0]};
     skills.Axe = {lv:0, xp:0, maxXp: xpData[0]};
     skills.ShortBlade = {lv:0, xp:0, maxXp: xpData[0]};
     skills.LongBlade = {lv:0, xp:0, maxXp: xpData[0]};
@@ -227,10 +228,17 @@ function setPlayerTrait(){
             traits.push( {name:value} );
             
        }else{
-            skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
+            if(value>0){
+                skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
+            }else{
+                //변수0, 둔감함 같은 경우
+                traits.push( {name:data[i].name} );
+            }
+            
        }
     }
-    console.log(skills);
+    //console.log(data);
+    //console.log(traits);
 }
 function findPlayerTrait(name) {
   return traits.find(v=> v.name === name);
@@ -248,6 +256,35 @@ function findPlayerSkill(name){
 function playerHasSkill(name){
     if(findPlayerSkill(name) !=null){return true}
     else{return false}
+}
+//물건관리 계산
+function maintenenceCalculate(item){
+    //물건관리 계산
+    // lossChance = 1 / (ConditionLowerChanceOneIn + floor(  floor(    MaintenanceLevel + (WeaponLevel/2)   )/2    )*2)
+    
+    const lowerChance = parseFloat(item.conditionLowerChance);
+    const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
+    const weaponLv = parseFloat(findPlayerSkill(item.subType).lv);
+    const base = ( lowerChance + Math.floor( Math.floor(   MaintenanceLv + ( weaponLv/2)  )/2 )*2 ) ;
+    const per = 1 / base ;
+    //console.log(per, base);
+    if(Math.random() < per){
+        //감소
+        addSkillXp("Maintenance", Math.floor(base*2)); //내구도 감소 시 2배
+        item.condition--;
+        if(item.condition<=0){
+            if(item.type=="Weapon"){
+                weapon=null;
+            }
+            renderEquipment();
+             log(`달그락! ${(per*100).toFixed(1)}% 확률로 아이템이 파괴되었습니다`,per);
+        }else{
+             log(`${(per*100).toFixed(1)}% 확률로 아이템 내구도 감소! (${item.condition}/${item.maxCondition})`,per);
+        }
+       
+    }else{
+        addSkillXp("Maintenance", Math.floor(base));
+    }
 }
 
 
@@ -308,12 +345,14 @@ function findWeapon(itemName ){
         path: data.path.toString(),
         rotate: parseInt(data.rotate),
         name: data.name.toString(),
-        multiHit: parseInt(data.multiHit),
-        durability: parseInt(data.durability),
-        stamina: parseInt(data.stamina),
-        damage: parseInt(data.damage),
         type: data.type.toString(),
         subType: data.subType.toString(),
+        multiHit: parseInt(data.multiHit),
+        condition: parseInt(data.condition),
+        maxCondition: parseInt(data.condition),
+        conditionLowerChance: parseInt(data.conditionLowerChance),
+        stamina: parseInt(data.stamina),
+        damage: parseInt(data.damage),
         weight: parseFloat(data.weight)
     }
     return data0;
@@ -327,6 +366,8 @@ function findMisc(itemName ){
         name: data.name.toString(),
         type: data.type.toString(),
         subType: data.subType.toString(),
+        condition: parseInt(data.condition),
+        maxCondition: parseInt(data.condition),
         weight: parseFloat(data.weight)
     }
     return data0;
@@ -334,7 +375,7 @@ function findMisc(itemName ){
 function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
-        weapon = weaponsData[ randomInt(0, weaponsData.length) ];
+        weapon = findWeapon(weaponsData[ randomInt(0, weaponsData.length) ].name);
     }else{
         weapon = findWeapon(itemName); 
     }

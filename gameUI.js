@@ -253,11 +253,11 @@ function closeSubOption(){itemSubOption.classList.add("hidden");}
 function itemsubMenu(data, dataset){
     itemSubOption.classList.remove("hidden");
     optionBoxes.style.left = `${point.x+20}px`;
-    optionBoxes.style.top = `${point.y-20}px`;
+    optionBoxes.style.top = `${point.y-40}px`;
     optionBoxes.innerHTML='';
     function makeBox(nameTxt){
         const box = document.createElement("button");
-        box.className = "bg-gray-500 text-3xl";
+        box.className = "bg-gray-500 text-3xl p-2 rounded text-white";
         //box.id = `option${i}`;
         box.innerText = nameTxt;
         optionBoxes.appendChild(box);
@@ -265,27 +265,32 @@ function itemsubMenu(data, dataset){
     }
     makeBox("아이템 정보").addEventListener('click', ()=>{
         //아이템 정보 호출
+        showItemModal(data)
         closeSubOption();
     });
-    if(data.type =='Weapon'){
-        makeBox("장착하기").addEventListener('click', ()=>{
-            setEquipment(data, dataset);
-            closeSubOption();
-        });
-    }  
-    if(dataset.route == storage_player.id){
-         //플레이어 가방에 있을 때
-         
-        if(data.subType =="bandage"){
-             makeBox("붕대 감기").addEventListener('click', ()=>{
-                 playerHealing(dataset.index);
+
+    if(dataset!=null){
+        if(data.type =='Weapon'){
+            makeBox("장착하기").addEventListener('click', ()=>{
+                setEquipment(data, dataset);
+                closeSubOption();
+            });
+        }  
+        if(dataset.route == storage_player.id){
+            //플레이어 가방에 있을 때
+
+            if(data.subType =="bandage"){
+                makeBox("붕대 감기").addEventListener('click', ()=>{
+                    playerHealing(dataset.index);
+                    closeSubOption();
+                }); 
+            }
+
+            makeBox("보관함에 넣기").addEventListener('click', ()=>{
+                itemMove(data, dataset);
                 closeSubOption();
             }); 
         }
-        makeBox("보관함에 넣기").addEventListener('click', ()=>{
-             itemMove(data, dataset);
-             closeSubOption();
-        }); 
     }
 }
 document.addEventListener("pointerdown", (e) => {
@@ -373,9 +378,7 @@ function itemMove_mouseDown(e){
                 itemsubMenu(data, dataset);
             }, 250); // 0.25초 누르면 장비
         //}
-    }
-   
-    
+    }    
 }
 function itemMove_mouseUp(e){
     if(mousedown){
@@ -430,6 +433,53 @@ function setEquipment(data, dataset){
     }
     renderStorageModal();
 }
+//////////////////장비창 정보 표시
+function itemEquip_mouseDown(e){
+    const id = e.currentTarget.id;
+    let data = null;
+    if(id == equipIcons.weapon.icon.id){
+        data = weapon;
+    }
+
+    if(mousedown==false){
+        mousedown =true;
+        equipBool=false;
+        //if(dataset.route == storage_player.id){
+            equipSetTimeout = setTimeout(() => {
+
+                equipBool = true;
+                equipSetTimeout = null;
+                
+                //setEquipment(data,dataset);
+                itemsubMenu(data, null);
+            }, 250); // 0.25초 누르면 장비
+        //}
+    }    
+}
+function itemEquip_mouseUp(e){
+    const id = e.currentTarget.id;
+    if(mousedown){
+        mousedown=false;
+        clearInterval(equipSetTimeout);
+        if(equipBool ){
+            //200ms 이상 장기 터치일 때 
+            equipBool=false;
+            return;
+        }else{
+            //짧은 터치
+            if(id == equipIcons.weapon.icon.id){
+                inventory.push(weapon);
+                weapon = null;
+            
+            }
+            renderStorageModal();
+        }
+        equipBool=false;
+    }else{
+        return;
+    }
+}
+/*
 equipIcons.weapon.icon.addEventListener('click', ()=>{
     if(weapon!=null){
         inventory.push(weapon);
@@ -437,6 +487,9 @@ equipIcons.weapon.icon.addEventListener('click', ()=>{
         renderStorageModal();
     }
 });
+*/
+equipIcons.weapon.icon.addEventListener('pointerdown', itemEquip_mouseDown);
+equipIcons.weapon.icon.addEventListener('pointerup', itemEquip_mouseUp);
 
 
 function renderEquipment(){
@@ -471,3 +524,74 @@ function renderEquipment(){
     }
     
 }
+//
+ // 모달 요소
+  const itemModal = document.getElementById('itemModal');
+  //const itemModalClose = document.getElementById('itemModalClose');
+  //const itemModalClose2 = document.getElementById('itemModalClose2');
+
+  // 필드 참조
+  const itemModalImgTag = document.getElementById('itemModalImgTag');
+  const itemName = document.getElementById('itemName');
+  const itemType = document.getElementById('itemType');
+  const field_type = document.getElementById('field-type');
+  const field_subType = document.getElementById('field-subType');
+  const field_multiHit = document.getElementById('field-multiHit');
+  const field_stamina = document.getElementById('field-stamina');
+  const field_damage = document.getElementById('field-damage');
+  const field_weight = document.getElementById('field-weight');
+  const field_conditionText = document.getElementById('field-conditionText');
+  const field_conditionBar = document.getElementById('field-conditionBar');
+  const field_conditionLowerChance = document.getElementById('field-conditionLowerChance');
+
+  function showItemModal(item) {
+    // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
+    itemName.textContent = translations[currentLang][item.name] ?? 'Unknown';
+    itemType.textContent = `${item.type ?? '-'} / ${item.subType ?? '-'}`;
+    field_type.textContent = item.type ?? '-';
+    field_subType.textContent = item.subType ?? '-';
+    field_multiHit.textContent = (item.multiHit ?? '-') + '';
+    field_stamina.textContent = (item.stamina ?? '-') + '';
+    field_damage.textContent = (item.damage ?? '-') + '';
+    field_weight.textContent = (item.weight ?? '-') + '';
+
+    // condition (숫자 가정: 0..100)
+    const cond = (typeof item.condition === 'number') ? item.condition : parseFloat(item.condition) || 0;
+    const cond0 = (typeof item.condition === 'number') ? item.maxCondition : parseFloat(item.maxCondition) || 0;
+    const pct = Math.ceil(cond/cond0*100);
+    field_conditionText.textContent = `${cond}/${cond0} (${pct}%)`;
+    field_conditionBar.style.width = pct + '%';
+    // lossChance = 1 / (ConditionLowerChanceOneIn + floor(  floor(    MaintenanceLevel + (WeaponLevel/2)   )/2    )*2)
+    
+    field_conditionLowerChance.textContent = (`1 / (${item.conditionLowerChance} + (물건관리 +(무기레벨/2) )` ?? '-') + '';
+
+    // 이미지 (선택적)
+    if (item.path) {
+      itemModalImgTag.src = item.path;
+      itemModalImgTag.classList.remove('hidden');
+    } else {
+      itemModalImgTag.src = '';
+      itemModalImgTag.classList.add('hidden');
+    }
+
+    // 보이기
+    itemModal.classList.remove('hidden');
+    // optional: focus for accessibility
+    itemModal.querySelector('button')?.focus();
+  }
+
+  function hideItemModal() {
+    itemModal.classList.add('hidden');
+  }
+
+  // 닫기 버튼 바인딩
+  //itemModalClose.addEventListener('click', hideItemModal);
+  //itemModalClose2.addEventListener('click', hideItemModal);
+  // 배경 클릭으로 닫기 (모달 외부)
+  itemModal.addEventListener('pointerdown', (e) => {
+    if (e.target === itemModal) hideItemModal();
+  });
+
+  // 예시: 사용법
+  // const sampleItem = { name:'빗자루', type:'Tool', subType:'Blunt', multiHit:1, condition:72, conditionLowerChance:0.2, stamina:6, damage:4, weight:2, path:'images/Pushbroom.png' };
+  // showItemModal(sampleItem);
