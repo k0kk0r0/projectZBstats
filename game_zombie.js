@@ -57,7 +57,7 @@ function zombieAttack( timedelay=600){
                     zombieMove(i,-45);
                     playerIsDamaged( 5);
                     //TurnEnd();
-                },  timedelay +i*250);
+                },  timedelay +i*150);
             }
         }
          setTimeout(() => { 
@@ -147,5 +147,12 @@ function zombieStun(index, stunValue) {
 function zombieIsDamaged(index, value){
     if(zombies[index].hp>0){
         zombies[index].hp -= value;
+    }
+}
+//좀비 아이템드롭
+function zombieDropItem(){
+    const rng = Math.random();
+    if(rng<0.2){
+        currentMapData.dropItems.push( findItem("Zomboxivir"));
     }
 }

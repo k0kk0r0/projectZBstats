@@ -13,7 +13,7 @@ const staminaBar = document.getElementById("staminaBar");
 const staminaTxt = document.getElementById("staminaTxt");
 
 //장소의 상단 설비 아이콘들
-const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock"];
+const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","water"];
 const facilityIcons = facilityNames.map(name =>({
     name:name,
     icon: document.getElementById(`Icon_${name}`),    
@@ -133,6 +133,9 @@ const skillBt = document.getElementById('skillBt');
 const bandingBt = document.getElementById('bandingBt');
 const atHomeBt = document.getElementById('atHomeBt');
 const nextMapBt = document.getElementById('nextMapBt');
+const prevMapTxt = document.getElementById('prevMapTxt');
+const nextMapTxt = document.getElementById('nextMapTxt');
+
 
 
 //무기 아이콘
@@ -186,7 +189,13 @@ const stunClass = 'rotate-90';
 
 
 //플레이어 데이터
-let weapon;
+const equipments = {
+  weapon: null,
+  hat: null,
+  armor: null,
+  pants: null,
+  shoes: null
+};
 let backpack;
 let inventory ;
 let stamina;
@@ -197,7 +206,7 @@ let job;
 let zombieKillCount;
 let traits =[]; 
 const xpData = [100, 200,500,800,1200,1500, 2000,3500,5000,7500,10000 ];
-const pushStamina= 5;
+const pushStamina= 4;
 function setPlayerTrait(){
     //선택한 플레이어 데이터 수집
     let data = getSelectedItemList();
@@ -274,7 +283,7 @@ function maintenenceCalculate(item){
         item.condition--;
         if(item.condition<=0){
             if(item.type=="Weapon"){
-                weapon=null;
+                equipments.weapon=null;
             }
             renderEquipment();
              log(`달그락! ${(per*100).toFixed(1)}% 확률로 아이템이 파괴되었습니다`,per);
@@ -368,22 +377,23 @@ function findMisc(itemName ){
         subType: data.subType.toString(),
         condition: parseInt(data.condition),
         maxCondition: parseInt(data.condition),
-        weight: parseFloat(data.weight)
+        weight: parseFloat(data.weight),
+        info: data.info.toString()
     }
     return data0;
 }
 function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
-        weapon = findWeapon(weaponsData[ randomInt(0, weaponsData.length) ].name);
+        equipments.weapon = findWeapon(weaponsData[ randomInt(0, weaponsData.length) ].name);
     }else{
-        weapon = findWeapon(itemName); 
+        equipments.weapon = findWeapon(itemName); 
     }
     renderEquipment();
 }
 
 function getWeapon(){
-    return weapon;
+    return equipments.weapon;
 }
 function findMapData(itemName){
     //맵 데이터 검색 및 가공해서 반환
@@ -428,7 +438,11 @@ async function ResetAllGame(){
     delaying = false;    
 
     
-    weapon =null;
+    equipments.weapon =null;
+    equipments.armor = null;
+    equipments.hat =null;
+    equipments.pants = null;
+    equipments.shoes = null;
     backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
     inventory = [];
     wound = [];
@@ -439,11 +453,12 @@ async function ResetAllGame(){
 
     //맵 이동 함수
     currentMapData=null;
-    mapNum=0;
+    
     mapData = [];
+    mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
-    mapData[0].zombieNum = 1; //난이도 하락
-    mapSetting(mapData[0]);
+    mapNum = 1;
+    mapSetting(mapData[mapNum]);
     
     stack = {
         weather:"sunny",
@@ -464,12 +479,14 @@ async function ResetAllGame(){
     //renderGameUI();
     setWeapon("random");
     commandBtsVisible(true);
-    
+    //보너스
+    inventory.push( findItem("Zomboxivir"));
     //준비완료
     logtxt.innerHTML='';
     log(translations[currentLang].ment);
 
     radioAction(0);
+    renderGameUI();
 }
 //맵 이동 갱신
 function mapSetting(data) {
@@ -731,6 +748,10 @@ function renderZombie(){
             zombieKillCount++;
             zombies.splice(i,1);
             i--;
+            const rng = Math.random();
+            if(rng<0.3){
+                currentMapData.dropItems.push( findItem("Zomboxivir"));
+            }
         }else{
 
         }
@@ -790,13 +811,34 @@ function renderGameUI(){
     }
     //console.log(currentMapData.thisFacilities);
     renderMoodles();
-
     renderZombie();
 
     //타이머 표시
     timerTxt.textContent = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') } ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
     //맵이름
     mapNameTxt.textContent = `${translations[currentLang].WestPoint} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
+    
+    if(mapNum-1> -1 ){
+         prevMapTxt.innerText = translations[currentLang][mapData[mapNum-1].name];
+         atHomeBt.classList.remove('hidden');
+    }else{
+        atHomeBt.classList.add('hidden');
+    }
+    if(mapNum+1 < mapData.length){
+        nextMapTxt.innerText = translations[currentLang][mapData[mapNum+1].name];
+        nextMapBt.classList.remove('hidden');
+    }else{
+        if(mapNum+1 == mapData.length){
+            nextMapTxt.innerText = '다음 지역으로';
+            nextMapBt.classList.remove('hidden');
+        }else{
+            nextMapBt.classList.add('hidden');
+        }
+        
+    }
+   
+    
+    
     //남은좀비수
     if(zombies.length>0){
         zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ${zombies.length}`

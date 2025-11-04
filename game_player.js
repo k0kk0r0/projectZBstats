@@ -118,7 +118,7 @@ function stopResting(){
 }
 function playerAttack(multiHit){
     const stat = playerStat();
-    if(weapon ==null){
+    if(equipments.weapon ==null){
         if(zombies.length>0){
             //좀비가 1명 이상
             if(zombies[0].isStunning>0){
@@ -146,7 +146,7 @@ function playerAttack(multiHit){
         return;
     }
     //무기 스태미나 소모
-    stamina -= weapon.stamina;
+    stamina -= equipments.weapon.stamina;
     if(stamina<=0){
         stamina = 0;
     }
@@ -154,14 +154,14 @@ function playerAttack(multiHit){
     
 
 
-    log(`플레이어의 ${translations[currentLang][weapon.name]} 무기 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
+    log(`플레이어의 ${translations[currentLang][equipments.weapon.name]} 무기 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
 
-    let skillLv = findPlayerSkill(weapon.subType).lv;
+    let skillLv = findPlayerSkill(equipments.weapon.subType).lv;
     for(let i =0 ; i< num; i++){
         //대미지 계산
         
-        let damage = (parseFloat(weapon.damage) /2 + randomInt(0,parseFloat(weapon.damage)/2))*(skillLv+1);
+        let damage = (parseFloat(equipments.weapon.damage) /2 + randomInt(0,parseFloat(equipments.weapon.damage)/2))*(skillLv+1);
         if(zombies[i].isStunning>0){
             damage = damage*2;
         }
@@ -179,7 +179,7 @@ function playerAttack(multiHit){
         damage = Math.ceil(damage);
         // zombies[i].hp -= damage;
         zombieIsDamaged(i, damage);
-        addSkillXp( weapon.subType, damage);
+        addSkillXp( equipments.weapon.subType, damage);
         addSkillXp( 'strength', damage);
         //Maintenance, 물건관리 작
        
@@ -208,7 +208,7 @@ function playerAttack(multiHit){
        
     }
     
-    maintenenceCalculate( weapon);
+    maintenenceCalculate( equipments.weapon);
     renderGameUI();
 }
 function playerPush(multiHit){
@@ -362,6 +362,18 @@ function playerBanding(itemIndex){
             break;
         }
     }
-    
     return bool;
 }
+function cureWound(name){
+    let bool =false;
+    for(let i =0 ; i<wound.length; i++){
+        let data = wound[i];
+        if(data.tag == name ){
+            wound.splice(i,1);
+            i--;
+            bool = true;
+        }
+    }
+    return bool;
+}
+

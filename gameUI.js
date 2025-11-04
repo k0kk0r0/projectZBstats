@@ -13,7 +13,7 @@ function renderSkill(){
     skillItem.innerHTML = `
       <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
       <span class="absolute inset-0 flex justify-between items-center px-3 text-sm font-semibold text-black">
-        <span>${translations[currentLang][name]} (Lv.${data.lv})</span>
+        <span>${translations[currentLang][name]??name} (Lv.${data.lv})</span>
         <span>${data.xp} / ${data.maxXp}</span>
       </span>
     `;
@@ -40,8 +40,8 @@ pushBt.addEventListener('click', () => {
     if(delaying) return; //딜레이 중이면 무시
     stopResting();
     if(!isAnimating){    
-         if(weapon!=null){
-            playerPush(parseInt(weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
+         if(equipments.weapon!=null){
+            playerPush(parseInt(equipments.weapon.multiHit)+1); //무기 멀티타격보다 1명더 넘어트리기
         }else{
             //무기가 없는 경우
             playerPush(2);
@@ -57,8 +57,8 @@ attackBt.addEventListener('click', () => {
     if(delaying) return;//딜레이 중이면 무시
     stopResting();
     if(!isAnimating){
-        if(weapon!=null){
-            playerAttack(weapon.multiHit);  
+        if(equipments.weapon!=null){
+            playerAttack(equipments.weapon.multiHit);  
         }else{
             //무기가 없는 경우
             playerAttack(1);
@@ -210,7 +210,8 @@ const equipIcons = {};
 equipNames.forEach(name => {
   equipIcons[name] = {
     icon: document.getElementById(`equipIcon_${name}`),
-    nameTxt: document.getElementById(`equipName_${name}`)
+    nameTxt: document.getElementById(`equipName_${name}`),
+    conditionBar : document.getElementById(`equipIcon_${name}_bar`)
   };
 });
  // 모달 바깥 클릭 시 닫기
@@ -285,7 +286,22 @@ function itemsubMenu(data, dataset){
                     closeSubOption();
                 }); 
             }
-
+            if(data.subType =="consume"){
+                if(data.name =="Zomboxivir"){
+                    makeBox("사용하기").addEventListener('click', ()=>{
+                    if(cureWound("zombie")){
+                        log(`${data.info.split("(")[0] } - 좀비화 치료`);
+                        inventory.splice(dataset.index,1);
+                        renderStorageModal();
+                        advanceTurn();
+                    }else{
+                        log(`치료할 상처가 없습니다.`);
+                    }
+                    closeSubOption();
+                }); 
+                }
+                
+            }
             makeBox("보관함에 넣기").addEventListener('click', ()=>{
                 itemMove(data, dataset);
                 closeSubOption();
@@ -329,7 +345,7 @@ function renderStorageModal(){
         weight.storage+= parseFloat(currentMapData.dropItems[i].weight);
     }
     //무게 더하기
-    if(weapon!=null){ weight.inventory+= parseFloat(weapon.weight)*0.3}
+    if(equipments.weapon!=null){ weight.inventory+= parseFloat(equipments.weapon.weight)*0.3}
     
     storage_weightTxt.innerText = `${weight.storage.toFixed(1)}/50`;
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(1)}/${weight.bagWeight}`;
@@ -344,21 +360,45 @@ function addInventoryItem(data , route, index){
     div.dataset.route = route.id;
     div.dataset.index = index;
 
-    const img = document.createElement('img');
-    img.src = data.path;
-    img.className = "w-full h-full object-contain p-2";
-    div.appendChild(img);
-    
     const namespan = document.createElement('span');
     namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b z-50";
-    namespan.innerText = translations[currentLang][data.name];
+    namespan.innerText = translations[currentLang][data.name]??data.name;
     div.appendChild(namespan);
+
+    // 내구도 배경 박스
+    const box = document.createElement('div');
+    box.className = "absolute inset-0 rounded-b z-0"; // 투명 배경
+    div.appendChild(box);
+
+    // 내구도 게이지 바
+    const durabilityBar = document.createElement('div');
+   
+    // 예: data.condition / data.maxCondition 으로 비율 계산
+    const ratio = Math.max(0, Math.min(1, data.condition / data.maxCondition || 0));
+    durabilityBar.style.height = `${ratio * 100}%`;
+     durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300 ${
+        data.maxCondition>1 ? 
+        itemRatioColor(ratio) : "bg-white-500"
+    }`;
+    //div.dataset.durabilityId = `durability_${index}`;
+   // durabilityBar.id = div.dataset.durabilityId;
+    box.appendChild(durabilityBar);
+
+    const img = document.createElement('img');
+    img.src = data.path;
+    img.className = "absolute w-full h-full object-contain p-2 z-50";
+    box.appendChild(img);
 
     //div.addEventListener('click', itemMove);
     div.addEventListener('pointerdown', itemMove_mouseDown);
     div.addEventListener('pointerup', itemMove_mouseUp);
     route.appendChild(div);
 }
+function itemRatioColor(value){
+    return (value > 0.5 ? "bg-green-300" : value > 0.25 ? "bg-yellow-200" : "bg-red-200");
+}
+
+
 let mousedown = false;
 let equipBool =false;
 let equipSetTimeout;
@@ -416,13 +456,13 @@ function itemMove(data, dataset){
 function setEquipment(data, dataset){
     if(data.type =='Weapon'){
         //무기인 경우
-        if(weapon!=null){
-            inventory.push(weapon);
-            weapon = null;
+        if(equipments.weapon!=null){
+            inventory.push(equipments.weapon);
+            equipments.weapon = null;
 
         }
-        if(weapon==null){
-            weapon = data;
+        if(equipments.weapon==null){
+            equipments.weapon = data;
             if(dataset.route == storage_player.id ){
                 inventory.splice(dataset.index,1);
             }else{
@@ -438,7 +478,7 @@ function itemEquip_mouseDown(e){
     const id = e.currentTarget.id;
     let data = null;
     if(id == equipIcons.weapon.icon.id){
-        data = weapon;
+        data = equipments.weapon;
     }
 
     if(mousedown==false){
@@ -466,12 +506,19 @@ function itemEquip_mouseUp(e){
             equipBool=false;
             return;
         }else{
-            //짧은 터치
-            if(id == equipIcons.weapon.icon.id){
-                inventory.push(weapon);
-                weapon = null;
-            
-            }
+            //짧은 터치, 장비해제
+             Object.entries(equipIcons).forEach(([key]) => {
+                const data =equipments[key];
+                const target = equipIcons[key];
+                if(data!=null){
+                   if(id == target.icon.id ){
+                        inventory.push( data );
+                        equipments[key] = null;
+                   }
+                }else{
+                    
+                }
+            });
             renderStorageModal();
         }
         equipBool=false;
@@ -479,49 +526,60 @@ function itemEquip_mouseUp(e){
         return;
     }
 }
-/*
-equipIcons.weapon.icon.addEventListener('click', ()=>{
-    if(weapon!=null){
-        inventory.push(weapon);
-        weapon = null;
-        renderStorageModal();
-    }
+Object.entries(equipIcons).forEach(([key]) => {
+    const target = equipIcons[key];
+    target.icon.addEventListener('pointerdown', itemEquip_mouseDown);
+    target.icon.addEventListener('pointerup', itemEquip_mouseUp);
 });
-*/
-equipIcons.weapon.icon.addEventListener('pointerdown', itemEquip_mouseDown);
-equipIcons.weapon.icon.addEventListener('pointerup', itemEquip_mouseUp);
 
 
 function renderEquipment(){
 
     //플레이어가 들고있는 무기 랜더링
-    if(weapon!=null){
+    if(equipments.weapon!=null){
         
-        equipWp.src = weapon.path;
+        equipWp.src = equipments.weapon.path;
         equipWp.classList.remove("rotate-90", 'rotate-180',"-rotate-90");
-        if(weapon.rotate>0){ 
-            if(weapon.rotate<=180){
-                equipWp.classList.add('rotate-'+weapon.rotate); 
+        if(equipments.weapon.rotate>0){ 
+            if(equipments.weapon.rotate<=180){
+                equipWp.classList.add('rotate-'+equipments.weapon.rotate); 
             }else{
-                equipWp.classList.add('-rotate-'+(weapon.rotate-180)); 
+                equipWp.classList.add('-rotate-'+(equipments.weapon.rotate-180)); 
             }
             
         }
-        weaponImg.src = weapon.path;
-        weaponName.textContent = translations[currentLang][weapon.name];
-
-        //storageModal 안의 장비창
-        equipIcons.weapon.icon.src = weapon.path;
-         equipIcons.weapon.nameTxt.innerText =  translations[currentLang][weapon.name];
-    }
-    if(weapon == null){
-        equipWp.src = 'icons/default.png';
+        weaponImg.src = equipments.weapon.path;
+        weaponName.textContent = translations[currentLang][equipments.weapon.name]; }
+    else if(equipments.weapon == null){
+        equipWp.src = 'icons/default.png'; //들고있는 무기아이콘
         weaponImg.src = 'icons/default.png';
         weaponName.textContent ='';
 
-        equipIcons.weapon.icon.src = 'icons/default.png';
-        equipIcons.weapon.nameTxt.innerText='⚔무기';
     }
+    const string ={
+        weapon:'⚔무기',
+        hat:'🎩모자',
+        armor:'👚방어구',
+        pants:'👖바지',
+        shoes:'👟신발'
+    }
+    Object.entries(equipIcons).forEach(([key]) => {
+        const data =equipments[key];
+        const target = equipIcons[key];
+        if(data!=null){
+            const ratio = data.condition/data.maxCondition;
+            target.icon.src = data.path;
+            target.nameTxt.innerText = translations[currentLang][data.name]??data.name;
+            target.conditionBar.style.height =`${(ratio*100)}%`;
+            target.conditionBar.classList.remove("bg-green-300", "bg-yellow-200", "bg-red-200");
+            target.conditionBar.classList.add(itemRatioColor(ratio));
+        }else{
+            //장비가 안 된 경우 초기화
+            target.icon.src = 'icons/default.png';
+            target.nameTxt.innerText = string[key];
+            target.conditionBar.style.height = '0%';
+        }
+    });
     
 }
 //
@@ -534,26 +592,28 @@ function renderEquipment(){
   const itemModalImgTag = document.getElementById('itemModalImgTag');
   const itemName = document.getElementById('itemName');
   const itemType = document.getElementById('itemType');
-  const field_type = document.getElementById('field-type');
-  const field_subType = document.getElementById('field-subType');
+  const itemLink = document.getElementById('itemLink');
   const field_multiHit = document.getElementById('field-multiHit');
   const field_stamina = document.getElementById('field-stamina');
   const field_damage = document.getElementById('field-damage');
   const field_weight = document.getElementById('field-weight');
+  const field_info = document.getElementById("field_info");
   const field_conditionText = document.getElementById('field-conditionText');
   const field_conditionBar = document.getElementById('field-conditionBar');
   const field_conditionLowerChance = document.getElementById('field-conditionLowerChance');
 
   function showItemModal(item) {
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
-    itemName.textContent = translations[currentLang][item.name] ?? 'Unknown';
+    itemName.textContent = translations[currentLang][item.name] ?? item.name;
     itemType.textContent = `${item.type ?? '-'} / ${item.subType ?? '-'}`;
-    field_type.textContent = item.type ?? '-';
-    field_subType.textContent = item.subType ?? '-';
+    itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"} ${item.path.replace(".png","").replace("/",".")}`;
+    //field_type.textContent = item.type ?? '-';
+    //field_subType.textContent = item.subType ?? '-';
     field_multiHit.textContent = (item.multiHit ?? '-') + '';
     field_stamina.textContent = (item.stamina ?? '-') + '';
     field_damage.textContent = (item.damage ?? '-') + '';
     field_weight.textContent = (item.weight ?? '-') + '';
+    field_info.textContent = (item.info ?? ''); //아이템 설명
 
     // condition (숫자 가정: 0..100)
     const cond = (typeof item.condition === 'number') ? item.condition : parseFloat(item.condition) || 0;
@@ -563,7 +623,7 @@ function renderEquipment(){
     field_conditionBar.style.width = pct + '%';
     // lossChance = 1 / (ConditionLowerChanceOneIn + floor(  floor(    MaintenanceLevel + (WeaponLevel/2)   )/2    )*2)
     
-    field_conditionLowerChance.textContent = (`1 / (${item.conditionLowerChance} + (물건관리 +(무기레벨/2) )` ?? '-') + '';
+    field_conditionLowerChance.textContent = item.conditionLowerChance? (`하락확률 : 1 / (${item.conditionLowerChance} + (물건관리 +(무기레벨/2) )` ) : '';
 
     // 이미지 (선택적)
     if (item.path) {

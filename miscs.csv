@@ -1,5 +1,6 @@
-type,subType,path,name,weight,condition
-Misc,misc,miscs/ToiletPaper.png,ToiletPaper,0.1,1
-FirstAid,bandage,miscs/Bandage.png,Bandage,0.1,1
-FirstAid,bandage,miscs/Bandaid.png,Bandaid,0.1,1
-FirstAid,bandage,miscs/Rag.png,Rag,0.1,1
+type,subType,path,name,weight,condition,info
+FirstAid,consume,TheyKnew/Zomboxivir.png,Zomboxivir,0.1,1,후....이번만은 봐드리는 겁니다...(사용 시 좀비 감염 제거)
+Misc,misc,Base/ToiletPaper.png,ToiletPaper,0.1,1,
+FirstAid,bandage,Base/Bandage.png,Bandage,0.1,1,
+FirstAid,bandage,Base/Bandaid.png,Bandaid,0.1,1,
+FirstAid,bandage,Base/Rag.png,Rag,0.1,1,
