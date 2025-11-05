@@ -4,3 +4,6 @@ Misc,misc,Base/ToiletPaper.png,ToiletPaper,0.1,1,
 FirstAid,bandage,Base/Bandage.png,Bandage,0.1,1,
 FirstAid,bandage,Base/Bandaid.png,Bandaid,0.1,1,
 FirstAid,bandage,Base/Rag.png,Rag,0.1,1,
+FluidContainer,bleach,Base/Bleach.png,Bleach,0.1,10,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
+FluidContainer,water,Base/WaterBottle.png,WaterBottle,0.1,10,
+FluidContainer,water,Base/PopBottle.png,PopBottle,0.1,20,

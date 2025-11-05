@@ -12,7 +12,7 @@ function renderSkill(){
 
     skillItem.innerHTML = `
       <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
-      <span class="absolute inset-0 flex justify-between items-center px-3 text-sm font-semibold text-black">
+      <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
         <span>${translations[currentLang][name]??name} (Lv.${data.lv})</span>
         <span>${data.xp} / ${data.maxXp}</span>
       </span>
@@ -250,8 +250,23 @@ itemSubOption.addEventListener("pointerdown", (e) =>{
         closeSubOption();
     }
 });
+function findInventoryItem(route, index){
+    //스토리지, 가방 등에서 아이템 찾기
+    let item =null;
+    if(route!=null){
+        if(route == storage_player.id){
+            item = inventory[index];
+        }
+        if(route == storage_storage.id){
+            item = currentMapData.dropItems[index];
+        }
+    }
+    return item;
+}
+//////////////////////아이템 서브메뉴///////////////////
 function closeSubOption(){itemSubOption.classList.add("hidden");}
 function itemsubMenu(data, dataset){
+    if(data ==null)return
     itemSubOption.classList.remove("hidden");
     optionBoxes.style.left = `${point.x+20}px`;
     optionBoxes.style.top = `${point.y-40}px`;
@@ -264,22 +279,56 @@ function itemsubMenu(data, dataset){
         optionBoxes.appendChild(box);
         return box;
     }
-    makeBox("아이템 정보").addEventListener('click', ()=>{
-        //아이템 정보 호출
-        showItemModal(data)
-        closeSubOption();
-    });
+    if(data!=null){
+        makeBox("아이템 정보").addEventListener('click', ()=>{
+            //아이템 정보 호출
+            showItemModal(data);
+            closeSubOption();
+        });
+    }
+    
 
     if(dataset!=null){
+        const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon'){
             makeBox("장착하기").addEventListener('click', ()=>{
                 setEquipment(data, dataset);
                 closeSubOption();
             });
-        }  
+        }
+        if(data.type =="FluidContainer"){
+            //액체류 마시기
+           
+            if(item.condition>0){
+                 const drinkname = translations[currentLang][data.subType] ?? data.subType;
+                makeBox(`${drinkname} 마시기`).addEventListener('click', ()=>{
+                    playerDrink( data.subType, item );
+                    renderStorageModal();
+                    closeSubOption();
+                });
+                 makeBox(`비우기`).addEventListener('click', ()=>{
+                    item.condition = 0;
+                    item.subType = 'empty';
+                    item.info = '';
+                    renderStorageModal();
+                    closeSubOption();
+                });
+            }else{
+                const addFluidtype = 'taintedWater'; //임시, taintedWater, water
+                const addFluidname = translations[currentLang][addFluidtype] ?? addFluidtype;
+                makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
+                    item.condition = item.maxCondition;
+                    item.subType = addFluidtype;
+                    renderStorageModal();
+                    closeSubOption();
+                });
+            }
+           
+
+        }
         if(dataset.route == storage_player.id){
             //플레이어 가방에 있을 때
-
+            
             if(data.subType =="bandage"){
                 makeBox("붕대 감기").addEventListener('click', ()=>{
                     playerHealing(dataset.index);
@@ -302,10 +351,13 @@ function itemsubMenu(data, dataset){
                 }
                 
             }
+           
+            /*
             makeBox("보관함에 넣기").addEventListener('click', ()=>{
                 itemMove(data, dataset);
                 closeSubOption();
-            }); 
+            });
+            */ 
         }
     }
 }
@@ -338,17 +390,25 @@ function renderStorageModal(){
     }
     for(let i =0;i<inventory.length; i++){
         addInventoryItem( inventory[i], storage_player, i);
-        weight.inventory+= parseFloat(inventory[i].weight);
+        weight.inventory += parseFloat( inventory[i].weight );
+        if(inventory[i].type=="FluidContainer"){
+            //액체의 경우, 무게 추가
+            weight.inventory += parseFloat(inventory[i].condition)/10;
+        }
     }
     for(let i =0;i<currentMapData.dropItems.length; i++){
         addInventoryItem( currentMapData.dropItems[i], storage_storage, i);
-        weight.storage+= parseFloat(currentMapData.dropItems[i].weight);
+        weight.storage += parseFloat(currentMapData.dropItems[i].weight);
+        if(currentMapData.dropItems[i].type=="FluidContainer"){
+            //액체의 경우, 무게 추가
+            weight.storage += parseFloat(currentMapData.dropItems[i].condition)/10;
+        }
     }
     //무게 더하기
     if(equipments.weapon!=null){ weight.inventory+= parseFloat(equipments.weapon.weight)*0.3}
     
-    storage_weightTxt.innerText = `${weight.storage.toFixed(1)}/50`;
-    inventory_weightTxt.innerText = `${weight.inventory.toFixed(1)}/${weight.bagWeight}`;
+    storage_weightTxt.innerText = `${weight.storage.toFixed(2)}/50`;
+    inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
     renderEquipment();
 }
 function addInventoryItem(data , route, index){
@@ -370,16 +430,22 @@ function addInventoryItem(data , route, index){
     box.className = "absolute inset-0 rounded-b z-0"; // 투명 배경
     div.appendChild(box);
 
-    // 내구도 게이지 바
-    const durabilityBar = document.createElement('div');
-   
     // 예: data.condition / data.maxCondition 으로 비율 계산
     const ratio = Math.max(0, Math.min(1, data.condition / data.maxCondition || 0));
+    // 내구도 게이지 바
+    const durabilityBar = document.createElement('div');
     durabilityBar.style.height = `${ratio * 100}%`;
-     durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300 ${
-        data.maxCondition>1 ? 
-        itemRatioColor(ratio) : "bg-white-500"
-    }`;
+    durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300`;
+    if(data.type=="Weapon" || data.type =="Armor"){
+        //무기, 방어구 등인 경우...
+        durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+    }
+    if(data.type=="FluidContainer"){
+        //액체류의 경우
+
+        durabilityBar.classList.add(itemColor(data.subType));
+        
+    }
     //div.dataset.durabilityId = `durability_${index}`;
    // durabilityBar.id = div.dataset.durabilityId;
     box.appendChild(durabilityBar);
@@ -395,7 +461,20 @@ function addInventoryItem(data , route, index){
     route.appendChild(div);
 }
 function itemRatioColor(value){
-    return (value > 0.5 ? "bg-green-300" : value > 0.25 ? "bg-yellow-200" : "bg-red-200");
+    return (value > 0.5 ? "bg-green-400" : value > 0.25 ? "bg-yellow-200" : "bg-red-200");
+}
+function itemColor(subType){
+    switch(subType){
+        case "water":
+            return "bg-cyan-300";
+
+        case "bleach":
+            return "bg-lime-200";
+        
+        case "taintedWater":
+            return "bg-emerald-300";
+    }
+    return 
 }
 
 
@@ -465,7 +544,7 @@ function setEquipment(data, dataset){
             equipments.weapon = data;
             if(dataset.route == storage_player.id ){
                 inventory.splice(dataset.index,1);
-            }else{
+            }else if(dataset.route == storage_storage.id ){
                 currentMapData.dropItems.splice(dataset.index,1);
             }
             
@@ -534,7 +613,15 @@ Object.entries(equipIcons).forEach(([key]) => {
 
 
 function renderEquipment(){
-
+    Object.entries(equipIcons).forEach(([key]) => {
+        const data =equipments[key];
+        if(data!=null){
+            if(data.condition<=0){
+                log(`와장창!! ${translations[currentLang][data.name]}가 파괴되었습니다.`);
+                equipments[key] =null;
+            }
+        }
+    });
     //플레이어가 들고있는 무기 랜더링
     if(equipments.weapon!=null){
         
@@ -572,7 +659,13 @@ function renderEquipment(){
             target.nameTxt.innerText = translations[currentLang][data.name]??data.name;
             target.conditionBar.style.height =`${(ratio*100)}%`;
             target.conditionBar.classList.remove("bg-green-300", "bg-yellow-200", "bg-red-200");
-            target.conditionBar.classList.add(itemRatioColor(ratio));
+            if(data.type=="FluidContainer"){
+                target.conditionBar.classList.add(itemColor(data.subType));
+            }
+            else if(data.type =="Weapon"){
+                target.conditionBar.classList.add(itemRatioColor(ratio));
+            }
+            
         }else{
             //장비가 안 된 경우 초기화
             target.icon.src = 'icons/default.png';
@@ -598,6 +691,7 @@ function renderEquipment(){
   const field_damage = document.getElementById('field-damage');
   const field_weight = document.getElementById('field-weight');
   const field_info = document.getElementById("field_info");
+  const field_condition = document.getElementById('field-condition');
   const field_conditionText = document.getElementById('field-conditionText');
   const field_conditionBar = document.getElementById('field-conditionBar');
   const field_conditionLowerChance = document.getElementById('field-conditionLowerChance');
@@ -606,25 +700,50 @@ function renderEquipment(){
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
     itemName.textContent = translations[currentLang][item.name] ?? item.name;
     itemType.textContent = `${item.type ?? '-'} / ${item.subType ?? '-'}`;
-    itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"} ${item.path.replace(".png","").replace("/",".")}`;
+    itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"}${item.path.replace(".png","").replace("/",".")}`;
     //field_type.textContent = item.type ?? '-';
     //field_subType.textContent = item.subType ?? '-';
     field_multiHit.textContent = (item.multiHit ?? '-') + '';
     field_stamina.textContent = (item.stamina ?? '-') + '';
     field_damage.textContent = (item.damage ?? '-') + '';
-    field_weight.textContent = (item.weight ?? '-') + '';
-    field_info.textContent = (item.info ?? ''); //아이템 설명
+    field_weight.textContent = (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '';
+    
+    const info = item.info!=null? item.info.replace(";",`\n`): "";
+    field_info.textContent = (info ?? ''); //아이템 설명
 
     // condition (숫자 가정: 0..100)
-    const cond = (typeof item.condition === 'number') ? item.condition : parseFloat(item.condition) || 0;
-    const cond0 = (typeof item.condition === 'number') ? item.maxCondition : parseFloat(item.maxCondition) || 0;
-    const pct = Math.ceil(cond/cond0*100);
-    field_conditionText.textContent = `${cond}/${cond0} (${pct}%)`;
-    field_conditionBar.style.width = pct + '%';
-    // lossChance = 1 / (ConditionLowerChanceOneIn + floor(  floor(    MaintenanceLevel + (WeaponLevel/2)   )/2    )*2)
-    
-    field_conditionLowerChance.textContent = item.conditionLowerChance? (`하락확률 : 1 / (${item.conditionLowerChance} + (물건관리 +(무기레벨/2) )` ) : '';
+    if(item.maxCondition>1){
+        //수용량이 있는 경우
+         field_condition.classList.remove("hidden");
+        const cond = (typeof item.condition === 'number') ? item.condition : parseFloat(item.condition) || 0;
+        const cond0 = (typeof item.condition === 'number') ? item.maxCondition : parseFloat(item.maxCondition) || 0;
+        const ratio = Math.ceil(cond/cond0*100);
+        
+        field_conditionBar.style.width = `${ratio}%`;
+        field_conditionBar.className ="h-full transition-all";
+        field_conditionLowerChance.textContent ='';
 
+        if(item.type=="Weapon" || item.type =="Armor"){ //무기, 방어구 등등...
+            const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
+            const weaponLv = parseFloat(findPlayerSkill(item.subType).lv);
+            const per = 1/( item.conditionLowerChance + Math.floor( Math.floor(   MaintenanceLv + ( weaponLv/2)  )/2 )*2 ) ;
+            field_conditionLowerChance.textContent = item.conditionLowerChance? (`하락확률 : ${(per*100).toFixed(1)}%` ) : '';
+            field_conditionBar.classList.add( itemRatioColor(cond/cond0) );
+            field_conditionText.textContent = `${cond}/${cond0} (${ratio}%)`;
+        }
+        else if(item.type=='FluidContainer'){
+            //액체류의 경우
+            field_conditionText.textContent = `${cond/10}/${cond0/10}L (${ratio}%)`;
+            field_conditionBar.classList.add(itemColor(item.subType));
+        }else{
+            field_conditionBar.classList.add("bg-yellow-400");
+        }
+    }else{
+        //표시 안하기
+        field_condition.classList.add("hidden");
+    }
+    
+    
     // 이미지 (선택적)
     if (item.path) {
       itemModalImgTag.src = item.path;

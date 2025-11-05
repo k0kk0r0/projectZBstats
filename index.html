@@ -249,7 +249,7 @@
 
       <!-- 메인 배경화면 -->
       <div class="flex-grow flex items-center justify-center">
-        <div class="relative w-full max-h-[600px] bg-gray-600 border-4 border-gray-500 overflow-hidden">
+        <div id="Scene" class="relative w-full max-h-[600px] bg-gray-600 border-4 border-gray-500 overflow-hidden">
           <img id="mainBg" src="images/bg0_dark.png" alt="게임화면" class="w-full h-full object-cover  z-10">
           <!-- 날짜 텍스트 (이미지 안쪽 상단에 표시됨) -->
           <span id="timer" class="absolute top-2 left-2 text-white text-2xl font-bold bg-black/60 px-3 py-1 rounded z-50">
@@ -308,27 +308,6 @@
               class="absolute bottom-4 left-20 w-20 h-20 z-20 transition-all duration-100 hidden">
 
 
-           <!-- 좀비들 (오른쪽 아래 배치) -->
-          <div id="zombie0" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
-            <img src="images/zb.png" id="zombieImg0" class="absolutew-full h-full">
-            <span id="damage0" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10  w-16 h-32 z-20 transition-all duration-100">
-            -10
-           </span>
-          </div>
-          
-         <div id="zombie1" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
-            <img src="images/zb.png" id="zombieImg1" class="absolutew-full h-full">
-            <span id="damage1" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10 w-16 h-32 z-20 transition-all duration-100">
-            -10
-           </span>
-          </div>
-          <div id="zombie2" class="absolute bottom-4 right-60 w-16 h-32 z-20 transition-all duration-100">
-            <img src="images/zb.png" id="zombieImg2" class="absolutew-full h-full">
-            <span id="damage2" class="hidden font-bold text-green-600 text-4xl absolute top-0 right-10 left-0 w-16 h-32 z-20 transition-all duration-100">
-            -10
-           </span>
-          </div>
-           
 
 
           <!-- 무기창 아이콘 (숨김) -->
@@ -655,12 +634,12 @@
           <div class="text-gray-600 text-xl">Weight</div><div id="field-weight" class="font-medium text-xl"></div>
           
         </div>
-        <div id="field_info" class="text-gray-600 text-lg"></div>
+        <div id="field_info" class="text-gray-600 text-lg whitespace-pre-line"></div>
         <!-- 컨디션 바 -->
-        <div>
+        <div id="field-condition">
           <div class="text-gray-600  text-sm mb-1">Condition <span id="field-conditionText" class="font-semibold"></span></div>
           <div class="w-full bg-gray-200  rounded-full h-4 overflow-hidden">
-            <div id="field-conditionBar" class="h-full bg-yellow-400 transition-all" style="width: 0%"></div>
+            <div id="field-conditionBar" class="h-full transition-all" style="width: 0%"></div>
           </div>
           <div class="text-xs text-gray-500 mt-1"><span id="field-conditionLowerChance"></span></div>
         </div>

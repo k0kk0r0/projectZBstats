@@ -1,6 +1,18 @@
 //좀비생성함수
 function spawnZombie(num){
-    zombies.push( {  hp: 40, isAnimating: false ,isStunning:0}) ;
+    const id= Math.floor(Math.random()*100000);
+    const div = document.createElement('div');
+    div.id=`zombie_${id}`;
+    div.className = "absolute bottom-4 right-0 w-16 h-32 z-20 transition-all duration-100";
+
+    const img = document.createElement('img');
+    img.src = "images/zb.png";
+    img.className = "absolute w-full h-full";
+    //img.id = `zombieImg_${id}`;
+    div.appendChild(img);
+
+    Scene.appendChild(div);
+    zombies.push( {div:div, img:img, hp: randomInt(50,20), isAnimating: false ,isStunning:0}) ;
 }
 function spawnZombies(num, min=0){
     const rng = randomInt(0,num);
@@ -8,13 +20,65 @@ function spawnZombies(num, min=0){
         spawnZombie(i);
     }
     for(let i =0; i< zombies.length; i++){
-        if(i<zombieElements.length){
-            zombieElements[i].style.right =(200- 60*i)+ "px";
-            zombieElements[i].classList.remove('hidden');
-            zombieElements[i].classList.remove(stunClass);
-            zombieMove(i);
+        zombies[i].div.style.right= `${(300+i*60)}px`;
+        zombies[i].div.classList.remove(stunClass);
+        zombieMove(i);
+    }
+}
+//대미지 숫자 표시
+function createDamageNumber(num, position){
+    const div = document.createElement("span");
+    div.className = "absolute font-bold text-green-600 text-4xl w-32 h-32 z-50 transition-all duration-100";
+    div.style.bottom = `50px`;
+    div.style.right = `${parseFloat(position)-40}px`;
+    div.innerText = num;
+    Scene.appendChild(div);
+    setTimeout(() => {
+        if(gameOver)return;
+        Scene.removeChild(div);
+    },  400);
+    //console.log(parseFloat(position)-40);
+}
+function renderZombie(){
+    if(gameOver)return;
+    //좀비 동작 표시
+    for(let i =0; i< zombies.length; i++){
+        
+    }
+    for(let i =0; i< zombies.length; i++){
+        zombies[i].div.style.right= `${(300+i*60)}px`;
+        zombies[i].div.classList.remove(stunClass);
+        //zombieMove(i);
+        
+        if(zombies[i].isStunning>0){
+            //스턴 된 경우
+            if(zombies[i].img.classList.contains(stunClass)){
+
+            }else{
+                zombies[i].img.classList.add(stunClass, "top-7");
+            }
+        }else{
+            zombies[i].img.classList.remove(stunClass,"top-7");
+        }
+
+        
+        if(zombies[i].hp <=0){
+            //체력 감소 시 좀비 숨김, 좀비 사망
+            const div = zombies[i].div;
+            zombies[i].img.classList.add(stunClass, "top-7");
+            setTimeout(() => {
+                if(gameOver) return;
+                Scene.removeChild(div);
+            },  1200);
+            zombieKillCount++;
+            zombies.splice(i,1);
+            i--;
+            zombieDropItem();
+        }else{
+
         }
     }
+    
 }
 function callZombies(num, addPer=0){
     //좀비소환
@@ -90,11 +154,11 @@ function zombieMove(index , distance=20) {
     if(zombies[index]==null){return};
     if(zombies[index].hp<0){return};
     if (zombies[index].isAnimating) return; // 이미 움직이면 무시
-    if(index>= zombieElements.length){return};
+    
     zombies[index].isAnimating = true;
 
     // 현재 위치 가져오기
-    const startPos = parseFloat(zombieElements[index].style.right) || 0;
+    const startPos = parseFloat(zombies[index].div.style.right) || 0;
     const targetPos = startPos - distance; // 이동 목표
     const duration = 200; // 이동 시간(ms)
     const startTime = performance.now();
@@ -107,10 +171,10 @@ function zombieMove(index , distance=20) {
         if (elapsed < duration) {
             const progress = elapsed / duration; // 0 ~ 1
             const currentPos = startPos + (targetPos - startPos) * progress*5;
-            zombieElements[index].style.right = currentPos + "px";
+            zombies[index].div.style.right = currentPos + "px";
             requestAnimationFrame(moveRight);
         } else {
-            zombieElements[index].style.right = targetPos + "px";
+            zombies[index].div.style.right = targetPos + "px";
             // 원위치로 돌아오기 시작 (왕복)
             requestAnimationFrame(() => moveLeft(performance.now()));
         }
@@ -125,10 +189,10 @@ function zombieMove(index , distance=20) {
         if (elapsed < leftDuration) {
             const progress = elapsed / leftDuration;
             const currentPos = targetPos - (targetPos - startPos) * progress;
-            zombieElements[index].style.right = currentPos + "px";
+            zombies[index].div.style.right = currentPos + "px";
             requestAnimationFrame(() => moveLeft(start));
         } else {
-            zombieElements[index].style.right = startPos + "px"; // 원위치 고정
+            zombies[index].div.style.right = startPos + "px"; // 원위치 고정
             zombies[index].isAnimating = false;
         }
     }
@@ -147,12 +211,13 @@ function zombieStun(index, stunValue) {
 function zombieIsDamaged(index, value){
     if(zombies[index].hp>0){
         zombies[index].hp -= value;
+        createDamageNumber(value, zombies[index].div.style.right);
     }
 }
 //좀비 아이템드롭
 function zombieDropItem(){
     const rng = Math.random();
-    if(rng<0.2){
+    if(rng<0.11){
         currentMapData.dropItems.push( findItem("Zomboxivir"));
     }
 }

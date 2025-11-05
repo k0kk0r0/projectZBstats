@@ -101,18 +101,6 @@ const player = document.getElementById('player');
 const playerRest = document.getElementById('playerRest');
 const playerZb = document.getElementById('playerZb');
 const equipWp = document.getElementById('equipWp');
-const zombie0 = document.getElementById('zombie0');
-const zombie1 = document.getElementById('zombie1');
-const zombie2 = document.getElementById('zombie2');
-const zombieImg0 = document.getElementById('zombieImg0');
-const zombieImg1 = document.getElementById('zombieImg1');
-const zombieImg2 = document.getElementById('zombieImg2');
-const zombieElements = [zombie0,zombie1,zombie2];
-const zombieImgs = [zombieImg0, zombieImg1, zombieImg2];
-const damage0 = document.getElementById('damage0');
-const damage1 = document.getElementById('damage1');
-const damage2 = document.getElementById('damage2');
-const damageTxt = [damage0, damage1, damage2];
 
 //무들 아이콘
 const moodleNames = ["Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
@@ -154,10 +142,11 @@ const logtxt = document.getElementById("logText");
 
 
 //배경
+const Scene = document.getElementById("Scene");
 const bg = document.getElementById('mainBg');
 
 //아이템리스트
-let weaponsData = []; //무기리스트
+let weaponDatas = []; //무기리스트
 let mapDatas = [];//맵리스트
 let miscs = [];//기타 아이템 리스트
 
@@ -277,23 +266,15 @@ function maintenenceCalculate(item){
     const base = ( lowerChance + Math.floor( Math.floor(   MaintenanceLv + ( weaponLv/2)  )/2 )*2 ) ;
     const per = 1 / base ;
     //console.log(per, base);
-    if(Math.random() < per){
+    if(Math.random() <= per){
         //감소
-        addSkillXp("Maintenance", Math.floor(base*2)); //내구도 감소 시 2배
+        addSkillXp("Maintenance", Math.floor(base*1.2)); //내구도 감소 시 1.2배
         item.condition--;
-        if(item.condition<=0){
-            if(item.type=="Weapon"){
-                equipments.weapon=null;
-            }
-            renderEquipment();
-             log(`달그락! ${(per*100).toFixed(1)}% 확률로 아이템이 파괴되었습니다`,per);
-        }else{
-             log(`${(per*100).toFixed(1)}% 확률로 아이템 내구도 감소! (${item.condition}/${item.maxCondition})`,per);
-        }
-       
+        log(`${(per*100).toFixed(1)}% 확률로 아이템 내구도 감소! (${item.condition}/${item.maxCondition})`,per);
     }else{
         addSkillXp("Maintenance", Math.floor(base));
     }
+    
 }
 
 
@@ -334,7 +315,7 @@ function loadMapDatas(){
     });
 }
 async function init() {
-  weaponsData = await loadWeapons();
+  weaponDatas = await loadWeapons();
   mapDatas = await loadMapDatas();
   miscsData = await loadMiscs();
 }
@@ -348,7 +329,7 @@ function findItem(itemName){
 }
 function findWeapon(itemName ){
     //무기데이터 검색 및 가공해서 반환
-    const data = weaponsData.find(w => w.name === itemName);
+    const data = weaponDatas.find(w => w.name === itemName);
     if(data==null){ return null }
     let data0 ={
         path: data.path.toString(),
@@ -385,7 +366,7 @@ function findMisc(itemName ){
 function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
-        equipments.weapon = findWeapon(weaponsData[ randomInt(0, weaponsData.length) ].name);
+        equipments.weapon = findWeapon(weaponDatas[ randomInt(0, weaponDatas.length) ].name);
     }else{
         equipments.weapon = findWeapon(itemName); 
     }
@@ -726,45 +707,7 @@ function renderPlayer(){
      }
    
 }
-function renderZombie(){
-    if(gameOver)return;
-    //좀비 동작 표시
-    for(let i =0; i< zombies.length; i++){
-        if(i>=zombieElements.length){
-            break;
-        }
-        if(zombies[i].isStunning>0){
-            //스턴 된 경우
-            if(zombieImgs[i].classList.contains(stunClass)){
-                //넘어짐이 있는 경우
-            }else{
-                zombieImgs[i].classList.add(stunClass);
-            }
-        }else{
-            zombieImgs[i].classList.remove(stunClass);
-        }
-        if(zombies[i].hp <=0){
-            //체력 감소 시 좀비 숨김, 좀비 사망
-            zombieKillCount++;
-            zombies.splice(i,1);
-            i--;
-            const rng = Math.random();
-            if(rng<0.3){
-                currentMapData.dropItems.push( findItem("Zomboxivir"));
-            }
-        }else{
 
-        }
-    }
-    //좀비 엘리먼트 표시, 좀비 배열이 줄면 뒤부터 감추기
-    for(let i =0 ; i <zombieElements.length; i++){
-        if(i<zombies.length){
-             zombieElements[i].classList.remove('hidden');
-        }else{
-             zombieElements[i].classList.add('hidden');
-        }
-    }
-}
 function renderMoodles(){
     //무들표시
     for(let i = 0; i < moodles.length;i++){
@@ -812,7 +755,7 @@ function renderGameUI(){
     //console.log(currentMapData.thisFacilities);
     renderMoodles();
     renderZombie();
-
+    renderEquipment();
     //타이머 표시
     timerTxt.textContent = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') } ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
     //맵이름
@@ -862,8 +805,9 @@ function checkGameOver(){
         //게임오버
         renderPlayer();
         renderMoodles();
-        log(`= 게임오버 =`);
-        log(`당신은 ${day-1}일, ${hour}시간 동안 생존하였습니다.`);
+        const _hour = hour-7;
+        log(`=== 게임오버 ===`);
+        log(`당신은 ${day-1}일, ${ (_hour<0? _hour+17:_hour ) }시간 동안 생존하였습니다.`);
         log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
     }
 }
