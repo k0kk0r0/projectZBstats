@@ -15,7 +15,7 @@ function spawnZombie(num){
     zombies.push( {div:div, img:img, hp: randomInt(50,20), isAnimating: false ,isStunning:0}) ;
 }
 function spawnZombies(num, min=0){
-    const rng = randomInt(0,num);
+    const rng =num;
     for(let i =0 ; i <rng+min; i++){
         spawnZombie(i);
     }
@@ -28,8 +28,9 @@ function spawnZombies(num, min=0){
 //대미지 숫자 표시
 function createDamageNumber(num, position){
     const div = document.createElement("span");
-    div.className = "absolute font-bold text-green-600 text-4xl w-32 h-32 z-50 transition-all duration-100";
-    div.style.bottom = `50px`;
+    div.className = "absolute font-bold text-red-600 text-4xl text-bold w-32 h-32 z-50 transition-all duration-100";
+    div.style="-webkit-text-stroke: 1px black;";
+    div.style.bottom = `20px`;
     div.style.right = `${parseFloat(position)-40}px`;
     div.innerText = num;
     Scene.appendChild(div);
@@ -46,7 +47,7 @@ function renderZombie(){
         
     }
     for(let i =0; i< zombies.length; i++){
-        zombies[i].div.style.right= `${(300+i*60)}px`;
+        zombies[i].div.style.right= `${(300-i*60)}px`;
         zombies[i].div.classList.remove(stunClass);
         //zombieMove(i);
         
@@ -69,11 +70,14 @@ function renderZombie(){
             setTimeout(() => {
                 if(gameOver) return;
                 Scene.removeChild(div);
+                
+                zombieDropItem();
             },  1200);
             zombieKillCount++;
             zombies.splice(i,1);
             i--;
-            zombieDropItem();
+            
+           
         }else{
 
         }
@@ -98,11 +102,21 @@ function callZombies(num, addPer=0){
     }
 
     if(rng <= per){
+        closeStorageModal();
+        
         log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
         spawnZombie(num,1);
         stopResting();
         stack.zombieSpawn = 0;
     }
+}
+function clearZombies(){
+    
+    for(let i = 0; i<zombies.length;i++){
+        //mapData.zombies.push( zombies[i]);
+        Scene.removeChild(zombies[i].div);
+    }
+    zombies = [];
 }
 function zombieAttack( timedelay=600){
     if(zombies.length>0){
@@ -152,7 +166,7 @@ function zombieSwapping(){
 function zombieMove(index , distance=20) {
     if(gameOver)return;
     if(zombies[index]==null){return};
-    if(zombies[index].hp<0){return};
+    //if(zombies[index].hp<=0){return};
     if (zombies[index].isAnimating) return; // 이미 움직이면 무시
     
     zombies[index].isAnimating = true;

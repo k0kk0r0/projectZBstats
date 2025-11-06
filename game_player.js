@@ -187,7 +187,7 @@ function playerAttack(multiHit){
             zombies[i].isStunning = 4; //스턴 턴 횟수
             zombieMove(i,10);
             zombieStun(i,4);
-            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
+            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
         }else{
             //좀비 경직을 넣을까?
             zombieMove(i,20);
@@ -217,7 +217,7 @@ function playerPush(multiHit){
         const stunPer = 0.35 + stat.strength*0.05;
         if(rng<= stunPer){
             //확률로 넉백            
-            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`, rng);
+            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
             zombieMove(i,20);
             zombieStun(i,4);
         }else{
@@ -261,11 +261,11 @@ function playerIsDamaged(value){
         //물림
         wound.push( {tag:"bitten", heal:-1, turn:(100+healer*4)} );
         wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
-        log(`${ ((0.1+per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.`, `${rng} < ${0.1} ${ per>0? '+':'' }${per!=0?per:''}` );
+        log(`${ ((0.1+per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.` ,true);
     }else if(rng<0.4+per){
         //찢어진상처
         wound.push( {tag:"scratched", heal:-1, turn:randomInt(20+healer,40+healer)} );
-        log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.`, `${rng} < ${0.4} ${ per>0? '+':''}${per!=0?per:''}` );
+        log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.` );
         if(zbrng<0.25){
             //감염
             wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
@@ -273,7 +273,7 @@ function playerIsDamaged(value){
     }else if(rng<0.6+per){
         //긁힘
         wound.push( {tag:"lacerated", heal:-1, turn:randomInt(17+healer,25+healer)} );
-        log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`, `${rng} < ${0.6} ${ per>0? '+':'' }${per!=0?per:''}` );
+        log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`);
         if(zbrng<0.07){
             //감염
             wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
@@ -327,15 +327,17 @@ function woundHealingCalculate(){
                 }
                 
             }
-            if(data.tag=="scratched" || data.tag == "bitten"){
-                health -=2;
-                if(data.heal<0){wndCount++;}//상처갯수 추가
-                
+            if(data.heal<0){
+                if(data.tag=="scratched" || data.tag == "bitten"){
+                    wndCount++;
+                    health -=2;;
+                }
+                if(data.tag=="lacerated"){
+                    health -=1.5;
+                    wndCount++;
+                }
             }
-            if(data.tag=="lacerated"){
-                health -=1.5;
-                if(data.heal<0){wndCount++;}//상처갯수 추가
-            }
+            
         }
     }
     setMoodleValue('Bleeding', wndCount>4? -4 : -wndCount);
@@ -345,7 +347,7 @@ function playerHealing(itemIndex){
     if(bool){
         advanceTurn();
     }else{
-        log(`치료할 상처가 없습니다`);
+        log(`치료할 상처가 없습니다`,true);
     }
 }
 function playerBanding(itemIndex){
@@ -355,8 +357,8 @@ function playerBanding(itemIndex){
         let data = wound[i];
         if(data.heal<0){
              if(data.tag =="lacerated" || data.tag =="scratched" || data.tag=="bitten"){
-                log( `${translations[currentLang][inventory[itemIndex].name]}을 소모하여 [${translations[currentLang][data.tag]}]에 붕대 감음.`);
-
+                const txt = `${translations[currentLang][inventory[itemIndex].name]}을 소모하여 [${translations[currentLang][data.tag]}]에 붕대 감음.`;
+                log(txt,true);
                 //wound.splice(i,1);
                 //i--;
                 data.heal = 1;
@@ -374,10 +376,10 @@ function cureWound(name){
     let bool =false;
     for(let i =0 ; i<wound.length; i++){
         let data = wound[i];
-        if(data.tag == name ){
+        if(data.tag == name && data.heal<0){
             //wound.splice(i,1);
             //i--;
-            wound[i].heal = 1;
+            data.heal = 1;
             //모든 좀비화 치료
             bool = true;
         }
@@ -396,14 +398,14 @@ function playerDrink( fluidType , item ){
          if(fluidType=="bleach"){
             //락스
             wound.push({tag:fluidType, heal:-1, turn:20 , turn0:20}); 
-            log(`끔찍한 선택을 했군요... 락스를 마셨습니다.`);
+            log(`끔찍한 선택을 했군요... 락스를 마셨습니다.`,true);
             closeStorageModal();
         }else if(fluidType =="water"){
             //물 섭취
-            log(`물을 마셨습니다.(${item.condition}/${item.maxCondition})`);
+            log(`물을 마셨습니다.(${item.condition}/${item.maxCondition})`,true );
         }
     }else{
-        log(`통이 비어있습니다.`);
+        log(`통이 비어있습니다.`,true);
     }
    
 }

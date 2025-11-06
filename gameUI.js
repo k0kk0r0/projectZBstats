@@ -108,6 +108,7 @@ nextMapBt.addEventListener('click',() =>{
      if(gameOver)return;
     if(delaying)return;//딜레이 중이면 무시
     //다음 맵 이동
+     mapData[mapNum].zombieNum = zombies.length; //지금 맵의 좀비 수를 맵데이터에 저장
     stopResting();
     mapNum++;
     let rng = Math.random();
@@ -118,7 +119,7 @@ nextMapBt.addEventListener('click',() =>{
                 mapData.push( findMapData('store_tool'));
             }else if(rng<0.35){
                 mapData.push( findMapData("livestock"));
-            }else if(rng<0.6){
+            }else if(rng<0.7){
                 mapData.push( findMapData("house"));
             }else{
                 mapData.push( findMapData('road'));
@@ -143,7 +144,7 @@ nextMapBt.addEventListener('click',() =>{
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`,rng);
+        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
      },timedelay);
     
     //TurnEnd();
@@ -155,6 +156,8 @@ atHomeBt.addEventListener('click', ()=>{
     if(delaying)return;//딜레이 중이면 무시
     stopResting();
     //이전 맵 이동
+    mapData[mapNum].zombieNum = zombies.length; //지금 맵의 좀비를 맵데이터에 저장
+
     mapNum--;
     if(mapNum<0){
         mapNum=0
@@ -187,7 +190,7 @@ bandingBt.addEventListener('click', ()=>{
     const itemIndex = getInventoryItemIndexType("bandage","subType");
     if(itemIndex<0){
         //아이템이 없음
-        log(`붕대 혹은 찢어진 천이 없습니다.`);
+        log(`붕대 혹은 찢어진 천이 없습니다.`,);
         return;
     }
     playerHealing(itemIndex);
@@ -297,33 +300,87 @@ function itemsubMenu(data, dataset){
             });
         }
         if(data.type =="FluidContainer"){
-            //액체류 마시기
+            //액체류 마시기, 채우기, 비우기
            
             if(item.condition>0){
-                 const drinkname = translations[currentLang][data.subType] ?? data.subType;
+                const drinkType = (data.subType.split(';').length>1? `${translations[currentLang][ data.subType.split(';')[0]] } 혼합액` : data.subType);
+                 const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
                 makeBox(`${drinkname} 마시기`).addEventListener('click', ()=>{
-                    playerDrink( data.subType, item );
+                    playerDrink( data.subType.split(';')[0], item );
+                    advanceTurn();
                     renderStorageModal();
-                    closeSubOption();
+                    //closeSubOption();
                 });
+                
+            }if(item.condition < item.maxCondition){
+
+                let waterSource ;
+                const faucet = getFacilityEnable("faucet");
+                
+                if(faucet){
+                    waterSource = 'water';
+                }else if(getFacilityEnable("water")!=null){
+                    waterSource = 'taintedWater';
+                }
+
+                // console.log(waterSource);
+
+                const addFluidname = translations[currentLang][waterSource] ?? waterSource;
+                makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
+                    if(faucet!=null){
+                        if(waterEndTurn>0){
+                            item.condition = item.maxCondition;
+                            advanceTurn();
+                            
+                        }else{
+                            //물이 끊긴 경우 수전의 물 사용
+                            while( true ){
+                                //
+                                
+                                if(parseFloat(faucet.needs.amount)<=0 || item.condition>= item.maxCondition){
+                                    advanceTurn();
+                                    break;
+                                }else{
+                                    item.condition++;
+                                    faucet.needs.amount--;
+                                }
+                            }
+                        }
+                        
+                    }
+                    if(waterSource=='taintedWater'){
+                        //강물이 있는 경우
+                        item.condition = item.maxCondition;
+                        advanceTurn();
+                    }
+
+                   
+                    if(item.subType=='empty'){
+                        //비어있는 경우
+                        item.subType = waterSource;
+                    }else{
+                        const subTypeArray = item.subType.split(';');
+                        
+                        if(subTypeArray.includes(waterSource)){
+                            //갖고 있는경우 추가로 더하진 않음...
+                        }else{
+                            item.subType = subTypeArray[0] == 'water'? item.subType=waterSource : `${item.subType};${waterSource}`;
+                        }
+                    }
+                    renderStorageModal();
+                    //closeSubOption();
+                });
+            }
+           if(item.condition>0){
                  makeBox(`비우기`).addEventListener('click', ()=>{
                     item.condition = 0;
                     item.subType = 'empty';
                     item.info = '';
+                    advanceTurn();
                     renderStorageModal();
-                    closeSubOption();
+                    //closeSubOption();
                 });
-            }else{
-                const addFluidtype = 'taintedWater'; //임시, taintedWater, water
-                const addFluidname = translations[currentLang][addFluidtype] ?? addFluidtype;
-                makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
-                    item.condition = item.maxCondition;
-                    item.subType = addFluidtype;
-                    renderStorageModal();
-                    closeSubOption();
-                });
-            }
-           
+           }
 
         }
         if(dataset.route == storage_player.id){
@@ -338,14 +395,21 @@ function itemsubMenu(data, dataset){
             if(data.subType =="consume"){
                 if(data.name =="Zomboxivir"){
                     makeBox("사용하기").addEventListener('click', ()=>{
+                        /*
                     if(cureWound("zombie")){
-                        log(`${data.info.split("(")[0] } - 좀비화 치료`);
+                        log(`${data.info.split("(")[0] } - 좀비화 치료`, true);
                         inventory.splice(dataset.index,1);
                         renderStorageModal();
                         advanceTurn();
                     }else{
                         log(`치료할 상처가 없습니다.`);
-                    }
+                    }*/
+                    cureWound("zombie");
+                    log(`${translations[currentLang][data.name]??data.name} 아이템을 사용했습니다`, true);
+                    inventory.splice(dataset.index,1);
+                    renderStorageModal();
+                    advanceTurn();
+                    
                     closeSubOption();
                 }); 
                 }
@@ -372,15 +436,18 @@ storageModal.addEventListener("click", (e) => {
     }
 });
 function closeStorageModal(){
+    closeSubOption();
     storageModal.classList.add("hidden");
 }
 backpackIcon.addEventListener('click', openStorageModal);
 document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
 function openStorageModal(){
+    if(gameOver)return
     storageModal.classList.remove('hidden');
     renderStorageModal();
 }
 function renderStorageModal(){
+    closeSubOption();
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
     let weight ={
@@ -464,7 +531,7 @@ function itemRatioColor(value){
     return (value > 0.5 ? "bg-green-400" : value > 0.25 ? "bg-yellow-200" : "bg-red-200");
 }
 function itemColor(subType){
-    switch(subType){
+    switch(subType.split(';')[0]){
         case "water":
             return "bg-cyan-300";
 
@@ -617,7 +684,7 @@ function renderEquipment(){
         const data =equipments[key];
         if(data!=null){
             if(data.condition<=0){
-                log(`와장창!! ${translations[currentLang][data.name]}가 파괴되었습니다.`);
+                log(`와장창!! ${translations[currentLang][data.name]}가 파괴되었습니다.`, true);
                 equipments[key] =null;
             }
         }
@@ -676,6 +743,9 @@ function renderEquipment(){
     
 }
 //
+
+
+
  // 모달 요소
   const itemModal = document.getElementById('itemModal');
   //const itemModalClose = document.getElementById('itemModalClose');
@@ -699,7 +769,7 @@ function renderEquipment(){
   function showItemModal(item) {
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
     itemName.textContent = translations[currentLang][item.name] ?? item.name;
-    itemType.textContent = `${item.type ?? '-'} / ${item.subType ?? '-'}`;
+    itemType.textContent = `${item.type ?? '-'} / ${(item.subType.split(';').length>1? `${item.subType.split(';')[0]} 혼합액`: item.subType ) ?? '-'}`;
     itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"}${item.path.replace(".png","").replace("/",".")}`;
     //field_type.textContent = item.type ?? '-';
     //field_subType.textContent = item.subType ?? '-';
