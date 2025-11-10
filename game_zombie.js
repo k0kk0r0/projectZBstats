@@ -20,9 +20,13 @@ function spawnZombies(num, min=0){
         spawnZombie(i);
     }
     for(let i =0; i< zombies.length; i++){
-        zombies[i].div.style.right= `${(300+i*60)}px`;
-        zombies[i].div.classList.remove(stunClass);
-        zombieMove(i);
+        if(zombies[i].isStunning<=0){
+            zombies[i].div.style.right= `${(300+i*60)}px`;
+            zombieMove(i);
+        }
+        
+        // zombies[i].div.classList.remove(stunClass);
+        
     }
 }
 //대미지 숫자 표시
@@ -143,7 +147,7 @@ function zombieAttack( timedelay=600){
             delaying = false;
             zombieSwapping();
             TurnEnd();
-        }, timedelay+400+num*200);
+        }, timedelay+400+num*150);
         
     }
 }

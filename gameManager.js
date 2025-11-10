@@ -384,14 +384,15 @@ function findMisc(itemName ){
 function findFood(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
     const data = foodsData.find(w => w.name === itemName);
+    const xp = 24; //24시간*6턴
     if(data==null){ return null }
     let data0 ={
         path: data.path.toString(),
         name: data.name.toString(),
         type: data.type.toString(),
         subType: data.subType.toString(),
-        condition: parseInt(data.condition),
-        maxCondition: parseInt(data.condition),
+        condition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp: data.rottenDays*xp): data.condition ),
+        maxCondition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp : data.rottenDays*xp ): data.condition  ),
         weight: parseFloat(data.weight),
         freshDays: parseInt(data.freshDays*24),
         rottenDays: parseInt(data.rottenDays*24),
@@ -485,6 +486,7 @@ async function ResetAllGame(){
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
     mapNum = 1;
+    mapData[mapNum].zombieNum = 0;
     mapSetting(mapData[mapNum]);
     
     stack = {
@@ -748,6 +750,7 @@ function TurnEnd() {
     }
     
    // log_popup();//감추기
+   renderStorageTurn();//아이템부패처리
     renderGameUI();
 }
 
@@ -838,7 +841,7 @@ function renderGameUI(){
     let timeTxt = 'Day ?';
     if(equipments.accessory!=null){
         //손목시계 착용하고 있는 경우
-        if(equipments.accessory.subType== "DigitalWatch"){
+        if(equipments.accessory.subType== "watch"){
             timeTxt = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') }`;
         }
     }

@@ -1,0 +1,323 @@
+
+let mousedown = false;
+let equipBool =false;
+let equipSetTimeout;
+
+backpackIcon.addEventListener('click', openStorageModal);
+document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
+
+Object.entries(equipIcons).forEach(([key]) => {
+    const target = equipIcons[key];
+    target.icon.addEventListener('pointerdown', itemEquip_mouseDown);
+    target.icon.addEventListener('pointerup', itemEquip_mouseUp);
+});
+/////////
+
+function openStorageModal(){
+    if(gameOver)return
+    storageModal.classList.remove('hidden');
+    renderStorageModal();
+}
+function closeStorageModal(){
+    closeSubOption();
+    storageModal.classList.add("hidden");
+}
+storageModal.addEventListener("click", (e) => {
+    if (e.target === storageModal) {
+       closeStorageModal();
+    }
+});
+function renderStorageTurn(){
+    //아이템 신선도 감소
+    for(let i =0 ; i< inventory.length ; i++){
+       itemRotten(inventory[i]);
+    }
+}
+function itemRotten(item){
+    if(item.subType=="food"){
+        if(item.condition>0){
+            item.condition--;
+            if(item.condition<=0){
+                item.freshDays =null;
+                item.rottenDays = null;
+                //item.condition = null;
+                //item.maxCondition = null;
+                item.path = item.path.replace("Open","").replace("Cooked","").replace("Overdone","").replace(".png", "Rotten.png");
+                //console.log(item.path);
+            /* if(item.path.endsWith("Open.png")){
+                        
+                }else{
+                    //통조림이 아닌 다른 음식들
+                    
+                }*/
+            }
+        }
+    }
+}
+function renderStorageModal(){
+    closeSubOption();
+    storage_player.innerHTML = '';
+    storage_storage.innerHTML = '';
+    let weight ={
+       storage:0,
+       inventory:0,
+       bagWeight:playerStat().bagWeight
+    }
+    for(let i =0;i<inventory.length; i++){
+        addInventoryItem( inventory[i], storage_player, i);
+        weight.inventory += parseFloat( inventory[i].weight );
+        if(inventory[i].type=="FluidContainer"){
+            //액체의 경우, 무게 추가
+            weight.inventory += parseFloat(inventory[i].condition)/10;
+        }
+    }
+    for(let i =0;i<currentMapData.dropItems.length; i++){
+        addInventoryItem( currentMapData.dropItems[i], storage_storage, i);
+        weight.storage += parseFloat(currentMapData.dropItems[i].weight);
+        if(currentMapData.dropItems[i].type=="FluidContainer"){
+            //액체의 경우, 무게 추가
+            weight.storage += parseFloat(currentMapData.dropItems[i].condition)/10;
+        }
+    }
+    //무게 더하기
+    if(equipments.weapon!=null){ weight.inventory+= parseFloat(equipments.weapon.weight)*0.3}
+    
+    storage_weightTxt.innerText = `${weight.storage.toFixed(2)}/50`;
+    inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
+    renderEquipment();
+}
+function addInventoryItem(data , route, index){
+    //
+    const div = document.createElement('div');
+    div.id = `item_${data}`;
+    div.className = "relative w-24 h-24 lg:w-16 lg:h-16  flex bg-white rounded aspect-square";
+    div.dataset.data = JSON.stringify(data);
+    div.dataset.route = route.id;
+    div.dataset.index = index;
+
+    const namespan = document.createElement('span');
+    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b z-50";
+    namespan.innerText = translations[currentLang][data.name]??data.name;
+    div.appendChild(namespan);
+
+    // 내구도 배경 박스
+    const box = document.createElement('div');
+    box.className = "absolute inset-0 rounded-b z-0"; // 투명 배경
+    div.appendChild(box);
+
+    // 예: data.condition / data.maxCondition 으로 비율 계산
+    const ratio = Math.max(0, Math.min(1, data.condition / data.maxCondition || 0));
+    // 내구도 게이지 바
+    const durabilityBar = document.createElement('div');
+    durabilityBar.style.height = `${ratio * 100}%`;
+    durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300`;
+    if(data.type=="Weapon" || data.type =="Armor"){
+        //무기, 방어구 등인 경우...
+        durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+    }
+    if(data.type=="FluidContainer"){
+        //액체류의 경우
+
+        durabilityBar.classList.add(itemColor(data.subType));
+        
+    }
+    if(data.subType=='food'){
+        //음식의 경우
+        const freshratio =(data.rottenDays-data.freshDays)/data.rottenDays;
+        durabilityBar.classList.add(itemRatioColor(ratio, freshratio ));
+        if(data.condition<=0){
+            durabilityBar.style.height = `100%`;
+        }else{
+            //50%까지는 감소
+           durabilityBar.style.height = `${ ratio> freshratio ? ratio * 100: 100}%`;
+        }
+    }
+    //div.dataset.durabilityId = `durability_${index}`;
+   // durabilityBar.id = div.dataset.durabilityId;
+    box.appendChild(durabilityBar);
+
+    const img = document.createElement('img');
+    img.src = data.path;
+    img.className = "absolute w-full h-full object-contain p-2 z-50";
+    box.appendChild(img);
+
+    //div.addEventListener('click', itemMove);
+    div.addEventListener('pointerdown', itemMove_mouseDown);
+    div.addEventListener('pointerup', itemMove_mouseUp);
+    route.appendChild(div);
+}
+
+///장착아이템 랜더링
+function renderEquipment(){
+    Object.entries(equipIcons).forEach(([key]) => {
+        const data =equipments[key];
+        if(data!=null){
+            if(data.condition<=0){
+                log(`와장창!! ${translations[currentLang][data.name]}가 파괴되었습니다.`, true);
+                equipments[key] =null;
+            }
+        }
+    });
+    //플레이어가 들고있는 무기 랜더링
+    if(equipments.weapon!=null){
+        
+        equipWp.src = equipments.weapon.path;
+        equipWp.classList.remove("rotate-90", 'rotate-180',"-rotate-90");
+        if(equipments.weapon.rotate>0){ 
+            if(equipments.weapon.rotate<=180){
+                equipWp.classList.add('rotate-'+equipments.weapon.rotate); 
+            }else{
+                equipWp.classList.add('-rotate-'+(equipments.weapon.rotate-180)); 
+            }
+            
+        }
+        weaponImg.src = equipments.weapon.path;
+        weaponName.textContent = translations[currentLang][equipments.weapon.name]; }
+    else if(equipments.weapon == null){
+        equipWp.src = 'icons/default.png'; //들고있는 무기아이콘
+        weaponImg.src = 'icons/default.png';
+        weaponName.textContent ='';
+
+    }
+    const string ={
+        weapon:'⚔무기',
+        hat:'🎩모자',
+        armor:'👚방어구',
+        pants:'👖바지',
+        shoes:'👟신발',
+        accessory: `💍장신구`
+    }
+    Object.entries(equipIcons).forEach(([key]) => {
+        const data =equipments[key];
+        const target = equipIcons[key];
+        if(data!=null){
+            const ratio = data.condition/data.maxCondition;
+            target.icon.src = data.path;
+            target.nameTxt.innerText = translations[currentLang][data.name]??data.name;
+            target.conditionBar.style.height =`${(ratio*100)}%`;
+            target.conditionBar.classList.remove("bg-green-300", "bg-yellow-200", "bg-red-200");
+            if(data.type=="FluidContainer"){
+                target.conditionBar.classList.add(itemColor(data.subType));
+            }
+            else if(data.type =="Weapon"){
+                target.conditionBar.classList.add(itemRatioColor(ratio));
+            }else if(data.type ="Accessory"){
+                //색 없음
+                //target.conditionBar.classList.add("bg-white-600");
+            }
+            
+        }else{
+            //장비가 안 된 경우 초기화
+            target.icon.src = 'icons/default.png';
+            target.nameTxt.innerText = string[key];
+            target.conditionBar.style.height = '0%';
+        }
+    });
+    
+}
+//
+function itemMove(data, dataset){
+     if(dataset.route == storage_player.id){
+        //가방으로 이동
+        currentMapData.dropItems.push( data);
+        inventory.splice(dataset.index,1);
+        renderStorageModal();
+    }
+    else if(dataset.route == storage_storage.id ){
+        //인벤으로 이동
+        inventory.push( data);
+        currentMapData.dropItems.splice(dataset.index,1);
+        renderStorageModal();
+    }
+}
+//////////////////아이템 정보 표시 및 서브메뉴 액션
+function itemMove_mouseDown(e){
+    if(mousedown==false){
+        mousedown =true;
+         const dataset = e.currentTarget.dataset;
+        const data = JSON.parse( dataset.data);
+        equipBool=false;
+        //if(dataset.route == storage_player.id){
+            equipSetTimeout = setTimeout(() => {
+
+                equipBool = true;
+                equipSetTimeout = null;
+                
+                //setEquipment(data,dataset);
+                itemsubMenu(data, dataset);
+            }, 250); // 0.25초 누르면 장비
+        //}
+    }    
+}
+function itemMove_mouseUp(e){
+    if(mousedown){
+        mousedown=false;
+        clearInterval(equipSetTimeout);
+        const dataset = e.currentTarget.dataset;
+        const data = JSON.parse( dataset.data);
+        if(equipBool ){
+            //200ms 이상 장기 터치일 때 
+            equipBool=false;
+            return;
+        }else{
+            //짧은 터치
+           itemMove(data, dataset);
+        }
+        equipBool=false;
+    }else{
+        return;
+    }
+}
+//////////////////장비창 정보 표시
+function itemEquip_mouseDown(e){
+    const id = e.currentTarget.id;
+    let data = null;
+    if(id == equipIcons.weapon.icon.id){
+        data = equipments.weapon;
+    }
+
+    if(mousedown==false){
+        mousedown =true;
+        equipBool=false;
+        //if(dataset.route == storage_player.id){
+            equipSetTimeout = setTimeout(() => {
+
+                equipBool = true;
+                equipSetTimeout = null;
+                
+                //setEquipment(data,dataset);
+                itemsubMenu(data, null);
+            }, 250); // 0.25초 누르면 장비
+        //}
+    }    
+}
+function itemEquip_mouseUp(e){
+    const id = e.currentTarget.id;
+    if(mousedown){
+        mousedown=false;
+        clearInterval(equipSetTimeout);
+        if(equipBool ){
+            //200ms 이상 장기 터치일 때 
+            equipBool=false;
+            return;
+        }else{
+            //짧은 터치, 장비해제
+             Object.entries(equipIcons).forEach(([key]) => {
+                const data =equipments[key];
+                const target = equipIcons[key];
+                if(data!=null){
+                   if(id == target.icon.id ){
+                        inventory.push( data );
+                        equipments[key] = null;
+                   }
+                }else{
+                    
+                }
+            });
+            renderStorageModal();
+        }
+        equipBool=false;
+    }else{
+        return;
+    }
+}
