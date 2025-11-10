@@ -208,7 +208,7 @@ const storage_storage = document.getElementById("storage_storage");
 const storage_weightTxt = document.getElementById("storage_weightTxt");
 const inventory_weightTxt = document.getElementById("inventory_weightTxt");
 
-const equipNames = ["weapon", "hat", "armor", "pants", "shoes"];
+const equipNames = ["weapon", "hat", "armor", "pants", "shoes", "accessory"];
 const equipIcons = {};
 equipNames.forEach(name => {
   equipIcons[name] = {
@@ -293,7 +293,7 @@ function itemsubMenu(data, dataset){
 
     if(dataset!=null){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
-        if(data.type =='Weapon'){
+        if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox("장착하기").addEventListener('click', ()=>{
                 setEquipment(data, dataset);
                 closeSubOption();
@@ -392,7 +392,21 @@ function itemsubMenu(data, dataset){
                     closeSubOption();
                 }); 
             }
+            if(data.subType == "canned"){
+                //캔 따기
+                makeBox("캔 따기").addEventListener('click', ()=>{
+                    //playerHealing(dataset.index);
+                    const opendItem = findItem(`${data.name}Open`);
+                    inventory.push(opendItem);
+                    inventory.splice( dataset.index,1);
+                    closeSubOption();
+                    advanceTurn();
+                    renderStorageModal();
+                }); 
+            }
             if(data.subType =="consume"){
+                
+
                 if(data.name =="Zomboxivir"){
                     makeBox("사용하기").addEventListener('click', ()=>{
                         /*
@@ -411,7 +425,7 @@ function itemsubMenu(data, dataset){
                     advanceTurn();
                     
                     closeSubOption();
-                }); 
+                    }); 
                 }
                 
             }
@@ -600,21 +614,24 @@ function itemMove(data, dataset){
     }
 }
 function setEquipment(data, dataset){
-    if(data.type =='Weapon'){
-        //무기인 경우
-        if(equipments.weapon!=null){
-            inventory.push(equipments.weapon);
-            equipments.weapon = null;
+    for(let i =0 ;i < equipNames.length ;i++){
+        const key = equipNames[i];
+        if(data.type.toLowerCase() === key){
+            //타입이 같은 경우
+            if(equipments[key]!=null){
+                inventory.push(equipments[key]);
+                equipments[key]= null;
 
-        }
-        if(equipments.weapon==null){
-            equipments.weapon = data;
-            if(dataset.route == storage_player.id ){
-                inventory.splice(dataset.index,1);
-            }else if(dataset.route == storage_storage.id ){
-                currentMapData.dropItems.splice(dataset.index,1);
             }
-            
+            if(equipments[key]==null){
+                equipments[key] = data;
+                if(dataset.route == storage_player.id ){
+                    inventory.splice(dataset.index,1);
+                }else if(dataset.route == storage_storage.id ){
+                    currentMapData.dropItems.splice(dataset.index,1);
+                }
+                break;
+            }
         }
     }
     renderStorageModal();
@@ -715,7 +732,8 @@ function renderEquipment(){
         hat:'🎩모자',
         armor:'👚방어구',
         pants:'👖바지',
-        shoes:'👟신발'
+        shoes:'👟신발',
+        accessory: `💍장신구`
     }
     Object.entries(equipIcons).forEach(([key]) => {
         const data =equipments[key];
@@ -731,6 +749,9 @@ function renderEquipment(){
             }
             else if(data.type =="Weapon"){
                 target.conditionBar.classList.add(itemRatioColor(ratio));
+            }else if(data.type ="Accessory"){
+                //색 없음
+                //target.conditionBar.classList.add("bg-white-600");
             }
             
         }else{
@@ -756,10 +777,8 @@ function renderEquipment(){
   const itemName = document.getElementById('itemName');
   const itemType = document.getElementById('itemType');
   const itemLink = document.getElementById('itemLink');
-  const field_multiHit = document.getElementById('field-multiHit');
-  const field_stamina = document.getElementById('field-stamina');
-  const field_damage = document.getElementById('field-damage');
-  const field_weight = document.getElementById('field-weight');
+
+  const itemModalSubmenu = document.getElementById("itemModalSubmenu");
   const field_info = document.getElementById("field_info");
   const field_condition = document.getElementById('field-condition');
   const field_conditionText = document.getElementById('field-conditionText');
@@ -770,14 +789,34 @@ function renderEquipment(){
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
     itemName.textContent = translations[currentLang][item.name] ?? item.name;
     itemType.textContent = `${item.type ?? '-'} / ${(item.subType.split(';').length>1? `${item.subType.split(';')[0]} 혼합액`: item.subType ) ?? '-'}`;
-    itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"}${item.path.replace(".png","").replace("/",".")}`;
+    
+    itemLink.textContent = `${item.path.startsWith("Base")? "":"[Mod]"}${item.path.replace(".png","").replace("Miscs/","").replace("Foods/","").replace("/",".")}`;
     //field_type.textContent = item.type ?? '-';
     //field_subType.textContent = item.subType ?? '-';
-    field_multiHit.textContent = (item.multiHit ?? '-') + '';
-    field_stamina.textContent = (item.stamina ?? '-') + '';
-    field_damage.textContent = (item.damage ?? '-') + '';
-    field_weight.textContent = (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '';
-    
+    itemModalSubmenu.innerHTML = '';
+    function makeDiv(fieldName, value){
+        if(value ==null){return}
+        const div1 = document.createElement("div");
+        div1.className = "text-gray-600 text-xl";
+        div1.innerText = fieldName;
+        itemModalSubmenu.appendChild(div1);
+
+        const div2 = document.createElement("div");
+        div2.className = "font-medium text-xl";
+        div2.innerText = value;
+        itemModalSubmenu.appendChild(div2);
+
+        //col-3 일 경우
+        //const div3 = document.createElement("div");
+        //itemModalSubmenu.appendChild(div3);
+    }
+    makeDiv('MultiHit', item.multiHit);
+    makeDiv('Stamina', item.stamina);
+    makeDiv('Damage', item.damage);
+    makeDiv('FreshDays', item.freshDays? (item.freshDays<0? "보존식품" : `${(item.freshDays/24)}일`) : null);
+    makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
+    makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '' );
+
     const info = item.info!=null? item.info.replace(";",`\n`): "";
     field_info.textContent = (info ?? ''); //아이템 설명
 

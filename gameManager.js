@@ -149,6 +149,7 @@ const bg = document.getElementById('mainBg');
 let weaponDatas = []; //무기리스트
 let mapDatas = [];//맵리스트
 let miscs = [];//기타 아이템 리스트
+let foods = [];
 
 //게임 상태 변수
 //턴 진행 함수
@@ -183,7 +184,8 @@ const equipments = {
   hat: null,
   armor: null,
   pants: null,
-  shoes: null
+  shoes: null,
+  accessory: null
 };
 let backpack;
 let inventory ;
@@ -302,6 +304,18 @@ function loadMiscs() {
     });
   });
 }
+//음식 아이템 호출
+function loadFoods() {
+  return new Promise((resolve) => {
+    Papa.parse("foods.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        resolve(results.data);
+      }
+    });
+  });
+}
 //맵 데이터 호출
 function loadMapDatas(){
     return new Promise((resolve) => {
@@ -318,14 +332,18 @@ async function init() {
   weaponDatas = await loadWeapons();
   mapDatas = await loadMapDatas();
   miscsData = await loadMiscs();
+  foodsData = await loadFoods();
 }
 init();
 function findItem(itemName){
     let item = findWeapon(itemName);
     if(item!=null){ return item }
+    
     item = findMisc(itemName);
     if(item!=null){ return item }
-    //방어구, 잡템 등등 추가
+    
+    item = findFood(itemName);
+    if(item!=null){ return item}
 }
 function findWeapon(itemName ){
     //무기데이터 검색 및 가공해서 반환
@@ -363,6 +381,26 @@ function findMisc(itemName ){
     }
     return data0;
 }
+function findFood(itemName ){
+    //음식 아이템 데이터 검색 및 가공해서 반환
+    const data = foodsData.find(w => w.name === itemName);
+    if(data==null){ return null }
+    let data0 ={
+        path: data.path.toString(),
+        name: data.name.toString(),
+        type: data.type.toString(),
+        subType: data.subType.toString(),
+        condition: parseInt(data.condition),
+        maxCondition: parseInt(data.condition),
+        weight: parseFloat(data.weight),
+        freshDays: parseInt(data.freshDays*24),
+        rottenDays: parseInt(data.rottenDays*24),
+        cookTime: parseInt( data.cookTime ),
+        info: data.info.toString()
+    }
+    return data0;
+}
+
 function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
@@ -430,7 +468,9 @@ async function ResetAllGame(){
     equipments.hat =null;
     equipments.pants = null;
     equipments.shoes = null;
-    backpack = {name:"backpack", path:"backpacks/SheetSlingBag.png"};
+    equipments.accessory = findItem("DigitalWatch");
+    //console.log(equipments.accessory);
+    backpack = {name:"backpack", path:"Base/Backpacks/SheetSlingBag.png"};
     inventory = [];
     wound = [];
     health = 100;
@@ -795,7 +835,15 @@ function renderGameUI(){
          //log_popup('턴 넘기는 중...',800);
     }
     //타이머 표시
-    timerTxt.textContent = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') } ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
+    let timeTxt = 'Day ?';
+    if(equipments.accessory!=null){
+        //손목시계 착용하고 있는 경우
+        if(equipments.accessory.subType== "DigitalWatch"){
+            timeTxt = `Day ${day}, ${hour}:${min.toString().padStart(2, '0') }`;
+        }
+    }
+    
+    timerTxt.textContent = `${timeTxt} ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
     //맵이름
     mapNameTxt.textContent = `${translations[currentLang].WestPoint} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
     

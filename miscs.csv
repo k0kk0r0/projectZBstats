@@ -1,9 +1,12 @@
 type,subType,path,name,weight,condition,info
 FirstAid,consume,TheyKnew/Zomboxivir.png,Zomboxivir,0.1,1,후....이번만은 봐드리는 겁니다...(사용 시 좀비 감염 제거)
-Misc,misc,Base/ToiletPaper.png,ToiletPaper,0.1,1,
-FirstAid,bandage,Base/Bandage.png,Bandage,0.1,1,
-FirstAid,bandage,Base/Bandaid.png,Bandaid,0.1,1,
-FirstAid,bandage,Base/Rag.png,Rag,0.1,1,
-FluidContainer,bleach,Base/Bleach.png,Bleach,0.1,10,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
-FluidContainer,water,Base/WaterBottle.png,WaterBottle,0.1,10,
-FluidContainer,water,Base/PopBottle.png,PopBottle,0.1,20,
+Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,
+FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,
+FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,
+FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,
+FluidContainer,bleach,Base/Miscs/Bleach.png,Bleach,0.1,10,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
+FluidContainer,water,Base/Miscs/WaterBottle.png,WaterBottle,0.1,10,
+FluidContainer,water,Base/Miscs/PopBottle.png,PopBottle,0.1,20,
+Accessory,DigitalWatch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,
+Accessory,DigitalWatch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,
+Accessory,DigitalWatch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,
