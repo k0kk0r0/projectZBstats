@@ -409,3 +409,22 @@ function playerDrink( fluidType , item ){
     }
    
 }
+//먹기
+function playerEatFood(item, div=1){
+    if(item==null){
+        return
+    }
+    //배고픔 해결
+    item.div -= div;
+    item.weight = Math.round((item.weight-item.weightDiv*div)*100)/100;
+    log(`${translations[currentLang][item.name]} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );
+    if(item.div<=0){
+        for(let i =0 ;i<inventory.length ; i++){
+            if(inventory[i] == item){
+                inventory[i] = findItem( item.convert );
+                break;
+            }
+        }
+    }
+
+}

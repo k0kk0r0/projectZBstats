@@ -141,6 +141,27 @@ function itemsubMenu(data, dataset){
                     renderStorageModal();
                 }); 
             }
+            if(data.subType == "food"){
+                //먹기
+                //const item = inventory[dataset.index];
+                if(item.div>0){
+                    makeBox("1/4 먹기").addEventListener('click', ()=>{
+                        playerEatFood(item, 1);
+                        closeSubOption();
+                        advanceTurn();
+                        renderStorageModal();
+                    }); 
+                    if(item.div>=2){
+                        makeBox("1/2 먹기").addEventListener('click', ()=>{
+                            playerEatFood(item, 2);
+                            closeSubOption();
+                            advanceTurn();
+                            renderStorageModal();
+                        }); 
+                    }
+                }
+                
+            }
             if(data.subType =="consume"){
                 
 

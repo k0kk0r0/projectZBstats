@@ -54,6 +54,7 @@ function itemRotten(item){
         }
     }
 }
+
 function renderStorageModal(){
     closeSubOption();
     storage_player.innerHTML = '';
@@ -96,7 +97,7 @@ function addInventoryItem(data , route, index){
     div.dataset.index = index;
 
     const namespan = document.createElement('span');
-    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b z-50";
+    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/50 text-center rounded-b z-50";
     namespan.innerText = translations[currentLang][data.name]??data.name;
     div.appendChild(namespan);
 
@@ -109,28 +110,32 @@ function addInventoryItem(data , route, index){
     const ratio = Math.max(0, Math.min(1, data.condition / data.maxCondition || 0));
     // 내구도 게이지 바
     const durabilityBar = document.createElement('div');
-    durabilityBar.style.height = `${ratio * 100}%`;
+    
     durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300`;
     if(data.type=="Weapon" || data.type =="Armor"){
         //무기, 방어구 등인 경우...
         durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+        durabilityBar.style.height = `${ratio * 100}%`;
     }
     if(data.type=="FluidContainer"){
         //액체류의 경우
-
-        durabilityBar.classList.add(itemColor(data.subType));
         
+        durabilityBar.classList.add(itemColor(data.subType));
+        durabilityBar.style.height = `${ratio * 100}%`;
     }
     if(data.subType=='food'){
         //음식의 경우
         const freshratio =(data.rottenDays-data.freshDays)/data.rottenDays;
         durabilityBar.classList.add(itemRatioColor(ratio, freshratio ));
+        durabilityBar.style.height=`${data.div/data.maxDiv*100}%`;
+        /*
         if(data.condition<=0){
             durabilityBar.style.height = `100%`;
         }else{
             //50%까지는 감소
            durabilityBar.style.height = `${ ratio> freshratio ? ratio * 100: 100}%`;
         }
+           */
     }
     //div.dataset.durabilityId = `durability_${index}`;
    // durabilityBar.id = div.dataset.durabilityId;

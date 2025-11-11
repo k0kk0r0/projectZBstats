@@ -1,3 +1,4 @@
-type,subType,path,name,weight,freshDays,rottenDays,cookTime,info
-Food,canned,Base/Foods/CannedCornedBeef.png,CannedCornedBeef,0.8,-1,,,
-Food,food,Base/Foods/CannedCornedBeefOpen.png,CannedCornedBeefOpen,0.8,2,4,10,
+type,subType,path,name,weight,freshDays,rottenDays,cookTime,hunger,convert,info
+Food,canned,Base/Foods/CannedCornedBeef.png,CannedCornedBeef,0.8,-1,,,24,CannedCornedBeefOpen,
+Food,food,Base/Foods/CannedCornedBeefOpen.png,CannedCornedBeefOpen,0.8,2,4,10,24,TinCanEmpty,
+Food,food,Base/Foods/Ham.png,Ham,1,5,10,20,60,,

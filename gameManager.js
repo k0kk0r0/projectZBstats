@@ -397,6 +397,11 @@ function findFood(itemName ){
         freshDays: parseInt(data.freshDays*24),
         rottenDays: parseInt(data.rottenDays*24),
         cookTime: parseInt( data.cookTime ),
+        hunger: parseInt(data.hunger),
+        convert: data.convert.toString(),
+        div:4,
+        maxDiv:4,
+        weightDiv: parseFloat(data.weight/4),
         info: data.info.toString()
     }
     return data0;
