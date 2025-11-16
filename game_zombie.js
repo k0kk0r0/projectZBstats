@@ -1,18 +1,40 @@
 //좀비생성함수
-function spawnZombie(num){
+const zombieNames = ["TheyKnew","pants","policeman","farmer"];
+function spawnZombie(num, _tag='random'){
     const id= Math.floor(Math.random()*100000);
     const div = document.createElement('div');
     div.id=`zombie_${id}`;
-    div.className = "absolute bottom-4 right-0 w-16 h-32 z-20 transition-all duration-100";
+    div.className = "absolute bottom-4 right-0 w-24 h-32 z-20 transition-all duration-100";
+    
+    let zombieTag ='pants';
+    const zombieInven = [];
+    if(_tag=='random'){
+        const rng = Math.random();
+        if(rng < 0.1){
+            zombieTag = "TheyKnew";
+            zombieInven.push( "Zomboxivir-0.3");
+        }
+        else if(rng <0.3){
+            zombieTag = "policeman";
+            zombieInven.push("NightStick-0.2-");
 
+        }else if(rng<0.5){
+            zombieTag = "farmer";
+            zombieInven.push("Shovel-0.2-");
+        }else{
+            zombieTag = "pants";
+            zombieInven.push("Rag-0.7");
+            zombieInven.push("WaterBottle-0.1-");
+        }
+    }
     const img = document.createElement('img');
-    img.src = "images/zb.png";
+    img.src = `images/zb_${ zombieTag}.png`;
     img.className = "absolute w-full h-full";
     //img.id = `zombieImg_${id}`;
     div.appendChild(img);
 
     Scene.appendChild(div);
-    zombies.push( {div:div, img:img, hp: randomInt(50,20), isAnimating: false ,isStunning:0}) ;
+    zombies.push( {div:div, tag:zombieTag, inventory:zombieInven, img:img, hp: randomInt(50,20), isAnimating: false ,isStunning:0}) ;
 }
 function spawnZombies(num, min=0){
     const rng =num;
@@ -70,13 +92,17 @@ function renderZombie(){
         if(zombies[i].hp <=0){
             //체력 감소 시 좀비 숨김, 좀비 사망
             const div = zombies[i].div;
+            const zombieInven = zombies[i].inventory;
             zombies[i].img.classList.add(stunClass, "top-7");
             setTimeout(() => {
                 if(gameOver) return;
+                zombieDropItem(zombieInven);
                 Scene.removeChild(div);
                 
-                zombieDropItem();
+                
             },  1200);
+
+            
             zombieKillCount++;
             zombies.splice(i,1);
             i--;
@@ -233,9 +259,20 @@ function zombieIsDamaged(index, value){
     }
 }
 //좀비 아이템드롭
-function zombieDropItem(){
-    const rng = Math.random();
-    if(rng<0.11){
-        currentMapData.dropItems.push( findItem("Zomboxivir"));
+function zombieDropItem( zombieInven){
+    //아이템드롭
+    if(zombieInven.length>0){
+        for(let i =0 ;i < zombieInven.length;i++){
+            const dropitem = zombieInven[i].split('-');
+            if(Math.random() < parseFloat(dropitem[1])){
+                let item = findItem(dropitem[0]);
+                if(dropitem[2]!=null){
+                    item.condition = randomInt(1,item.maxCondition);
+                }   
+                currentMapData.dropItems.push(item );
+            }
+            
+        }
+        renderStorageModal();
     }
 }

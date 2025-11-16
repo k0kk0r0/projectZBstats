@@ -344,6 +344,8 @@ function findItem(itemName){
     
     item = findFood(itemName);
     if(item!=null){ return item}
+
+    return null;
 }
 function findWeapon(itemName ){
     //무기데이터 검색 및 가공해서 반환

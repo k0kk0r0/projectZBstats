@@ -1,5 +1,5 @@
 name,outdoor,zombieNum,src,thisFacilities,dropItems,FarmZone,LivestockZone
-house,false,2,images/bg0_dark.png,radio_on;bed;faucet;fridge_on;micro_off,CannedCornedBeef-0.8;Bleach-0.7;WaterBottle-0.7;PopBottle-0.3;ToiletPaper-0.8;Pushbroom-0.4;RollingPin-0.4;BaseballBat-0.1;Bat_Metal-0.1;BrokenBottle-0.4;Cleaver-0.4;Fork-0.8;Pan-0.7;Plunger-0.4;Rag-0.6;Bandaid-0.3;Bandage-0.2,,
+house,false,2,images/bg0_dark.png,radio_on;bed;faucet;fridge_on;micro_off,Ham-0.8;CannedCornedBeef-0.8;Bleach-0.7;WaterBottle-0.7;PopBottle-0.3;ToiletPaper-0.8;Pushbroom-0.4;RollingPin-0.4;BaseballBat-0.1;Bat_Metal-0.1;BrokenBottle-0.4;Cleaver-0.4;Fork-0.8;Pan-0.7;Plunger-0.4;Rag-0.6;Bandaid-0.3;Bandage-0.2,,
 road,true,3,images/bg1_dark.png,,,,
 store,false,3,images/bgstore_dark.png,faucet;fridge_on,,,
 store_tool,false,3,images/bgstore_light.png,faucet;fridge_on,WaterBottle-0.7;PopBottle-0.6;Sledgehamer-0.1;Hammer-0.2;Shovel-0.2;Crowbar-0.1;Axe-0.2;WoodAxe-0.2,,

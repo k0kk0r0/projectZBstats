@@ -89,6 +89,9 @@ function renderStorageModal(){
 }
 function addInventoryItem(data , route, index){
     //
+    if(data ==null){
+        return;
+    }
     const div = document.createElement('div');
     div.id = `item_${data}`;
     div.className = "relative w-24 h-24 lg:w-16 lg:h-16  flex bg-white rounded aspect-square";
