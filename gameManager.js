@@ -440,13 +440,15 @@ function findMapData(itemName){
     let data0 ={
         name: data.name,
         outdoor: JSON.parse(data.outdoor),
-        zombieNum: parseInt( data.zombieNum),
         zombies:[],
         src: data.src,
         thisFacilities: data.thisFacilities.split(";"),
         storages:[{name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray}]
     }
     data0.thisFacilities.push('storage','livestock');//항상 추가
+    for(let i =0; i< parseInt( data.zombieNum) ;i++){
+        data0.zombies.push( spawnZombie( 'random') );
+    }
     return data0
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -460,12 +462,7 @@ async function ResetAllGame(){
     log_popup();//감추기
     powerEndTurn = randomInt(0,14*6);
     waterEndTurn = randomInt(0,14*6);
-    if(zombies.length>0){
-        clearZombies();
-    }
-    zombies = [];
-
-    
+   
     
     gameOver=false;
     isResting = false;
@@ -491,6 +488,7 @@ async function ResetAllGame(){
     //맵 이동 함수
     currentMapData=null;
     
+    zombies=[];
     mapData = [];
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
@@ -533,23 +531,20 @@ function mapSetting(data) {
     currentMapData = data;
     clearInterval(interval );
     interval = null;
-
-    clearZombies();
-    let zombieNum = parseInt(currentMapData.zombieNum);
     let txt='';
     if(playerHasTrait("conspicuous")){
         //넘치는존재감
         txt = "<넘치는 존재감>으로";
-        zombieNum++;
         log(`${txt} 좀비가 더 이끌려 왔습니다`)
     }
     if(playerHasTrait("inconspicuous")){
         //부족한존재감
         txt = "<부족한 존재감>으로";
-        zombieNum--;
         log(`${txt} 좀비가 덜 이끌려 왔습니다`)
     }
-    spawnZombies(zombieNum); //좀비소환
+    
+    clearZombies();
+    spawnZombies(); //좀비소환
     bgLightDark( currentMapData );
 
     //맵 아이템
@@ -900,6 +895,7 @@ function checkGameOver(){
         gameOver =true;
         delaying= true;
         //게임오버
+        clearInterval(interval );
         renderPlayer();
         renderMoodles();
         const _hour = hour-7;

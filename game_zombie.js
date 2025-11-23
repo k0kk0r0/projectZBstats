@@ -1,12 +1,7 @@
 //좀비생성함수
 const zombieNames = ["TheyKnew","pants","policeman","farmer"];
-function spawnZombie(num, _tag='random'){
-    const id= Math.floor(Math.random()*100000);
-    const div = document.createElement('div');
-    div.id=`zombie_${id}`;
-    div.className = "absolute bottom-4 right-0 w-24 h-32 z-20 transition-all duration-100";
-    
-    let zombieTag ='pants';
+function spawnZombie(_tag='random'){
+    let zombieTag = '';
     const zombieInven = [];
     if(_tag=='random'){
         const rng = Math.random();
@@ -26,21 +21,40 @@ function spawnZombie(num, _tag='random'){
             zombieInven.push("Rag-0.7");
             zombieInven.push("WaterBottle-0.1-");
         }
+    }else{
+        zombieTag = _tag;
     }
+    return zombie = {tag:zombieTag, inventory:zombieInven};
+}
+
+
+function renderZombieDiv(zombie){
+    const id= Math.floor(Math.random()*100000);
+    const div = document.createElement('div');
+    div.id=`zombie_${id}`;
+    div.className = "absolute bottom-4 right-0 w-24 h-32 z-20 transition-all duration-100 zombieDiv";
     const img = document.createElement('img');
-    img.src = `images/zb_${ zombieTag}.png`;
+    img.src = `images/zb_${ zombie.tag}.png`;
     img.className = "absolute w-full h-full";
     //img.id = `zombieImg_${id}`;
+    
+    
     div.appendChild(img);
-
     Scene.appendChild(div);
-    zombies.push( {div:div, tag:zombieTag, inventory:zombieInven, img:img, hp: randomInt(50,20), isAnimating: false ,isStunning:0}) ;
+    zombie.div = div;
+    zombie.img = img;
+    zombie.id = id;
+    zombie.hp = 50;
+    zombie.isAnimating = false;
+    zombie.isStunning = 0;
+
+    zombies.push( zombie);
 }
-function spawnZombies(num, min=0){
-    const rng =num;
-    for(let i =0 ; i <rng+min; i++){
-        spawnZombie(i);
+function spawnZombies(){
+    for(let i =0; i< currentMapData.zombies.length; i++){
+        renderZombieDiv(currentMapData.zombies[i]);
     }
+    zombies = currentMapData.zombies;
     for(let i =0; i< zombies.length; i++){
         if(zombies[i].isStunning<=0){
             zombies[i].div.style.right= `${(300+i*60)}px`;
@@ -104,6 +118,7 @@ function renderZombie(){
 
             
             zombieKillCount++;
+            //currentMapData.zombies.splice(i,1);
             zombies.splice(i,1);
             i--;
             
@@ -135,18 +150,18 @@ function callZombies(num, addPer=0){
         closeStorageModal();
         
         log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
-        spawnZombie(num,1);
+        currentMapData.zombies.push( spawnZombie() );
+        spawnZombies();
         stopResting();
         stack.zombieSpawn = 0;
     }
 }
 function clearZombies(){
     
-    for(let i = 0; i<zombies.length;i++){
-        //mapData.zombies.push( zombies[i]);
-        Scene.removeChild(zombies[i].div);
-    }
-    zombies = [];
+    Scene.querySelectorAll(`.zombieDiv`).forEach( (element) => {
+        Scene.removeChild(element);
+    } );
+    zombies=[];
 }
 function zombieAttack( timedelay=600){
     if(zombies.length>0){
