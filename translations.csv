@@ -93,6 +93,13 @@ taintedWaterInfo,오염된 물을 마시면 병들 수 있습니다,Drinking tai
 CannedCornedBeef,콘비프 통조림,Canned Corned Beef
 remainZombie,남은 좀비,Zombies
 WestPoint,웨스트포인트,West Point
+Louisville,루이빌,Louisville
+nextMap,다음 지역,Next Area
+prevMap,이전 지역,Previous Area
+corpse,시체,Corpse
+storage,보관함,Storage
+ground,바닥,Ground
+farm,농장,Farm
 house,가정집,House
 road,길거리,Road
 store_tool,도구상점,Tool store

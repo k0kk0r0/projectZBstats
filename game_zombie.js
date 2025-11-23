@@ -261,6 +261,8 @@ function zombieIsDamaged(index, value){
 //좀비 아이템드롭
 function zombieDropItem( zombieInven){
     //아이템드롭
+    
+    let dropItem = [];
     if(zombieInven.length>0){
         for(let i =0 ;i < zombieInven.length;i++){
             const dropitem = zombieInven[i].split('-');
@@ -269,10 +271,11 @@ function zombieDropItem( zombieInven){
                 if(dropitem[2]!=null){
                     item.condition = randomInt(1,item.maxCondition);
                 }   
-                currentMapData.dropItems.push(item );
+               dropItem.push(item );
             }
-            
         }
-        renderStorageModal();
+       
     }
+    addStorageList('corpse', dropItem, 50);
+    renderStorageModal();
 }

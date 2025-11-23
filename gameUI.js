@@ -261,7 +261,7 @@ function findInventoryItem(route, index){
             item = inventory[index];
         }
         if(route == storage_storage.id){
-            item = currentMapData.dropItems[index];
+            item = storage[storageIndex].inventory[index];
         }
     }
     return item;
@@ -300,7 +300,7 @@ function setEquipment(data, dataset){
                 if(dataset.route == storage_player.id ){
                     inventory.splice(dataset.index,1);
                 }else if(dataset.route == storage_storage.id ){
-                    currentMapData.dropItems.splice(dataset.index,1);
+                    storage[storageIndex].inventory.splice(dataset.index,1);
                 }
                 break;
             }

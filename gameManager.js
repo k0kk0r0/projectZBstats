@@ -189,6 +189,7 @@ const equipments = {
 };
 let backpack;
 let inventory ;
+let storage;
 let stamina;
 let health;
 let wound = [];//상처 배열
@@ -386,7 +387,7 @@ function findMisc(itemName ){
 function findFood(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
     const data = foodsData.find(w => w.name === itemName);
-    const xp = 24; //24시간*6턴
+    const xp = 24*6; //24시간*6턴
     if(data==null){ return null }
     let data0 ={
         path: data.path.toString(),
@@ -443,7 +444,7 @@ function findMapData(itemName){
         zombies:[],
         src: data.src,
         thisFacilities: data.thisFacilities.split(";"),
-        dropItems:dropItemsArray
+        storages:[{name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray}]
     }
     data0.thisFacilities.push('storage','livestock');//항상 추가
     return data0
@@ -479,6 +480,7 @@ async function ResetAllGame(){
     equipments.accessory = findItem("DigitalWatch");
     //console.log(equipments.accessory);
     backpack = {name:"backpack", path:"Base/Backpacks/SheetSlingBag.png"};
+    storage = [];
     inventory = [];
     wound = [];
     health = 100;
@@ -550,12 +552,11 @@ function mapSetting(data) {
     spawnZombies(zombieNum); //좀비소환
     bgLightDark( currentMapData );
 
-
-    //맵 보관함 아이템 출력(임시)
-   // if(currentMapData.dropItems.length>0){
-        //console.log(currentMapData.dropItems);
-    //}
-   renderGameUI();
+    //맵 아이템
+    storageIndex=0;
+    storage = currentMapData.storages;
+    renderStorageModal();
+    renderGameUI();
 }
 //날씨변경
 function changeweather(){
@@ -758,7 +759,7 @@ function TurnEnd() {
     
    // log_popup();//감추기
    renderStorageTurn();//아이템부패처리
-    renderGameUI();
+   renderGameUI();
 }
 
 function findMoodle(_moodleName){
@@ -855,7 +856,7 @@ function renderGameUI(){
     
     timerTxt.textContent = `${timeTxt} ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
     //맵이름
-    mapNameTxt.textContent = `${translations[currentLang].WestPoint} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
+    mapNameTxt.textContent = `${translations[currentLang].Louisville} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
     
     if(mapNum-1> -1 ){
          prevMapTxt.innerText = translations[currentLang][mapData[mapNum-1].name];
@@ -868,7 +869,7 @@ function renderGameUI(){
         nextMapBt.classList.remove('hidden');
     }else{
         if(mapNum+1 == mapData.length){
-            nextMapTxt.innerText = '다음 지역으로';
+            nextMapTxt.innerText = translations[currentLang].nextMap;
             nextMapBt.classList.remove('hidden');
         }else{
             nextMapBt.classList.add('hidden');

@@ -2,6 +2,41 @@
 let mousedown = false;
 let equipBool =false;
 let equipSetTimeout;
+let storageIndex =0; //현재 열려있는 보관함 인덱스
+
+const storageTag = document.getElementById('storageTag');
+function addStorageTag(name, index, turn=-1){
+    //<button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
+    //<button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
+    let icon ='';
+    switch(name){
+        case 'ground':
+            icon ='🌐';
+            break;
+        case 'storage':
+            icon ='📦';
+            break;
+        case 'corpse':
+            icon ='⚰';
+            break;
+        default:
+            icon ='📦';
+    }
+    const btn = document.createElement('button');
+    btn.className = "text-xl font-bold p-2 border rounded bg-blue-400 storageBtn";
+    btn.innerText = `${icon}${translations[currentLang][name]??name}${turn>0? "("+turn+")":``}`;
+    btn.dataset.index = index;
+    btn.addEventListener('click', ()=>{
+        storageIndex = btn.dataset.index;
+        renderStorageModal();
+    });
+    storageTag.appendChild(btn);
+}
+
+function addStorageList(name, items, turnLimit=-1){
+    storage.push( {name:name, inventory:items, turn:turnLimit} );
+    renderStorageModal();
+}
 
 backpackIcon.addEventListener('click', openStorageModal);
 document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
@@ -32,6 +67,23 @@ function renderStorageTurn(){
     for(let i =0 ; i< inventory.length ; i++){
        itemRotten(inventory[i]);
     }
+    //시체 보관함 턴 감소
+    for(let j =0; j< mapData.length; j++){
+        const storage = mapData[j].storages;
+        for(let i = 0; i< storage.length; i++){
+            if(storage[i].turn>0){
+                storage[i].turn--;
+                if(storage[i].turn<=0){
+                    //시체 사라짐
+                    //log(`${translations[currentLang][storage[i].name]}의 보관 기간이 만료되어 내용물이 사라졌습니다.`, true);
+                    storage.splice(i,1);
+                    i--;
+                }
+            }
+        }
+    }
+  
+    renderStorageModal();
 }
 function itemRotten(item){
     if(item.subType=="food"){
@@ -59,6 +111,22 @@ function renderStorageModal(){
     closeSubOption();
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
+    storageTag.innerHTML ='';
+    for(let i =0; i< storage.length; i++){
+        addStorageTag( storage[i].name , i, storage[i].turn );
+    }
+
+    //스토리지 인덱스선택
+    storageTag.querySelectorAll('.storageBtn').forEach( (btn) => {
+        if(btn.dataset.index == storageIndex){
+            btn.classList.remove('bg-slate-400');
+            btn.classList.add('bg-blue-400');
+        }else{
+            btn.classList.remove('bg-blue-400');
+            btn.classList.add('bg-slate-400');
+        }
+    });
+
     let weight ={
        storage:0,
        inventory:0,
@@ -72,12 +140,13 @@ function renderStorageModal(){
             weight.inventory += parseFloat(inventory[i].condition)/10;
         }
     }
-    for(let i =0;i<currentMapData.dropItems.length; i++){
-        addInventoryItem( currentMapData.dropItems[i], storage_storage, i);
-        weight.storage += parseFloat(currentMapData.dropItems[i].weight);
-        if(currentMapData.dropItems[i].type=="FluidContainer"){
+    const _storageInventory = storage[storageIndex].inventory;
+    for(let i =0;i<_storageInventory.length; i++){
+        addInventoryItem( _storageInventory[i], storage_storage, i);
+        weight.storage += parseFloat(_storageInventory[i].weight);
+        if(_storageInventory[i].type=="FluidContainer"){
             //액체의 경우, 무게 추가
-            weight.storage += parseFloat(currentMapData.dropItems[i].condition)/10;
+            weight.storage += parseFloat(_storageInventory[i].condition)/10;
         }
     }
     //무게 더하기
@@ -227,14 +296,14 @@ function renderEquipment(){
 function itemMove(data, dataset){
      if(dataset.route == storage_player.id){
         //가방으로 이동
-        currentMapData.dropItems.push( data);
+        storage[storageIndex].inventory.push( data);
         inventory.splice(dataset.index,1);
         renderStorageModal();
     }
     else if(dataset.route == storage_storage.id ){
         //인벤으로 이동
         inventory.push( data);
-        currentMapData.dropItems.splice(dataset.index,1);
+        storage[storageIndex].inventory.splice(dataset.index,1);
         renderStorageModal();
     }
 }
@@ -280,9 +349,21 @@ function itemMove_mouseUp(e){
 function itemEquip_mouseDown(e){
     const id = e.currentTarget.id;
     let data = null;
+    /*
     if(id == equipIcons.weapon.icon.id){
         data = equipments.weapon;
     }
+    */
+     Object.entries(equipIcons).forEach(([key]) => {
+        const _data =equipments[key];
+        const target = equipIcons[key];
+        if(_data!=null){
+            if(id == target.icon.id ){
+            data = _data;
+        }
+        }
+        
+     });
 
     if(mousedown==false){
         mousedown =true;

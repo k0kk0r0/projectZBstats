@@ -152,7 +152,7 @@
   </div>
   <!-- 게임 모달 -->
    <div id="gameModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 hidden">
-    <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[70vw] sm:min-h-[870px] lg:min-h-[720px] max-h-[800px] sm:max-h-[900px] rounded-2xl shadow-xl bg-gray-600">
+    <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[70vw] sm:min-h-[840px] lg:min-h-[720px] max-h-[800px] sm:max-h-[800px] rounded-2xl shadow-xl bg-gray-600">
       <!-- 닫기 버튼 -->
       <button id="closeGameModalBtn" class="absolute top-2 right-2 z-50 text-white-600 hover:text-black text-2xl sm:text-4xl">
         ✕
@@ -276,7 +276,7 @@
               70 / 100
             </span>
           </div>
-
+          <!--
           <div id="atHomeBt" class="absolute w-24 h-24 top-36 left-12 z-50 w-20 h-20 rounded">
             <img src="images/prevBt.png" alt="" class="w-full h-full">
             <span id="prevMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
@@ -289,7 +289,7 @@
               다음 지역으로
             </span>
           </div>
-
+          -->
           <!-- 플레이어 (왼쪽 아래 배치) -->
            <!--
           <img src="images/player.png" 
@@ -358,11 +358,26 @@
         </div>
       </div>
 
-      <!-- 하단 버튼 바 -->
-      <div class="flex items-center bg-gray-600 px-3 py-2">
-         <div class="flex gap-2 space-x-1">
-          <!-- 액션 버튼들 -->
-           <div id="pushBt" class="lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
+      
+     <!-- 결과 텍스트창 -->
+      <div class="bg-gray-600 px-3 py-2 mt-0 rounded">
+        <div id="logText" class="flex flex-col overflow-y-auto max-h-40">
+          <!-- 로그가 여기에 누적됨 -->
+        </div>
+      </div>
+
+    </div>
+     <!-- 하단 버튼 바 -->
+    <div class="flex items-center bg-gray-400 px-3 py-2 z-50 hover rounded absolute bottom-5">
+        <div class="flex gap-2 space-x-1">
+        <!-- 액션 버튼들 -->
+          <div id="atHomeBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/prevBt.png" alt="" class="w-full h-full">
+            <span id="prevMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              집으로
+            </span>
+          </div>
+          <div id="pushBt" class="lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/pushBt.png" alt="밀치기" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               밀치기
@@ -374,7 +389,7 @@
               공격하기
             </span>
           </div>
-          
+        
           <div id="restBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/restBt.png" alt="휴식" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
@@ -399,23 +414,17 @@
               붕대감기
             </span>
           </div>
-          <!--
-          
-          -->
-          <div class="w-[0px] lg:h-16 sm:h-24 rounded relative flex items-center justify-center bg-white">
-           
+         
+          <div id="nextMapBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/nextBt.png" alt="" class="w-full h-full">
+            <span id="nextMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              다음 지역
+            </span>
           </div>
-        </div>
       </div>
-     <!-- 결과 텍스트창 -->
-      <div class="bg-gray-600 px-3 py-2 mt-0 rounded">
-        <div id="logText" class="flex flex-col overflow-y-auto max-h-40">
-          <!-- 로그가 여기에 누적됨 -->
-        </div>
-      </div>
-
     </div>
   </div>
+ 
   <!-- 스킬 모달 -->
   <div id="skillModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative">
@@ -462,7 +471,11 @@
       <!-- 보관함 -->
       <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
         <h2 id="storage_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
-        <h2 class="text-xl font-bold mb-2">📦 보관함</h2>
+        <div id="storageTag" class="mg-2 gap-2 flex p-2">
+          <button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
+          <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
+          <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
+        </div>
         <div id="storage_storage"
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
@@ -472,7 +485,7 @@
       
       <!-- 플레이어 인벤토리 -->
       <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
-        <h2 class="text-xl font-bold mb-2">🦺 장비 슬롯 </h2>
+        <h2 class="text-xl font-bold mb-2">🦺장비 슬롯 </h2>
             <!-- 장비 슬롯 -->
         <div id="equipmentSlots" class="grid grid-cols-6 gap-2 justify-items-center">
           <!-- 무기 -->
@@ -542,7 +555,7 @@
         </div>
 
         <h2 id="inventory_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
-        <h2 class="text-xl font-bold mb-2">🎒 플레이어 인벤토리 </h2>
+        <h2 class="text-xl font-bold mb-2">🎒플레이어 인벤토리 </h2>
         <div id ="storage_player"
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
@@ -555,7 +568,7 @@
   </div>
   <!-- 상세메뉴 모달 -->
   <div id="itemSubOption" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute">
+    <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute bg-slate-500/80 rounded p-2">
       <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
         
     </div>

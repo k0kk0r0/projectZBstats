@@ -10,9 +10,9 @@ function itemsubMenu(data, dataset){
     optionBoxes.style.left = `${point.x+20}px`;
     optionBoxes.style.top = `${point.y-40}px`;
     optionBoxes.innerHTML='';
-    function makeBox(nameTxt){
+    function makeBox(nameTxt, boxColor="bg-gray-500"){
         const box = document.createElement("button");
-        box.className = "bg-gray-500 text-3xl p-2 rounded text-white";
+        box.className = `text-3xl p-2 rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
         //box.id = `option${i}`;
         box.innerText = nameTxt;
         optionBoxes.appendChild(box);
@@ -30,7 +30,7 @@ function itemsubMenu(data, dataset){
     if(dataset!=null){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
-            makeBox("장착하기").addEventListener('click', ()=>{
+            makeBox("장착하기",`bg-blue-400`).addEventListener('click', ()=>{
                 setEquipment(data, dataset);
                 closeSubOption();
             });
@@ -41,7 +41,7 @@ function itemsubMenu(data, dataset){
             if(item.condition>0){
                 const drinkType = (data.subType.split(';').length>1? `${translations[currentLang][ data.subType.split(';')[0]] } 혼합액` : data.subType);
                  const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
-                makeBox(`${drinkname} 마시기`).addEventListener('click', ()=>{
+                makeBox(`${drinkname} 마시기`, itemColor(drinkType)).addEventListener('click', ()=>{
                     playerDrink( data.subType.split(';')[0], item );
                     advanceTurn();
                     renderStorageModal();
@@ -123,14 +123,14 @@ function itemsubMenu(data, dataset){
             //플레이어 가방에 있을 때
             
             if(data.subType =="bandage"){
-                makeBox("붕대 감기").addEventListener('click', ()=>{
+                makeBox("붕대 감기", "bg-slate-300").addEventListener('click', ()=>{
                     playerHealing(dataset.index);
                     closeSubOption();
                 }); 
             }
             if(data.subType == "canned"){
                 //캔 따기
-                makeBox("캔 따기").addEventListener('click', ()=>{
+                makeBox("캔 따기", "bg-slate-300").addEventListener('click', ()=>{
                     //playerHealing(dataset.index);
                     const opendItem = findItem(`${data.name}Open`);
                     opendItem.name = data.name;
@@ -145,14 +145,14 @@ function itemsubMenu(data, dataset){
                 //먹기
                 //const item = inventory[dataset.index];
                 if(item.div>0){
-                    makeBox("1/4 먹기").addEventListener('click', ()=>{
+                    makeBox("1/4 먹기", "bg-slate-300").addEventListener('click', ()=>{
                         playerEatFood(item, 1);
                         closeSubOption();
                         advanceTurn();
                         renderStorageModal();
                     }); 
                     if(item.div>=2){
-                        makeBox("1/2 먹기").addEventListener('click', ()=>{
+                        makeBox("1/2 먹기", "bg-slate-300").addEventListener('click', ()=>{
                             playerEatFood(item, 2);
                             closeSubOption();
                             advanceTurn();
@@ -166,7 +166,7 @@ function itemsubMenu(data, dataset){
                 
 
                 if(data.name =="Zomboxivir"){
-                    makeBox("사용하기").addEventListener('click', ()=>{
+                    makeBox("사용하기", "bg-slate-300").addEventListener('click', ()=>{
                         /*
                     if(cureWound("zombie")){
                         log(`${data.info.split("(")[0] } - 좀비화 치료`, true);
