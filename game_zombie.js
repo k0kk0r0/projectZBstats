@@ -33,6 +33,7 @@ function renderZombieDiv(zombie){
     const div = document.createElement('div');
     div.id=`zombie_${id}`;
     div.className = "absolute bottom-4 right-0 w-24 h-32 z-20 transition-all duration-100 zombieDiv";
+
     const img = document.createElement('img');
     img.src = `images/zb_${ zombie.tag}.png`;
     img.className = "absolute w-full h-full";
@@ -54,16 +55,7 @@ function spawnZombies(){
     for(let i =0; i< currentMapData.zombies.length; i++){
         renderZombieDiv(currentMapData.zombies[i]);
     }
-    zombies = currentMapData.zombies;
-    for(let i =0; i< zombies.length; i++){
-        if(zombies[i].isStunning<=0){
-            zombies[i].div.style.right= `${(300+i*60)}px`;
-            zombieMove(i);
-        }
-        
-        // zombies[i].div.classList.remove(stunClass);
-        
-    }
+   renderZombie();
 }
 //대미지 숫자 표시
 function createDamageNumber(num, position){
@@ -83,9 +75,8 @@ function createDamageNumber(num, position){
 function renderZombie(){
     if(gameOver)return;
     //좀비 동작 표시
-    for(let i =0; i< zombies.length; i++){
-        
-    }
+     zombies = currentMapData.zombies;
+
     for(let i =0; i< zombies.length; i++){
         zombies[i].div.style.right= `${(300-i*60)}px`;
         zombies[i].div.classList.remove(stunClass);
@@ -150,8 +141,8 @@ function callZombies(num, addPer=0){
         closeStorageModal();
         
         log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
-        currentMapData.zombies.push( spawnZombie() );
-        spawnZombies();
+        renderZombieDiv(spawnZombie()) ;
+        renderZombie();
         stopResting();
         stack.zombieSpawn = 0;
     }

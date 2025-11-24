@@ -528,10 +528,7 @@ async function ResetAllGame(){
 //맵 이동 갱신
 function mapSetting(data) {
    
-    currentMapData = data;
-    clearInterval(interval );
-    interval = null;
-    let txt='';
+    
     if(playerHasTrait("conspicuous")){
         //넘치는존재감
         txt = "<넘치는 존재감>으로";
@@ -543,6 +540,11 @@ function mapSetting(data) {
         log(`${txt} 좀비가 덜 이끌려 왔습니다`)
     }
     
+    currentMapData = data;
+    clearInterval(interval );
+    interval = null;
+    let txt='';
+
     clearZombies();
     spawnZombies(); //좀비소환
     bgLightDark( currentMapData );
