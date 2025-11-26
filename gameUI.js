@@ -289,11 +289,12 @@ function setEquipment(data, dataset){
     for(let i =0 ;i < equipNames.length ;i++){
         const key = equipNames[i];
         if(data.type.toLowerCase() === key){
+            
             //타입이 같은 경우
             if(equipments[key]!=null){
                 inventory.push(equipments[key]);
                 equipments[key]= null;
-
+                
             }
             if(equipments[key]==null){
                 equipments[key] = data;
@@ -302,8 +303,8 @@ function setEquipment(data, dataset){
                 }else if(dataset.route == storage_storage.id ){
                     storage[storageIndex].inventory.splice(dataset.index,1);
                 }
-                break;
             }
+            break;
         }
     }
     renderStorageModal();

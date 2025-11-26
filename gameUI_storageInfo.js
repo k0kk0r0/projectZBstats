@@ -126,11 +126,11 @@ function renderStorageModal(){
             btn.classList.add('bg-slate-400');
         }
     });
-
+    const playerstat = playerStat() ?? {bagWeight:20};
     let weight ={
        storage:0,
        inventory:0,
-       bagWeight:playerStat().bagWeight
+       bagWeight:playerstat.bagWeight
     }
     for(let i =0;i<inventory.length; i++){
         addInventoryItem( inventory[i], storage_player, i);
@@ -276,9 +276,9 @@ function renderEquipment(){
             if(data.type=="FluidContainer"){
                 target.conditionBar.classList.add(itemColor(data.subType));
             }
-            else if(data.type =="Weapon"){
+            else if(data.type =="Weapon" || data.type =="Armor"){
                 target.conditionBar.classList.add(itemRatioColor(ratio));
-            }else if(data.type ="Accessory"){
+            }else{
                 //색 없음
                 //target.conditionBar.classList.add("bg-white-600");
             }
@@ -313,6 +313,16 @@ function itemMove_mouseDown(e){
         mousedown =true;
          const dataset = e.currentTarget.dataset;
         const data = JSON.parse( dataset.data);
+
+        equipBool = true;
+        //즉시 서브메뉴 호출
+                equipSetTimeout = null;
+                point.x = e.clientX;
+                  point.y = e.clientY;
+                //setEquipment(data,dataset);
+                itemsubMenu(data, dataset, true);
+                return;
+
         equipBool=false;
         //if(dataset.route == storage_player.id){
             equipSetTimeout = setTimeout(() => {
@@ -359,8 +369,8 @@ function itemEquip_mouseDown(e){
         const target = equipIcons[key];
         if(_data!=null){
             if(id == target.icon.id ){
-            data = _data;
-        }
+                data = _data;
+            }
         }
         
      });
@@ -395,8 +405,11 @@ function itemEquip_mouseUp(e){
                 const data =equipments[key];
                 const target = equipIcons[key];
                 if(data!=null){
+                    
                    if(id == target.icon.id ){
                         inventory.push( data );
+                        
+                        
                         equipments[key] = null;
                    }
                 }else{

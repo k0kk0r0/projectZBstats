@@ -3,6 +3,15 @@ const zombieNames = ["TheyKnew","pants","policeman","farmer"];
 function spawnZombie(_tag='random'){
     let zombieTag = '';
     const zombieInven = [];
+
+    //옷가지
+    if(Math.random()<0.2){
+        zombieInven.push("TshirtGeneric-0.7-");
+    }else{
+        zombieInven.push("ShirtGeneric-0.7-");
+    }
+
+    //좀비종류
     if(_tag=='random'){
         const rng = Math.random();
         if(rng < 0.1){
@@ -11,7 +20,7 @@ function spawnZombie(_tag='random'){
         }
         else if(rng <0.3){
             zombieTag = "policeman";
-            zombieInven.push("NightStick-0.2-");
+            zombieInven.push("NightStick-0.2-");  
 
         }else if(rng<0.5){
             zombieTag = "farmer";
@@ -19,7 +28,7 @@ function spawnZombie(_tag='random'){
         }else{
             zombieTag = "pants";
             zombieInven.push("Rag-0.7");
-            zombieInven.push("WaterBottle-0.1-");
+            zombieInven.push("WaterBottle-0.1-"); 
         }
     }else{
         zombieTag = _tag;
@@ -45,7 +54,7 @@ function renderZombieDiv(zombie){
     zombie.div = div;
     zombie.img = img;
     zombie.id = id;
-    zombie.hp = 50;
+    zombie.hp = randomInt(40,60);
     zombie.isAnimating = false;
     zombie.isStunning = 0;
 
@@ -276,7 +285,7 @@ function zombieDropItem( zombieInven){
                 let item = findItem(dropitem[0]);
                 if(dropitem[2]!=null){
                     item.condition = randomInt(1,item.maxCondition);
-                }   
+                }
                dropItem.push(item );
             }
         }

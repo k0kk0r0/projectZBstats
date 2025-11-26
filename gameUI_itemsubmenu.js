@@ -1,14 +1,15 @@
+
 //////////////////////아이템 서브메뉴///////////////////
 document.addEventListener("pointerdown", (e) => {
     point.x = e.clientX;
     point.y = e.clientY;
 });
 function closeSubOption(){itemSubOption.classList.add("hidden");}
-function itemsubMenu(data, dataset){
+function itemsubMenu(data, dataset, immediate =false){
     if(data ==null)return
     itemSubOption.classList.remove("hidden");
-    optionBoxes.style.left = `${point.x+20}px`;
-    optionBoxes.style.top = `${point.y-40}px`;
+    optionBoxes.style.left = `${point.x>screen.width-100? point.x-220:point.x+30}px`;
+    optionBoxes.style.top = `${point.y>screen.height-100? point.y-240:point.y-40}px`;
     optionBoxes.innerHTML='';
     function makeBox(nameTxt, boxColor="bg-gray-500"){
         const box = document.createElement("button");
@@ -35,6 +36,24 @@ function itemsubMenu(data, dataset){
                 closeSubOption();
             });
         }
+        if(data.subType== "clothing"){
+            //의상 찢기
+            if(data.convert != null){
+                makeBox("의상 찢기", "bg-slate-300").addEventListener('click', ()=>{
+                    inventory.push( findItem(data.convert) );
+                    if(dataset.route == storage_storage.id){
+                        storage[storageIndex].inventory.splice(dataset.index,1);
+                    }else{
+                        inventory.splice(dataset.index,1);
+                    }
+                    
+                    renderStorageModal();
+                    advanceTurn();
+                    
+                    closeSubOption();
+                });
+            }
+        }
         if(data.type =="FluidContainer"){
             //액체류 마시기, 채우기, 비우기
            
@@ -48,64 +67,66 @@ function itemsubMenu(data, dataset){
                     //closeSubOption();
                 });
                 
-            }if(item.condition < item.maxCondition){
+            }
+            if(item.condition < item.maxCondition){
 
-                let waterSource ;
+                let waterSource =null;
                 const faucet = getFacilityEnable("faucet");
-                
+                console.log(getFacilityEnable("water"));  
                 if(faucet){
                     waterSource = 'water';
-                }else if(getFacilityEnable("water")!=null){
+                }else if( getFacilityEnable("water")){
                     waterSource = 'taintedWater';
                 }
 
                 // console.log(waterSource);
-
-                const addFluidname = translations[currentLang][waterSource] ?? waterSource;
-                makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
-                    if(faucet!=null){
-                        if(waterEndTurn>0){
-                            item.condition = item.maxCondition;
-                            advanceTurn();
-                            
-                        }else{
-                            //물이 끊긴 경우 수전의 물 사용
-                            while( true ){
-                                //
+                if(waterSource!=null){
+                    const addFluidname = translations[currentLang][waterSource] ?? waterSource;
+                    makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
+                        if(faucet!=null){
+                            if(waterEndTurn>0){
+                                item.condition = item.maxCondition;
+                                advanceTurn();
                                 
-                                if(parseFloat(faucet.needs.amount)<=0 || item.condition>= item.maxCondition){
-                                    advanceTurn();
-                                    break;
-                                }else{
-                                    item.condition++;
-                                    faucet.needs.amount--;
+                            }else{
+                                //물이 끊긴 경우 수전의 물 사용
+                                while( true ){
+                                    //
+                                    
+                                    if(parseFloat(faucet.needs.amount)<=0 || item.condition>= item.maxCondition){
+                                        advanceTurn();
+                                        break;
+                                    }else{
+                                        item.condition++;
+                                        faucet.needs.amount--;
+                                    }
                                 }
                             }
+                            
                         }
-                        
-                    }
-                    if(waterSource=='taintedWater'){
-                        //강물이 있는 경우
-                        item.condition = item.maxCondition;
-                        advanceTurn();
-                    }
+                        if(waterSource=='taintedWater'){
+                            //강물이 있는 경우
+                            item.condition = item.maxCondition;
+                            advanceTurn();
+                        }
 
-                   
-                    if(item.subType=='empty'){
-                        //비어있는 경우
-                        item.subType = waterSource;
-                    }else{
-                        const subTypeArray = item.subType.split(';');
-                        
-                        if(subTypeArray.includes(waterSource)){
-                            //갖고 있는경우 추가로 더하진 않음...
+                    
+                        if(item.subType=='empty'){
+                            //비어있는 경우
+                            item.subType = waterSource;
                         }else{
-                            item.subType = subTypeArray[0] == 'water'? item.subType=waterSource : `${item.subType};${waterSource}`;
+                            const subTypeArray = item.subType.split(';');
+                            
+                            if(subTypeArray.includes(waterSource)){
+                                //갖고 있는경우 추가로 더하진 않음...
+                            }else{
+                                item.subType = subTypeArray[0] == 'water'? item.subType=waterSource : `${item.subType};${waterSource}`;
+                            }
                         }
-                    }
-                    renderStorageModal();
-                    //closeSubOption();
-                });
+                        renderStorageModal();
+                        //closeSubOption();
+                    });
+                }
             }
             if(item.condition>0){
                  makeBox(`비우기`).addEventListener('click', ()=>{
@@ -117,6 +138,7 @@ function itemsubMenu(data, dataset){
                     //closeSubOption();
                 });
            }
+           
 
         }
         if(dataset.route == storage_player.id){
@@ -162,6 +184,7 @@ function itemsubMenu(data, dataset){
                 }
                 
             }
+            
             if(data.subType =="consume"){
                 
 
@@ -188,12 +211,24 @@ function itemsubMenu(data, dataset){
                 
             }
            
-            /*
-            makeBox("보관함에 넣기").addEventListener('click', ()=>{
+            if(immediate){
+                 makeBox("보관함에 넣기").addEventListener('click', ()=>{
+                    itemMove(data, dataset);
+                    closeSubOption();
+                });
+            }
+           
+            
+        }
+        else if(dataset.route == storage_storage.id){
+            //보관함에 있을 때
+
+
+
+            makeBox("가방에 넣기").addEventListener('click', ()=>{
                 itemMove(data, dataset);
                 closeSubOption();
             });
-            */ 
         }
     }
 }

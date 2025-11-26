@@ -5,7 +5,7 @@ function playerStat(){
         setMoodleValue('Zombie',100);
         setMoodleValue('Panic',0);
         setMoodleValue('Endurance',0);
-        return;
+        return null;
     }
 
     let panicMd = findMoodle('Panic');
@@ -257,6 +257,22 @@ function playerIsDamaged(value){
         healer = 5;
     }
     //slowhealer, fasthealer, thinskinned, thickskinned
+    let defend=false;
+    const clothDefendPer =0.65;
+    if(equipments.armor != null){
+        if(equipments.armor.condition>1){
+            //방어구 장착시 상처 확률 감소
+            const armorRng = Math.random();
+            if( armorRng < clothDefendPer){
+                defend = true;
+                //의상으로 방어
+                equipments.armor.condition--;
+                log(`${clothDefendPer*100}% 확률로 장착한 [${translations[currentLang][equipments.armor.name]??equipments.armor.name}] 의상으로 막아냈습니다.`);
+                renderGameUI();//renderEquipment()포함
+                return;
+            }
+        }
+    }
     if(rng< 0.1 +per){
         //물림
         wound.push( {tag:"bitten", heal:-1, turn:(100+healer*4)} );
@@ -270,7 +286,7 @@ function playerIsDamaged(value){
             //감염
             wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
         }
-    }else if(rng<0.6+per){
+    }else{
         //긁힘
         wound.push( {tag:"lacerated", heal:-1, turn:randomInt(17+healer,25+healer)} );
         log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`);

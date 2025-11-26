@@ -1,0 +1,3 @@
+name,type,subType,path,condition,weight,convert
+TshirtGeneric,Armor,clothing,Base/Cloths/TshirtGeneric.png,5,1,Rag
+ShirtGeneric,Armor,clothing,Base/Cloths/ShirtGeneric.png,5,1,Rag

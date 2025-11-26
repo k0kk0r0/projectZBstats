@@ -147,9 +147,10 @@ const bg = document.getElementById('mainBg');
 
 //아이템리스트
 let weaponDatas = []; //무기리스트
+let clothDatas = []; //의상리스트
 let mapDatas = [];//맵리스트
-let miscs = [];//기타 아이템 리스트
-let foods = [];
+let miscDatas = [];//기타 아이템 리스트
+let foodDatas = [];
 
 //게임 상태 변수
 //턴 진행 함수
@@ -197,7 +198,7 @@ let skills = {};
 let job;
 let zombieKillCount;
 let traits =[]; 
-const xpData = [100, 200,500,800,1200,1500, 2000,3500,5000,7500,10000 ];
+const xpData = [1000, 1200,1500,1800,2000,2500, 3000,3500,5000,7500,10000 ];
 const pushStamina= 4;
 function setPlayerTrait(){
     //선택한 플레이어 데이터 수집
@@ -280,11 +281,10 @@ function maintenenceCalculate(item){
     
 }
 
-
-//무기 데이터 호출
-function loadWeapons() {
+//데이터 호출
+function loadItemDatas( link ) {
   return new Promise((resolve) => {
-    Papa.parse("weapons.csv", {
+    Papa.parse(link, {
       download: true,
       header: true,
       complete: function(results) {
@@ -292,48 +292,14 @@ function loadWeapons() {
       }
     });
   });
-}
-//기타 아이템 호출
-function loadMiscs() {
-  return new Promise((resolve) => {
-    Papa.parse("miscs.csv", {
-      download: true,
-      header: true,
-      complete: function(results) {
-        resolve(results.data);
-      }
-    });
-  });
-}
-//음식 아이템 호출
-function loadFoods() {
-  return new Promise((resolve) => {
-    Papa.parse("foods.csv", {
-      download: true,
-      header: true,
-      complete: function(results) {
-        resolve(results.data);
-      }
-    });
-  });
-}
-//맵 데이터 호출
-function loadMapDatas(){
-    return new Promise((resolve) => {
-        Papa.parse("mapDatas.csv",{
-            download: true,
-            header: true,
-            complete: function(results){
-                resolve(results.data);
-            }
-        });
-    });
 }
 async function init() {
-  weaponDatas = await loadWeapons();
-  mapDatas = await loadMapDatas();
-  miscsData = await loadMiscs();
-  foodsData = await loadFoods();
+    
+  mapDatas = await loadItemDatas("mapDatas.csv");
+  weaponDatas = await loadItemDatas("items/weapons.csv");
+  miscDatas = await loadItemDatas("items/miscs.csv");
+  foodDatas = await loadItemDatas("items/foods.csv");
+  clothDatas = await loadItemDatas("items/cloths.csv"); 
 }
 init();
 function findItem(itemName){
@@ -344,6 +310,9 @@ function findItem(itemName){
     if(item!=null){ return item }
     
     item = findFood(itemName);
+    if(item!=null){ return item}
+
+    item = findCloth(itemName);
     if(item!=null){ return item}
 
     return null;
@@ -368,9 +337,25 @@ function findWeapon(itemName ){
     }
     return data0;
 }
+function findCloth(itemName ){
+    //의상 데이터 검색 및 가공해서 반환
+    const data = clothDatas.find(w => w.name === itemName);
+    if(data==null){ return null }
+    let data0 ={
+        path: data.path.toString(),
+        name: data.name.toString(),
+        type: data.type.toString(),
+        subType: data.subType.toString(),
+        condition: parseInt(data.condition),
+        maxCondition: parseInt(data.condition),
+        convert: data.convert.toString(),
+        weight: parseFloat(data.weight)
+    }
+    return data0;
+}
 function findMisc(itemName ){
     //기타 아이템 데이터 검색 및 가공해서 반환
-    const data = miscsData.find(w => w.name === itemName);
+    const data = miscDatas.find(w => w.name === itemName);
     if(data==null){ return null }
     let data0 ={
         path: data.path.toString(),
@@ -386,7 +371,7 @@ function findMisc(itemName ){
 }
 function findFood(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
-    const data = foodsData.find(w => w.name === itemName);
+    const data = foodDatas.find(w => w.name === itemName);
     const xp = 24*6; //24시간*6턴
     if(data==null){ return null }
     let data0 ={
@@ -513,6 +498,7 @@ async function ResetAllGame(){
     //resetFacilityIcons();
 
     //renderGameUI();
+    equipments.armor = findCloth("TshirtGeneric");
     setWeapon("random");
     commandBtsVisible(true);
     //보너스
@@ -539,7 +525,7 @@ function mapSetting(data) {
         txt = "<부족한 존재감>으로";
         log(`${txt} 좀비가 덜 이끌려 왔습니다`)
     }
-    
+
     currentMapData = data;
     clearInterval(interval );
     interval = null;

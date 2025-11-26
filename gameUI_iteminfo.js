@@ -19,8 +19,8 @@
 
   function showItemModal(item) {
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
-    
-    const _itempath = `${item.path.startsWith("Base")? "":"[Mod]"}${item.path.replace(".png","").replace("Miscs/","").replace("Foods/","").replace("/",".")}`;
+    const _pathsplit =item.path.replace(".png","").split('/');
+    const _itempath = `${item.path.startsWith("Base")? "":"[Mod]"}${_pathsplit[0]}.${_pathsplit[_pathsplit.length-1] }`;
     let _itemname = translations[currentLang][item.name] ?? item.name;
     itemName.textContent = `${item.subType =='food' ?( item.condition>0 ? (item.condition/item.maxCondition >(item.rottenDays-item.freshDays)/item.rottenDays?'신선한 ':'신선하지 않은 ') :'' ) :''}
       ${(_itempath.endsWith("Cooked")?"요리된 ": (_itempath.endsWith("Overdone")? "타버린 ":(_itempath.endsWith("Rotten")?"상한 ":"")))}${_itemname}${_itempath.endsWith("Open")?"(열림)": ""}`;
@@ -68,13 +68,19 @@
         field_conditionBar.className ="h-full transition-all";
         field_conditionLowerChance.textContent ='';
 
-        if(item.type=="Weapon" || item.type =="Armor"){ //무기, 방어구 등등...
+        if(item.type=="Weapon" ){ //무기, 방어구 등등...
             const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
             const weaponLv = parseFloat(findPlayerSkill(item.subType).lv);
             const per = 1/( item.conditionLowerChance + Math.floor( Math.floor(   MaintenanceLv + ( weaponLv/2)  )/2 )*2 ) ;
             field_conditionLowerChance.textContent = item.conditionLowerChance? (`하락확률 : ${(per*100).toFixed(1)}%` ) : '';
             field_conditionBar.classList.add( itemRatioColor(cond/cond0) );
             field_conditionText.textContent = `${cond}/${cond0} (${ratio}%)`;
+        }
+        if(item.type=='Armor'){
+            //const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
+            //const armorLv = parseFloat(findPlayerSkill(item.subType).lv);
+            field_conditionText.textContent = `구멍 ${cond0-cond}개, (${ratio}%)`;
+            field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }
         else if(item.type=='FluidContainer'){
             //액체류의 경우
@@ -83,7 +89,7 @@
         }else if(item.subType=='food'){
             //신선도가 있는 음식의 경우
             field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );
-            field_conditionText.textContent = `${cond}/${cond0} (${ratio}%)`;
+            field_conditionText.textContent = `신선도 ${cond}/${cond0} (${ratio}%)`;
         }else{
             field_conditionBar.classList.add("bg-yellow-400");
         }
