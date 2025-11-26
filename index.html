@@ -311,14 +311,14 @@
 
 
           <!-- 무기창 아이콘 (숨김) -->
-          <div id="weaponIcon" class="absolute top-16 left-4 z-50 w-20 h-20 rounded bg-gray-200 hidden">
+          <div id="weaponIcon" class="hidden absolute top-16 left-4 z-50 w-20 h-20 rounded bg-gray-200">
             <img id="weaponImg" src="images/attackBt.png" alt="무기" class="w-full h-full p-2 z-50" >
             <span id="weaponName" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               무기이름
             </span>
           </div>
           <!-- 가방 아이콘  -->
-          <div id="backpackIcon" class="absolute bottom-4 left-4 z-50 w-20 h-20 rounded bg-gray-200">
+          <div id="backpackIcon" class="hidden absolute bottom-4 left-4 z-50 w-20 h-20 rounded bg-gray-200">
             <img id="backpackImg" src="Base/Backpacks/SheetSlingBag.png" alt="가방" class="w-full h-full p-2 z-50" >
             <span id="backpackName" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               가방
@@ -369,60 +369,81 @@
     </div>
      <!-- 하단 버튼 바 -->
     <div class="flex items-center bg-gray-400 px-3 py-2 z-50 hover rounded absolute bottom-5">
+      <div class="flex gap-2 space-x-1">
+      <!-- 액션 버튼들 -->
+        <div id="atHomeBt" class="commandBT lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/prevBt.png" alt="" class="w-full h-full">
+          <span id="prevMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            집으로
+          </span>
+        </div>
+        <div id="restBt" class="commandBT lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/restBt.png" alt="휴식" class="w-14 h-14">
+          <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            휴식
+          </span>
+        </div>
+        <div id="pushBt" class="commandBT lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/pushBt.png" alt="밀치기" class="w-14 h-14">
+          <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            밀치기
+          </span>
+        </div>
+        
+        <div id="menuBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="icons/Spiffo.png" alt="메뉴" class="w-14 h-14">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              메뉴
+            </span>
+          </div>
+        <div id="attackBt" class="commandBT lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/attackBt.png" alt="공격하기" class="w-14 h-14">
+          <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            공격하기
+          </span>
+        </div>
+        <div id="sleepBt" class=" hidden lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white hidden">
+          <img src="images/sleepBt.png" alt="잠자기" class="w-14 h-14">
+          <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            잠자기
+          </span>
+        </div>
+       
+        <div id="bandingBt" class="commandBT lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/banding.png" alt="붕대감기" class="w-14 h-14">
+          <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            붕대감기
+          </span>
+        </div>
+        
+        <div id="nextMapBt" class="commandBT lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <img src="images/nextBt.png" alt="" class="w-full h-full">
+          <span id="nextMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+            다음 지역
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- 하단 메뉴 바 -->
+    <div id="menuModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
+      <div class="fixed flex items-center bg-gray-400 px-3 py-2 z-50 hover rounded absolute bottom-10 ">
         <div class="flex gap-2 space-x-1">
         <!-- 액션 버튼들 -->
-          <div id="atHomeBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/prevBt.png" alt="" class="w-full h-full">
-            <span id="prevMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              집으로
-            </span>
-          </div>
-          <div id="pushBt" class="lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/pushBt.png" alt="밀치기" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              밀치기
-            </span>
-          </div>
-          <div id="attackBt" class="lg:w-32 lg:h-16 sm:w-32 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/attackBt.png" alt="공격하기" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              공격하기
-            </span>
-          </div>
-        
-          <div id="restBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/restBt.png" alt="휴식" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              휴식
-            </span>
-          </div>
-          <div id="sleepBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white hidden">
-            <img src="images/sleepBt.png" alt="잠자기" class="w-14 h-14">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              잠자기
-            </span>
-          </div>
           <div id="skillBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               스킬 창
             </span>
           </div>
-          <div id="bandingBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/banding.png" alt="붕대감기" class="w-14 h-14">
+          <div id="inventoryBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="Base/Backpacks/SheetSlingBag.png" alt="소지품" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              붕대감기
-            </span>
-          </div>
-         
-          <div id="nextMapBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/nextBt.png" alt="" class="w-full h-full">
-            <span id="nextMapTxt" class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              다음 지역
+              소지품
             </span>
           </div>
       </div>
     </div>
+   
   </div>
  
   <!-- 스킬 모달 -->
@@ -471,7 +492,7 @@
       <!-- 보관함 -->
       <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
         <h2 id="storage_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
-        <div id="storageTag" class="mg-2 gap-2 flex p-2">
+        <div id="storageTag" class="mg-2 gap-2 flex p-2 flex-wrap">
           <button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
           <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
           <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
@@ -480,7 +501,11 @@
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
         </div>
-        <h3 class="absolute bottom-4 left-4 text-2xl"> 아이템을 꾹 누르면 정보를 확인하거나 장착할 수 있습니다 </h3>
+        <checkbox id="storage_quickEquipChk" class="absolute bottom-4 left-4 flex items-center space-x-2">
+          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
+          <label for="storage_quickEquipChk" class="text-lg font-bold">좌측 항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
+
+        </checkbox>
       </div>
       
       <!-- 플레이어 인벤토리 -->

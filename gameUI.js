@@ -1,3 +1,38 @@
+//명령 버튼
+const pushBt = document.getElementById('pushBt');
+const attackBt = document.getElementById('attackBt');
+const restBt = document.getElementById('restBt');
+const sleepBt = document.getElementById('sleepBt');
+
+const bandingBt = document.getElementById('bandingBt');
+const atHomeBt = document.getElementById('atHomeBt');
+const nextMapBt = document.getElementById('nextMapBt');
+const prevMapTxt = document.getElementById('prevMapTxt');
+const nextMapTxt = document.getElementById('nextMapTxt');
+
+//메뉴창
+const menuBt = document.getElementById('menuBt');
+const skillBt = document.getElementById('skillBt');
+const inventoryBt = document.getElementById('inventoryBt');
+
+
+//무기 아이콘
+const weaponIcon = document.getElementById('weaponIcon');
+const weaponImg = document.getElementById('weaponImg');
+const weaponName = document.getElementById('weaponName');
+//가방 아이콘
+const backpackIcon = document.getElementById(`backpackIcon`);
+const backpackImg = document.getElementById(`backpackImg`);
+const backpackName = document.getElementById('backpackName');
+
+function commandBtsVisible(value){
+    const commandBts = gameModal.querySelectorAll('.commandBT');
+    for(let i = 0; i<commandBts.length;i++){
+        commandBts[i].classList.toggle('hidden', !value);
+    }
+    closeMenuModal();
+}
+
 function renderSkill(){
   const skillList = document.getElementById("skillList");
   skillList.innerHTML = ""; // 초기화
@@ -32,8 +67,37 @@ function openSkillModal(){
     renderSkill();
     skillmodal.classList.remove('hidden');
 }
-
+const menuModal = document.getElementById("menuModal");
+function openMenuModal(){
+    menuModal.classList.remove('hidden');
+}
+function closeMenuModal(){
+    menuModal.classList.add('hidden');
+}
+menuModal.addEventListener("click", (e) => {
+    if (e.target === menuModal) {
+        closeMenuModal();
+    }
+});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //버튼함수
+menuBt.addEventListener('click', () => {
+    //메뉴 창 열기
+    openMenuModal();
+});
+
+skillBt.addEventListener('click', ()=>{
+    //스킬 창 열기
+    openSkillModal();
+    closeMenuModal();
+});
+inventoryBt.addEventListener('click', ()=>{
+    //인벤토리 창 열기
+    openStorageModal();
+    closeMenuModal();
+});
+
+
 pushBt.addEventListener('click', () => {
     //캐릭터 밀치기(좀비 넘어트리기)
      if(gameOver)return;
@@ -70,7 +134,6 @@ attackBt.addEventListener('click', () => {
     advanceTurn();
     callZombies(1);//좀비추가
 });
-
 restBt.addEventListener('click', () => {
     //휴식 및 턴 넘기기
      if(gameOver)return;
@@ -99,10 +162,6 @@ restBt.addEventListener('click', () => {
         advanceTurn();
         renderGameUI();
     },400); 
-});
-skillBt.addEventListener('click', ()=>{
-    //스킬 창 열기
-    openSkillModal();
 });
 nextMapBt.addEventListener('click',() =>{
      if(gameOver)return;

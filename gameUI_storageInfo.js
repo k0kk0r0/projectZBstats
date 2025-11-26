@@ -308,6 +308,7 @@ function itemMove(data, dataset){
     }
 }
 //////////////////아이템 정보 표시 및 서브메뉴 액션
+const storage_quickEquipChkInput = document.getElementById('storage_quickEquipChkInput');
 function itemMove_mouseDown(e){
     if(mousedown==false){
         mousedown =true;
@@ -316,13 +317,14 @@ function itemMove_mouseDown(e){
 
         equipBool = true;
         //즉시 서브메뉴 호출
-                equipSetTimeout = null;
-                point.x = e.clientX;
-                  point.y = e.clientY;
-                //setEquipment(data,dataset);
-                itemsubMenu(data, dataset, true);
-                return;
-
+        if(storage_quickEquipChkInput.checked==false){
+            equipSetTimeout = null;
+            point.x = e.clientX;
+                point.y = e.clientY;
+            //setEquipment(data,dataset);
+            itemsubMenu(data, dataset, true);
+            return;
+        }
         equipBool=false;
         //if(dataset.route == storage_player.id){
             equipSetTimeout = setTimeout(() => {

@@ -8,8 +8,11 @@ function closeSubOption(){itemSubOption.classList.add("hidden");}
 function itemsubMenu(data, dataset, immediate =false){
     if(data ==null)return
     itemSubOption.classList.remove("hidden");
-    optionBoxes.style.left = `${point.x>screen.width-100? point.x-220:point.x+30}px`;
-    optionBoxes.style.top = `${point.y>screen.height-100? point.y-240:point.y-40}px`;
+    const innerWidth = window.innerWidth;
+    const innerHeight = window.innerHeight;
+    //console.log(point, innerWidth, innerHeight);
+    optionBoxes.style.left = `${point.x> innerWidth*0.75? point.x-innerWidth*0.2-20:point.x+30}px`;
+    optionBoxes.style.top = `${point.y> innerHeight*0.7? point.y-innerHeight*0.2-20:point.y-40}px`;
     optionBoxes.innerHTML='';
     function makeBox(nameTxt, boxColor="bg-gray-500"){
         const box = document.createElement("button");
@@ -26,14 +29,15 @@ function itemsubMenu(data, dataset, immediate =false){
             closeSubOption();
         });
     }
-    
+    const zombieIsAlived = zombies.length>0? true : false;
 
     if(dataset!=null){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
-            makeBox("장착하기",`bg-blue-400`).addEventListener('click', ()=>{
+            makeBox(`장착하기${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
                 setEquipment(data, dataset);
                 closeSubOption();
+                if(zombieIsAlived)advanceTurn();
             });
         }
         if(data.subType== "clothing"){
@@ -145,7 +149,7 @@ function itemsubMenu(data, dataset, immediate =false){
             //플레이어 가방에 있을 때
             
             if(data.subType =="bandage"){
-                makeBox("붕대 감기", "bg-slate-300").addEventListener('click', ()=>{
+                makeBox(`붕대 감기${zombieIsAlived?'(턴 넘김)':''}`, "bg-slate-300").addEventListener('click', ()=>{
                     playerHealing(dataset.index);
                     closeSubOption();
                 }); 
@@ -212,9 +216,10 @@ function itemsubMenu(data, dataset, immediate =false){
             }
            
             if(immediate){
-                 makeBox("보관함에 넣기").addEventListener('click', ()=>{
+                 makeBox(`${storage[0].name=="ground"?"바닥에 버리기":"보관함에 넣기"}${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                     itemMove(data, dataset);
                     closeSubOption();
+                    if(zombieIsAlived)advanceTurn();
                 });
             }
            
@@ -225,9 +230,10 @@ function itemsubMenu(data, dataset, immediate =false){
 
 
 
-            makeBox("가방에 넣기").addEventListener('click', ()=>{
+            makeBox(`가방에 넣기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                 itemMove(data, dataset);
                 closeSubOption();
+                if(zombieIsAlived)advanceTurn();
             });
         }
     }

@@ -111,31 +111,10 @@ const moodles = moodleNames.map(name => ({
   value: 0
 }));
 
-//명령 버튼
-const pushBt = document.getElementById('pushBt');
-const attackBt = document.getElementById('attackBt');
-const restBt = document.getElementById('restBt');
-const sleepBt = document.getElementById('sleepBt');
-
-const skillBt = document.getElementById('skillBt');
-const bandingBt = document.getElementById('bandingBt');
-const atHomeBt = document.getElementById('atHomeBt');
-const nextMapBt = document.getElementById('nextMapBt');
-const prevMapTxt = document.getElementById('prevMapTxt');
-const nextMapTxt = document.getElementById('nextMapTxt');
 
 
 
-//무기 아이콘
-const weaponIcon = document.getElementById('weaponIcon');
-const weaponImg = document.getElementById('weaponImg');
-const weaponName = document.getElementById('weaponName');
-//가방 아이콘
-const backpackIcon = document.getElementById(`backpackIcon`);
-const backpackImg = document.getElementById(`backpackImg`);
-const backpackName = document.getElementById('backpackName');
 
-const commandBts = [pushBt,attackBt,restBt,skillBt,bandingBt, atHomeBt,nextMapBt, backpackIcon]; //, weaponIcon
 
 //로그텍스트 추가
 const logtxt = document.getElementById("logText");
@@ -892,11 +871,7 @@ function checkGameOver(){
         log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
     }
 }
-function commandBtsVisible(value){
-    for(let i = 0; i<commandBts.length;i++){
-        commandBts[i].classList.toggle('hidden', !value);
-    }
-}
+
 
 
 //상단설비 호출 함수
