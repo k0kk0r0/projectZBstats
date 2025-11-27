@@ -20,7 +20,7 @@
   function showItemModal(item) {
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
     const _pathsplit =item.path.replace(".png","").split('/');
-    const _itempath = `${item.path.startsWith("Base")? "":"[Mod]"}${_pathsplit[0]}.${_pathsplit[_pathsplit.length-1] }`;
+    const _itempath =( item.path.startsWith("Base")? `${_pathsplit[0]}.${_pathsplit[_pathsplit.length-1]}` :`[Mod]${_pathsplit[1]}.${_pathsplit[2]}` );
     let _itemname = translations[currentLang][item.name] ?? item.name;
     itemName.textContent = `${item.subType =='food' ?( item.condition>0 ? (item.condition/item.maxCondition >(item.rottenDays-item.freshDays)/item.rottenDays?'신선한 ':'신선하지 않은 ') :'' ) :''}
       ${(_itempath.endsWith("Cooked")?"요리된 ": (_itempath.endsWith("Overdone")? "타버린 ":(_itempath.endsWith("Rotten")?"상한 ":"")))}${_itemname}${_itempath.endsWith("Open")?"(열림)": ""}`;

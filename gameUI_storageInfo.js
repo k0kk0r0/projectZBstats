@@ -320,7 +320,7 @@ function itemMove_mouseDown(e){
         if(storage_quickEquipChkInput.checked==false){
             equipSetTimeout = null;
             point.x = e.clientX;
-                point.y = e.clientY;
+            point.y = e.clientY;
             //setEquipment(data,dataset);
             itemsubMenu(data, dataset, true);
             return;
@@ -359,14 +359,13 @@ function itemMove_mouseUp(e){
 }
 //////////////////장비창 정보 표시
 function itemEquip_mouseDown(e){
-    const id = e.currentTarget.id;
-    let data = null;
+     const key = e.currentTarget.id.split('_')[1];
+    let data = equipments[key];
     /*
     if(id == equipIcons.weapon.icon.id){
         data = equipments.weapon;
     }
-    */
-     Object.entries(equipIcons).forEach(([key]) => {
+        Object.entries(equipIcons).forEach(([key]) => {
         const _data =equipments[key];
         const target = equipIcons[key];
         if(_data!=null){
@@ -376,7 +375,15 @@ function itemEquip_mouseDown(e){
         }
         
      });
-
+    */
+     
+    if(storage_quickEquipChkInput.checked==false){
+        
+        point.x = e.clientX;
+        point.y = e.clientY;
+        itemsubMenu(data, null);
+        return;
+    }
     if(mousedown==false){
         mousedown =true;
         equipBool=false;
@@ -393,7 +400,7 @@ function itemEquip_mouseDown(e){
     }    
 }
 function itemEquip_mouseUp(e){
-    const id = e.currentTarget.id;
+    const key = e.currentTarget.id.split('_')[1];
     if(mousedown){
         mousedown=false;
         clearInterval(equipSetTimeout);
@@ -403,25 +410,20 @@ function itemEquip_mouseUp(e){
             return;
         }else{
             //짧은 터치, 장비해제
-             Object.entries(equipIcons).forEach(([key]) => {
-                const data =equipments[key];
-                const target = equipIcons[key];
-                if(data!=null){
-                    
-                   if(id == target.icon.id ){
-                        inventory.push( data );
-                        
-                        
-                        equipments[key] = null;
-                   }
-                }else{
-                    
-                }
-            });
+            unequip(key);
             renderStorageModal();
         }
         equipBool=false;
     }else{
         return;
     }
+}
+function unequip(key){
+     //짧은 터치, 장비해제
+    const data =equipments[key];
+    if(data!=null){
+        inventory.push( data );
+        equipments[key] = null;
+    }
+    renderStorageModal();
 }

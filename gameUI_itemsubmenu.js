@@ -8,11 +8,9 @@ function closeSubOption(){itemSubOption.classList.add("hidden");}
 function itemsubMenu(data, dataset, immediate =false){
     if(data ==null)return
     itemSubOption.classList.remove("hidden");
-    const innerWidth = window.innerWidth;
-    const innerHeight = window.innerHeight;
+    
     //console.log(point, innerWidth, innerHeight);
-    optionBoxes.style.left = `${point.x> innerWidth*0.75? point.x-innerWidth*0.2-20:point.x+30}px`;
-    optionBoxes.style.top = `${point.y> innerHeight*0.7? point.y-innerHeight*0.2-20:point.y-40}px`;
+    
     optionBoxes.innerHTML='';
     function makeBox(nameTxt, boxColor="bg-gray-500"){
         const box = document.createElement("button");
@@ -30,8 +28,16 @@ function itemsubMenu(data, dataset, immediate =false){
         });
     }
     const zombieIsAlived = zombies.length>0? true : false;
+    if(dataset==null){
+        if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
+            makeBox(`장착 해제${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
+                unequip(data.type.toLowerCase());
+                closeSubOption();
+                if(zombieIsAlived)advanceTurn();
+            });
+        }
 
-    if(dataset!=null){
+    }else if(dataset!=null){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착하기${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
@@ -189,32 +195,35 @@ function itemsubMenu(data, dataset, immediate =false){
                 
             }
             
+            
             if(data.subType =="consume"){
                 
 
-                if(data.name =="Zomboxivir"){
-                    makeBox("사용하기", "bg-slate-300").addEventListener('click', ()=>{
-                        /*
-                    if(cureWound("zombie")){
-                        log(`${data.info.split("(")[0] } - 좀비화 치료`, true);
-                        inventory.splice(dataset.index,1);
-                        renderStorageModal();
-                        advanceTurn();
-                    }else{
-                        log(`치료할 상처가 없습니다.`);
-                    }*/
-                    cureWound("zombie");
-                    log(`${translations[currentLang][data.name]??data.name} 아이템을 사용했습니다`, true);
-                    inventory.splice(dataset.index,1);
-                    renderStorageModal();
-                    advanceTurn();
-                    
-                    closeSubOption();
-                    }); 
-                }
+                //if(data.name =="Zomboxivir"){
+                   
+                //}
                 
             }
            
+            //////////////////모드데이터////////////////////////////////////
+            if(modDatas.length>0){
+                //console.log(modDatas);
+                for(let i = 0 ; i < modDatas.length; i++){
+                    const string =modDatas[i].api.cureWound(data.name);
+                        if(string!=null){
+                        makeBox("사용하기", "bg-slate-300").addEventListener('click', ()=>{
+                            cureWound(string);
+                            log(`${translations[currentLang][data.name]??data.name} 아이템을 사용했습니다`, true);
+                            inventory.splice(dataset.index,1);
+                            renderStorageModal();
+                            advanceTurn();
+                            
+                            closeSubOption();
+                        }); 
+                    }
+                }
+            }
+            //////////////////////////////////////////////////////////////
             if(immediate){
                  makeBox(`${storage[0].name=="ground"?"바닥에 버리기":"보관함에 넣기"}${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                     itemMove(data, dataset);
@@ -237,4 +246,17 @@ function itemsubMenu(data, dataset, immediate =false){
             });
         }
     }
+    //크기조절
+    
+    const innerWidth = window.innerWidth;
+    const innerHeight = window.innerHeight;
+    optionBoxes.style.left = innerWidth;
+    optionBoxes.style.top = innerHeight;
+    setTimeout(() =>{
+        const space = 30;
+        const width = optionBoxes.offsetWidth;
+        const height = optionBoxes.offsetHeight;
+        optionBoxes.style.left = `${point.x + width> innerWidth*0.9? point.x-width-space:point.x+space}px`;
+        optionBoxes.style.top = `${point.y+height> innerHeight*0.9? point.y-height-space:point.y-space}px`;
+    },10 );
 }
