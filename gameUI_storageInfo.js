@@ -322,7 +322,7 @@ function itemMove_mouseDown(e){
             point.x = e.clientX;
             point.y = e.clientY;
             //setEquipment(data,dataset);
-            itemsubMenu(data, dataset, true);
+            itemsubMenu(data, dataset);
             return;
         }
         equipBool=false;
@@ -350,6 +350,7 @@ function itemMove_mouseUp(e){
             return;
         }else{
             //짧은 터치
+            if(zombies.length>0){return}//좀비가 있는 경우
            itemMove(data, dataset);
         }
         equipBool=false;
@@ -410,8 +411,9 @@ function itemEquip_mouseUp(e){
             return;
         }else{
             //짧은 터치, 장비해제
+            
+            if(zombies.length>0){return}//좀비가 있는 경우
             unequip(key);
-            renderStorageModal();
         }
         equipBool=false;
     }else{

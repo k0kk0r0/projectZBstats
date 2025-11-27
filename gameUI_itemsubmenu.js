@@ -224,13 +224,13 @@ function itemsubMenu(data, dataset, immediate =false){
                 }
             }
             //////////////////////////////////////////////////////////////
-            if(immediate){
+            
                  makeBox(`${storage[0].name=="ground"?"바닥에 버리기":"보관함에 넣기"}${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                     itemMove(data, dataset);
                     closeSubOption();
                     if(zombieIsAlived)advanceTurn();
                 });
-            }
+            
            
             
         }

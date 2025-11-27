@@ -11,6 +11,10 @@ function spawnZombie(_tag='random'){
         zombieInven.push("ShirtGeneric-0.7-");
     }
 
+   
+    zombieInven.push(`DigitalWatch${Math.random()<0.15?'_fancy':(Math.random()<0.5?'_red':'')}-0.3`)
+    
+
     //좀비종류
     if(_tag=='random'){
         const rng = Math.random();
@@ -283,10 +287,13 @@ function zombieDropItem( zombieInven){
             const dropitem = zombieInven[i].split('-');
             if(Math.random() < parseFloat(dropitem[1])){
                 let item = findItem(dropitem[0]);
-                if(dropitem[2]!=null){
-                    item.condition = randomInt(1,item.maxCondition);
+                if(item!=null){
+                    if(dropitem[2]!=null){
+                        item.condition = randomInt(1,item.maxCondition);
+                    }
+                    dropItem.push(item );
                 }
-               dropItem.push(item );
+                
             }
         }
        
