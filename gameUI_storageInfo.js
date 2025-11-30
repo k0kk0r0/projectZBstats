@@ -140,6 +140,7 @@ function renderStorageModal(){
             weight.inventory += parseFloat(inventory[i].condition)/10;
         }
     }
+    if(storageIndex>storage.length-1){storageIndex = storage.length-1};
     const _storageInventory = storage[storageIndex].inventory;
     for(let i =0;i<_storageInventory.length; i++){
         addInventoryItem( _storageInventory[i], storage_storage, i);
@@ -428,4 +429,27 @@ function unequip(key){
         equipments[key] = null;
     }
     renderStorageModal();
+}
+
+function pushItemToInventory(_inventory, itemName){
+    //당장은 안 쓰는 함수임..갯수구현 힘듬.
+    //inventory.push( findItem(data.convert) );
+    const item = findItem(itemName);
+    if(item.count !=null){
+        if(item.count>0){
+            //숫자를 세는 경우
+            for(let i = 0; i<_inventory.length;i++){
+                if(_inventory[i].name == item.name){
+                    _inventory[i].count++;
+                    return;
+                }
+            }
+            _inventory.push( item );
+        }else{
+            _inventory.push( item );
+        }
+    }else{
+        _inventory.push( item );
+    }
+    
 }

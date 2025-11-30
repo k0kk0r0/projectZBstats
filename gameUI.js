@@ -171,7 +171,7 @@ nextMapBt.addEventListener('click',() =>{
     stopResting();
     mapNum++;
     let rng = Math.random();
-    if(mapNum==mapData.length){
+    if(mapNum==mapData.length-1){
         if(currentMapData.name =="road"){
             //현재 길거리에 있을 때에만
             if(rng<0.15){

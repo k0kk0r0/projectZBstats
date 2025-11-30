@@ -5,7 +5,7 @@ document.addEventListener("pointerdown", (e) => {
     point.y = e.clientY;
 });
 function closeSubOption(){itemSubOption.classList.add("hidden");}
-function itemsubMenu(data, dataset, immediate =false){
+function itemsubMenu(data, dataset){
     if(data ==null)return
     itemSubOption.classList.remove("hidden");
     
@@ -45,23 +45,34 @@ function itemsubMenu(data, dataset, immediate =false){
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();
             });
+           
         }
-        if(data.subType== "clothing"){
-            //의상 찢기
-            if(data.convert != null){
-                makeBox("의상 찢기", "bg-slate-300").addEventListener('click', ()=>{
-                    inventory.push( findItem(data.convert) );
-                    if(dataset.route == storage_storage.id){
-                        storage[storageIndex].inventory.splice(dataset.index,1);
-                    }else{
-                        inventory.splice(dataset.index,1);
-                    }
-                    
-                    renderStorageModal();
-                    advanceTurn();
-                    
-                    closeSubOption();
-                });
+        if(data.convert != null){
+            if(data.type != 'food'){
+                //음식의 경우 따로 처리
+                let dismentleTxt ={
+                    clothing: "옷 찢기",
+                    watch: "시계 분해하기",
+                    default :"분해하기"
+                 }
+                  if(data.subType== "clothing" || data.subType== "watch"){
+                //의상 찢기, 분해
+                
+                    makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, "bg-slate-300").addEventListener('click', ()=>{
+                        inventory.push( findItem(data.convert) );
+                        //pushItemToInventory(inventory, data.convert);
+                        if(dataset.route == storage_storage.id){
+                            storage[storageIndex].inventory.splice(dataset.index,1);
+                        }else{
+                            inventory.splice(dataset.index,1);
+                        }
+                        
+                        renderStorageModal();
+                        advanceTurn();
+                        
+                        closeSubOption();
+                    });
+                }
             }
         }
         if(data.type =="FluidContainer"){

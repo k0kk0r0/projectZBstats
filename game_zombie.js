@@ -152,9 +152,28 @@ function callZombies(num, addPer=0){
 
     if(rng <= per){
         closeStorageModal();
-        
+        let zombieData = spawnZombie();
+        let nextzombies =[];
+        if(mapNum>0){
+            if(mapData[mapNum+1]!=null ){
+                nextzombies= mapData[mapNum+1].zombies;
+                
+            }
+            if(nextzombies.length<=0 && mapData[mapNum-1]!=null){
+                nextzombies= mapData[mapNum-1].zombies;
+
+            }
+            if(nextzombies.length>0){
+                //다음 맵 좀비 끌어오기
+                
+                const zn= randomInt(0, nextzombies.length);
+                zombieData = nextzombies[zn];
+                nextzombies.splice(zn,1);
+                //console.log(`다음 맵 ${zn}번째 좀비 끌어오기`);
+            }
+        }
         log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
-        renderZombieDiv(spawnZombie()) ;
+        renderZombieDiv(zombieData) ;
         renderZombie();
         stopResting();
         stack.zombieSpawn = 0;
@@ -167,7 +186,7 @@ function clearZombies(){
     } );
     zombies=[];
 }
-function zombieAttack( timedelay=600){
+function zombieAttack( timedelay=300){
     if(zombies.length>0){
         const attackNum = 2;
         const num = (attackNum > zombies.length)? zombies.length: attackNum;
@@ -178,13 +197,14 @@ function zombieAttack( timedelay=600){
         }
         for(let i =0; i< num; i++){
             if(zombies[i].hp > 0 && zombies[i].isStunning <= 0 ){
+                timedelay += 200;
                 setTimeout(() => {
                     if(gameOver)return;
                     log(`좀비${i}의 공격!`);
                     zombieMove(i,-45);
-                    playerIsDamaged( 5);
+                    playerIsDamaged( 1);
                     //TurnEnd();
-                },  timedelay +i*150);
+                },  timedelay);
             }
         }
          setTimeout(() => { 
@@ -192,8 +212,8 @@ function zombieAttack( timedelay=600){
             delaying = false;
             zombieSwapping();
             TurnEnd();
-        }, timedelay+400+num*150);
-        
+        }, timedelay);
+        //console.log(timedelay);
     }
 }
 function zombieSwapping(){

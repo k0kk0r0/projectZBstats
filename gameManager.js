@@ -123,6 +123,7 @@ const logtxt = document.getElementById("logText");
 //배경
 const Scene = document.getElementById("Scene");
 const bg = document.getElementById('mainBg');
+const weatherBg = document.getElementById('weatherBg');
 
 //아이템리스트
 let weaponDatas = []; //무기리스트
@@ -316,12 +317,12 @@ function loadItemDatas( link ) {
 }
 async function init() {
     
-  mapDatas = await loadItemDatas("mapDatas.csv");
-  weaponDatas = await loadItemDatas("items/weapons.csv");
-  miscDatas = await loadItemDatas("items/miscs.csv");
-  foodDatas = await loadItemDatas("items/foods.csv");
-  clothDatas = await loadItemDatas("items/cloths.csv"); 
-  
+    mapDatas = await loadItemDatas("mapDatas.csv");
+    weaponDatas = await loadItemDatas("items/weapons.csv");
+    miscDatas = await loadItemDatas("items/miscs.csv");
+    foodDatas = await loadItemDatas("items/foods.csv");
+    clothDatas = await loadItemDatas("items/cloths.csv"); 
+    
     const modData = await loadModFiles('TheyKnew');
 
     // 2. 📌 modData.api를 통해 main 함수에 접근하여 호출합니다.
@@ -398,7 +399,9 @@ function findMisc(itemName ){
         subType: data.subType.toString(),
         condition: parseInt(data.condition),
         maxCondition: parseInt(data.condition),
+        convert: data.convert.toString(),
         weight: parseFloat(data.weight),
+        //count: parseInt(data.count),
         info: data.info.toString()
     }
     return data0;
@@ -493,7 +496,7 @@ async function ResetAllGame(){
     equipments.hat =null;
     equipments.pants = null;
     equipments.shoes = null;
-    equipments.accessory = findItem("DigitalWatch");
+    equipments.accessory = null;
     //console.log(equipments.accessory);
     backpack = {name:"backpack", path:"Base/Backpacks/SheetSlingBag.png"};
     storage = [];
@@ -511,16 +514,18 @@ async function ResetAllGame(){
     mapData = [];
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
+    mapData.push( findMapData('road'));
     mapNum = 1;
     mapData[mapNum].zombieNum = 0;
     mapSetting(mapData[mapNum]);
     
     stack = {
         weather:"sunny",
-        nextWeather:"rain",
+        nextWeather:"foggy",
         prevWeather:"sunny",
         weatherTime:randomInt(5,10),
 
+        dark:false,
         zombieSpawn:0
     };
     for(let i=0;i<moodles.length;i++){
@@ -593,39 +598,68 @@ function changeweather(){
             if(stack.weather =="rain"){    txt0 = '비가 그치고'  }
             if(stack.weather =="windy"){    txt0 = '바람이 그치고'  }
             if(stack.weather =="sunny"){    txt0 = '맑은 날씨가 끝나고'  }
+            if(stack.weather =="foggy"){    txt0 = '안개가 걷히고'  }
             //날씨변경 시 알림
             if(stack.nextWeather=="rain"){  txt="비가 옵니다."  }
             if(stack.nextWeather=="windy"){ txt="바람이 붑니다."   }
             if(stack.nextWeather=="sunny"){ txt="날씨가 잔잔해졌습니다."  }
+            if(stack.nextWeather=="foggy"){ txt="안개가 낍니다."  }
+            
             
             log(`${txt0} ${txt}`);
         }
         stack.weather = stack.nextWeather;
         const rng = Math.random();
-         if(rng < 0.3){
+         if(rng < 0.2){
             stack.nextWeather = "rain";
-            stack.weatherTime = randomInt(4,20);
+            stack.weatherTime = randomInt(12,20);
+            
+        }else if(rng < 0.4){
+            stack.nextWeather = "foggy";
+            stack.weatherTime = randomInt(12,18);
             
         }else if(rng < 0.7){
             stack.nextWeather = "windy";
-            stack.weatherTime = randomInt(2,8);
+            stack.weatherTime = randomInt(12,18);
             
         }else{
             stack.nextWeather = "sunny";
-            stack.weatherTime = randomInt(10,10);
-           
+            stack.weatherTime = randomInt(10,20);
+        }
+        
+    }
+    changeWeatherBg();
+}
+function changeWeatherBg(){
+    
+    weatherBg.classList.add("hidden");
+    if(stack.dark){
+        weatherBg.classList.remove("hidden");
+        weatherBg.src = "images/bg_dark.png";
+    }else{
+        if(currentMapData.outdoor){
+            //바깥의 경우에만 날씨효과 적용
+            switch (stack.weather){
+                case "foggy":
+                    weatherBg.classList.remove("hidden");
+                    weatherBg.src = "images/bg_foggy.png";
+                break;
+
+            }
         }
     }
+   
+    
 }
 function radioAction(num){
     //라디오 작동
     let txt = '';
     if(getFacilityEnable('radio')){
         if(num==0){ 
-            log(`pzzz.. ABS 비상방송...pzzz... 날씨는... <${translations[currentLang][stack.weather]}> pzzz...`);
+            log(`pzzz.. ABS 비상방송...pzzz... 날씨는... <${translations[currentLang][stack.weather] ?? stack.weather}> pzzz...`);
         }
         if(num==10){
-            log(`pzzz... 앞으로 ${stack.weatherTime}턴 동안 ...날씨가 지속된 후... pzzz... <${translations[currentLang][stack.nextWeather]}>.. pzzz...`)
+            log(`pzzz... 앞으로 ${stack.weatherTime}턴 동안 ...날씨가 지속된 후... pzzz... <${translations[currentLang][stack.nextWeather]??stack.nextWeather}>.. pzzz...`)
         }
         if(num==20){
             if(powerEndTurn>0){
@@ -646,17 +680,31 @@ function bgLightDark(data){
         if( hour>=8 && hour < 20 ){
             //낮 시간대
             dark = false;
+            stack.dark = dark;
         }else{
             dark =true;
+            stack.dark = dark;
         }
     }else{
         //실내의 경우
+        
         if( getFacilityEnable("generator") || powerEndTurn>0){
             //발전기가 켜져 있으면
             dark = false;
+            stack.dark = dark;
         }else{
-            dark = true;
+            if( hour>=8 && hour < 20 ){
+                //낮 시간대
+                dark = true;
+                stack.dark = false;
+            }else{
+                //밤 시간대
+                dark = true;
+                stack.dark =true;
+            }
         }
+        
+        
     }
     if(!dark){
         if(src.includes("_dark")){
@@ -666,8 +714,11 @@ function bgLightDark(data){
         if(src.includes("_light")){
             editsrc = src.replace("_light","_dark");
         }
+        
     }
+    
     bg.src = editsrc;
+    changeWeatherBg();
 }
 function log(text, popup=false) {
   const p = document.createElement("p"); // 한 줄씩 추가
@@ -890,7 +941,12 @@ function renderGameUI(){
         atHomeBt.classList.add('hidden');
     }
     if(mapNum+1 < mapData.length){
-        nextMapTxt.innerText = translations[currentLang][mapData[mapNum+1].name];
+        if(mapNum+2 >= mapData.length){
+            nextMapTxt.innerText = translations[currentLang].nextMap;
+        }else{
+            nextMapTxt.innerText = translations[currentLang][mapData[mapNum+1].name];
+        }
+        
         nextMapBt.classList.remove('hidden');
     }else{
         if(mapNum+1 == mapData.length){
@@ -906,7 +962,31 @@ function renderGameUI(){
     
     //남은좀비수
     if(zombies.length>0){
-        zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ${zombies.length}`
+        
+        //실내나 밝은 경우에는 숫자 표시
+        let zombieCountable=true;
+        if(currentMapData.outdoor){
+            if(stack.weather =="foggy" || stack.weather =="rain"){
+            //날씨가 안 좋은 경우
+                 zombieCountable=false;
+            }
+            if(stack.dark){
+                //밤인 경우
+                zombieCountable=false;
+            }
+
+        }else{
+            if(stack.dark){
+                //밤인 경우
+                zombieCountable=false;
+            }
+        }
+       if(zombieCountable){
+            zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ${zombies.length}`;
+       }else{
+            zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ???`;
+       }
+        
         zombieNumTxt.classList.remove('hidden');
     }else{
         zombieNumTxt.classList.add('hidden');

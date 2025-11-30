@@ -1,12 +1,13 @@
-type,subType,path,name,weight,condition,info
-Misc,junk,Base/Miscs/TinCanEmpty.png,TinCanEmpty,0.2,1,
-Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,
-FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,
-FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,
-FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,
-FluidContainer,bleach,Base/Miscs/Bleach.png,Bleach,0.1,10,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
-FluidContainer,water,Base/Miscs/WaterBottle.png,WaterBottle,0.1,10,
-FluidContainer,water,Base/Miscs/PopBottle.png,PopBottle,0.1,20,
-Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,
-Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,
-Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,
+type,subType,path,name,weight,condition,convert,count,info
+Misc,junk,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,1,
+Misc,junk,Base/Miscs/TinCanEmpty.png,TinCanEmpty,0.2,1,,,
+Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,,,
+FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,,,
+FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,,,
+FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,,,
+FluidContainer,bleach,Base/Miscs/Bleach.png,Bleach,0.1,10,,,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
+FluidContainer,water,Base/Miscs/WaterBottle.png,WaterBottle,0.1,10,,,
+FluidContainer,water,Base/Miscs/PopBottle.png,PopBottle,0.1,20,,,
+Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,ElectronicsScrap,,
+Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,ElectronicsScrap,,
+Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,ElectronicsScrap,,

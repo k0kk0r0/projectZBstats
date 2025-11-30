@@ -250,7 +250,11 @@
       <!-- 메인 배경화면 -->
       <div class="flex-grow flex items-center justify-center">
         <div id="Scene" class="relative w-full max-h-[600px] bg-gray-600 border-4 border-gray-500 overflow-hidden">
-          <img id="mainBg" src="images/bg0_dark.png" alt="게임화면" class="w-full h-full object-cover  z-10">
+          <div class="relative w-full h-full min-h-[480px] max-h-[600px]">
+            <img id="mainBg" src="images/bg0_dark.png" alt="게임화면" class="absolute w-full h-full object-cover  z-10">
+            <img id="weatherBg" src="images/bg_foggy.png" alt="날씨" class="hidden absolute w-full h-full object-cover  z-40">
+          </div>
+          
           <!-- 날짜 텍스트 (이미지 안쪽 상단에 표시됨) -->
           <span id="timer" class="absolute top-2 left-2 text-white text-2xl font-bold bg-black/60 px-3 py-1 rounded z-50">
             7월 4일 07:00
@@ -325,7 +329,7 @@
             </span>
           </div>
           <!-- 무들 아이콘들 -->
-          <div class="flex flex-col items-center gap-2 absolute top-12 right-2 ">
+          <div class="flex flex-col items-center gap-2 absolute top-12 right-2 z-50 ">
             <div id="Moodle_Icon_Tired" class="w-16 h-12 rounded bg-gray-600/80">      
               <img src="uxicons/Moodle_Icon_Tired.png" alt="Tired" class="absolute w-12 h-12 z-50" >
               <img id="pgBar_Tired" src="uxicons/pgbar-1.png" alt="" class="absolute w-16 h-12 z-50" > 
@@ -485,7 +489,7 @@
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
     <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
-     <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] max-w-[960px] 
+     <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] max-w-[900px] 
               
                 h-[50vh] lg:h-[70vh] min-h-[720px]
                 grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
@@ -501,13 +505,12 @@
           class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
         </div>
-        <checkbox id="storage_quickEquipChk" class="absolute bottom-4 left-4 flex items-center space-x-2">
-          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
-          <label for="storage_quickEquipChk" class="text-lg font-bold">좌측 항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
-
-        </checkbox>
+        
       </div>
-      
+      <checkbox id="storage_quickEquipChk" class="absolute flex items-center space-x-2 bg-slate-300/70">
+          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
+          <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
+      </checkbox>
       <!-- 플레이어 인벤토리 -->
       <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
         <h2 class="text-xl font-bold mb-2">🦺장비 슬롯 </h2>
@@ -707,7 +710,7 @@
         let html = `<p class="mb-2 text-xl">📢 ${data.version} 업데이트 안내</p>`;
         html += "<ul>";
         data.changes.forEach(item => {
-          html += `<li class="mb-1 lg:text-2xl sm:text-2xl ">- ${item}</li>`;
+          html += `<li class="mb-1 lg:text-2xl sm:text-2xl "> ${item.startsWith("0.")? 'ver. ': ' -'}${item}</li>`;
         });
         //html += "</ul><p class='mt-2 text-2xl lg:text-lg text-gray-600'>" + data.note + "</p>";
         noticeContent.innerHTML = html;
