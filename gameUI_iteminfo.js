@@ -48,7 +48,12 @@
     }
     makeDiv('MultiHit', item.multiHit);
     makeDiv('Stamina', item.stamina);
-    makeDiv('Damage', item.damage);
+
+    makeDiv('Damage', item.damage? ( item.damage==item.damageMax? item.damage: `${item.damage}~${item.damageMax}` ) : null);
+    
+    makeDiv('Critical(%)', item.cri? `${item.cri*100}%`:null);
+    makeDiv('Critical Multify', item.criXp? `x${item.criXp}`:null);
+
     makeDiv('FreshDays', item.freshDays? (item.freshDays<0? "보존식품" : `${(item.freshDays/24)}일`) : null);
     makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
     makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '' );

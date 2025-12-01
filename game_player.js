@@ -156,11 +156,41 @@ function playerAttack(multiHit){
 
     let skillLv = findPlayerSkill(equipments.weapon.subType).lv;
     for(let i =0 ; i< num; i++){
+        /*
+        피해량을 계산하는 방법은 먼저 위키에 명시된 값에서 피해량을 빼는 것입니다. 이 범위 내의 값은 무작위로 선택됩니다. 그 다음 보너스/페널티가 곱셈적으로 적용됩니다.
+* 체중 부족(20%) 또는 매우 체중 부족에 따른 페널티(40%)
+* 공황 및 스트레스 페널티(스트레스 또는 공황 단계당 10%)
+* 낮은 지구력과 피로에 따른 페널티(레벨은 5%, 10%, 20%, 50%)
+* 무기 유형별 기술 레벨 인자. (레벨당 30% + 10%입니다)
+* 무기 유형에 따른 두 번째 기술 보너스는 3레벨에서 10%, 7레벨에 20%로 증가합니다.
+* 피해량이 사거리 감소하지 않는 무기(예: 휘두르는 무기)는 사거리 상한선에 해당하는 보너스가 있고, 가까이 있을 경우 페널티가 있습니다. 이 효과는 최대 사거리에서 100% 피해 보너스에서 가까이 있을 때 페널티로 선형적으로 적용됩니다. (즉: 피해량은 2*거리/최대 사거리를 곱한 상태에서 바닥은 0.3입니다)
+* 이 값은 위키
+에 언급된 힘 보너스/페널티 비율로 곱합니다* 강한 경우 40%, 약한 경우 40% 추가 보너스가 >=9 또는 <=1일 때.
+* 바닥에 있는 좀비를 공격하면 50% 피해 보너스가 있습니다.
+* 양손 무기를 한 손에 사용할 경우 50% 페널티가 있습니다.
+* 최근에 좀비를 4번 이상 공격한 경우, 피해량이 300%로 배가되며, 이후 공격할 때마다 150%씩 증가합니다.
+* 좀비를 향해 시선을 돌릴 경우 50% 피해 보너스가 있습니다. (>90도 각도와는 다릅니다)
+* 치명타는 무기에 명시된 비율로 발생하며, 이 비율에 대한 보너스는 무기의 숙련도에 따라 적용됩니다. 이 경우 피해량에 무기 명시된 양이 배됩니다.
+
+마지막으로 이 값에 근접 무기는 22.5, 총은 105를 곱합니다.
+*/
         //대미지 계산
-        
-        let damage = (parseFloat(equipments.weapon.damage) /2 + randomInt(0,parseFloat(equipments.weapon.damage)/2))*(skillLv+1);
+        let _cri = equipments.weapon.cri;
+        let _criXp = equipments.weapon.criXp;
+        const _damage = equipments.weapon.damage;
+        const _maxDamage = equipments.weapon.damageMax;
+
+        let damage = 22.5 *(_damage + Math.random()*(_maxDamage-_damage));
+        console.log(damage, _damage, _maxDamage);
+        damage =  damage * (skillLv+1);
+
         if(zombies[i].isStunning>0){
-            damage = damage*2;
+            damage = damage*1.5;
+        }
+        if(Math.random() < _cri){
+            //크리티컬 터짐
+            damage = damage*_criXp;
+            console.log('cri',damage);
         }
         //패닉
         if(stat.panic>0){

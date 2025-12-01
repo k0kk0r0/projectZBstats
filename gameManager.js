@@ -367,7 +367,10 @@ function findWeapon(itemName ){
         maxCondition: parseInt(data.condition),
         conditionLowerChance: parseInt(data.conditionLowerChance),
         stamina: parseInt(data.stamina),
-        damage: parseInt(data.damage),
+        damage: parseFloat(data.damage),
+        damageMax: parseFloat(data.damage),
+        cri: parseFloat(data.cri),
+        criXp: parseFloat(data.criXp),
         weight: parseFloat(data.weight)
     }
     return data0;
@@ -644,7 +647,10 @@ function changeWeatherBg(){
                     weatherBg.classList.remove("hidden");
                     weatherBg.src = "images/bg_foggy.png";
                 break;
-
+                case "rain":
+                    weatherBg.classList.remove("hidden");
+                    weatherBg.src = "images/bg_rain.png";
+                break;
             }
         }
     }
