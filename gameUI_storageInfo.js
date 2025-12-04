@@ -4,6 +4,8 @@ let equipBool =false;
 let equipSetTimeout;
 let storageIndex =0; //현재 열려있는 보관함 인덱스
 const equipIconBoxes = storageModal.querySelectorAll(".equipiconbox");
+const storagePn = document.getElementById("storagePn");
+const storagePnFrame = document.getElementById("storagePnFrame");
 
 const storageTag = document.getElementById('storageTag');
 function addStorageTag(name, index, turn=-1){
@@ -49,10 +51,10 @@ Object.entries(equipIcons).forEach(([key]) => {
 });
 /////////
 
-function openStorageModal(){
+function openStorageModal(bool){
     if(gameOver)return
     storageModal.classList.remove('hidden');
-    renderStorageModal();
+    renderStorageModal(bool);
 }
 function closeStorageModal(){
     closeSubOption();
@@ -108,11 +110,23 @@ function itemRotten(item){
     }
 }
 
-function renderStorageModal(){
+function renderStorageModal(storageVisible =true){
     closeSubOption();
+    removeMatrialItem();
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
     storageTag.innerHTML ='';
+
+    storagePn.classList.toggle(`hidden`, !storageVisible);
+    if(storageVisible){
+        storagePnFrame.classList.remove('grid-cols-1','grid-rows-1');
+        storagePnFrame.classList.add('lg:grid-cols-2','sm:grid-cols-1','lg:grid-rows-1','sm:grid-rows-2');
+        
+    }else{
+        storagePnFrame.classList.remove('lg:grid-cols-2','sm:grid-cols-1','lg:grid-rows-1','sm:grid-rows-2');
+        storagePnFrame.classList.add('grid-cols-1','grid-rows-1');
+    }
+    
     for(let i =0; i< storage.length; i++){
         addStorageTag( storage[i].name , i, storage[i].turn );
     }
@@ -136,7 +150,7 @@ function renderStorageModal(){
 
     let boxSize='';
     ///////////////가변 크기
-    console.log(window.innerWidth/window.innerHeight);
+   // console.log(window.innerWidth/window.innerHeight);
     if(window.innerWidth/window.innerHeight<0.65){
         boxSize = `w-28 h-28`;
         storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";
@@ -151,7 +165,7 @@ function renderStorageModal(){
         storage_player.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";  
     }
     for(let n =0 ;n<equipIconBoxes.length; n++){
-        equipIconBoxes[n].className=`equipiconbox relative overflow-hidden p-4 bg-gray-400 rounded flex items-center justify-center ${boxSize}`;
+        equipIconBoxes[n].className=`equipiconbox relative overflow-hidden p-4 bg-white rounded flex items-center justify-center ${boxSize}`;
     }
 
     for(let i =0;i<inventory.length; i++){
@@ -232,6 +246,10 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16'){
            durabilityBar.style.height = `${ ratio> freshratio ? ratio * 100: 100}%`;
         }
            */
+    }
+    if(data.subType=='matrial'){
+        durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+        durabilityBar.style.height = `${ratio * 100}%`;
     }
     //div.dataset.durabilityId = `durability_${index}`;
    // durabilityBar.id = div.dataset.durabilityId;
@@ -475,4 +493,34 @@ function pushItemToInventory(_inventory, itemName){
         _inventory.push( item );
     }
     
+}
+
+function changeItemCondition(data, matrial, repeat){
+    while (true){
+        
+        if(data.condition>=data.maxCondition){
+            break;
+        }
+        if(matrial.condition<=0){
+            break;
+        }
+        if(repeat<=0){
+            break;
+        }
+        repeat--;
+        data.condition++;
+        matrial.condition--;
+       // console.log(data.condition, matrial.condition);
+    }
+    return data;
+}
+function removeMatrialItem(subtype="matrial"){
+    for(let i =0;i<inventory.length;i++){
+        if(inventory[i].subType==subtype){
+            if(inventory[i].condition<=0){
+                inventory.splice(i,1);
+                i--;
+            }
+        }
+    }
 }

@@ -47,6 +47,39 @@ function itemsubMenu(data, dataset){
             });
            
         }
+        if(data.type=='Armor'){
+            //방어구인 경우
+            makeBox(`옷 수선하기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
+                if(findInventoryItemData('Needle')){
+                    const thread = findInventoryItemData('Thread');
+                    if(thread!=null && thread.condition>0){
+                        const rag = findInventoryItemData("Rag");
+                        if(rag!=null){
+                            rag.subType='matrial';
+                            rag.condition=0;
+                            
+                            data = changeItemCondition(data, thread,1);
+                            findInventoryItem(dataset.route, dataset.index).condition = data.condition;
+                            addSkillXp("Tailoring",125);
+                            advanceTurn();
+                        }else{
+                            log(`남은 ${translations[currentLang].Rag}이 없습니다.`,true);
+                        }
+                    }else{
+                        log(`남은 실이 없습니다.`,true);
+                    }
+                }else{
+                    //바늘이 없는 경우
+                    log(`바늘이 없습니다.`,true);
+                }
+                
+                closeSubOption();
+                renderStorageModal();
+
+            });
+
+        }
+
         if(data.convert != null){
             if(data.type != 'food'){
                 //음식의 경우 따로 처리
@@ -81,7 +114,7 @@ function itemsubMenu(data, dataset){
             if(item.condition>0){
                 const drinkType = (data.subType.split(';').length>1? `${translations[currentLang][ data.subType.split(';')[0]] } 혼합액` : data.subType);
                  const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
-                makeBox(`${drinkname} 마시기`, itemColor(drinkType)).addEventListener('click', ()=>{
+                makeBox(`${drinkname} 마시기${zombieIsAlived?'(턴 넘김)':''}`, itemColor(drinkType)).addEventListener('click', ()=>{
                     playerDrink( data.subType.split(';')[0], item );
                     advanceTurn();
                     renderStorageModal();
@@ -103,7 +136,7 @@ function itemsubMenu(data, dataset){
                 // console.log(waterSource);
                 if(waterSource!=null){
                     const addFluidname = translations[currentLang][waterSource] ?? waterSource;
-                    makeBox(`${addFluidname} 채우기`).addEventListener('click', ()=>{
+                    makeBox(`${addFluidname} 채우기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                         if(faucet!=null){
                             if(waterEndTurn>0){
                                 item.condition = item.maxCondition;
@@ -150,7 +183,7 @@ function itemsubMenu(data, dataset){
                 }
             }
             if(item.condition>0){
-                 makeBox(`비우기`).addEventListener('click', ()=>{
+                 makeBox(`비우기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                     item.condition = 0;
                     item.subType = 'empty';
                     item.info = '';
@@ -164,6 +197,8 @@ function itemsubMenu(data, dataset){
         }
         if(dataset.route == storage_player.id){
             //플레이어 가방에 있을 때
+            
+
             
             if(data.subType =="bandage"){
                 makeBox(`붕대 감기${zombieIsAlived?'(턴 넘김)':''}`, "bg-slate-300").addEventListener('click', ()=>{

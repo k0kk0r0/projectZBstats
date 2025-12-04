@@ -195,6 +195,9 @@ function setPlayerTrait(){
     skills.ShortBlunt = {lv:0, xp:0, maxXp: xpData[0]};
     skills.LongBlunt = {lv:0, xp:0, maxXp: xpData[0]};
 
+    //생활스킬
+    skills.Tailoring = {lv:0, xp:0, maxXp: xpData[0]};
+
 
     for(let i =0 ; i< data.length; i++){
         let value = data[i].value;
@@ -454,11 +457,15 @@ function findMapData(itemName){
     let dropItemsArray=[];
     const dropTable = data.dropItems.split(";");
     for(let i =0;i<dropTable.length ; i++){
-        item = dropTable[i].split("-");
+        _dropitem = dropTable[i].split("-");
         let rng = Math.random();
-        if(rng < parseFloat(item[1])){
+        if(rng < parseFloat(_dropitem[1])){
            // console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
-            dropItemsArray.push( findItem( item[0]) );
+           let item = findItem( _dropitem[0]);
+           if(_dropitem[2]!=null){
+                item.condition = randomInt(1, item.maxCondition);
+           }
+            dropItemsArray.push( item);
         }
     }
 
@@ -562,7 +569,7 @@ async function ResetAllGame(){
     renderGameUI();
 
     //테스트
-    openStorageModal();
+    //openStorageModal();
 }
 //맵 이동 갱신
 function mapSetting(data) {

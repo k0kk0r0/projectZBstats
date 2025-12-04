@@ -439,12 +439,19 @@
               스킬 창
             </span>
           </div>
+           <div id="storageBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/storage.png" alt="보관함" class="w-14 h-14">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              보관함
+            </span>
+          </div>
           <div id="inventoryBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="Base/Backpacks/SheetSlingBag.png" alt="소지품" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               소지품
             </span>
           </div>
+         
       </div>
     </div>
    
@@ -489,7 +496,7 @@
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
     <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
-     <div class="bg-gray-800 text-white rounded-2xl shadow-xl 
+     <div id="storagePnFrame" class="bg-gray-800 text-white rounded-2xl shadow-xl 
                 w-[90vw] max-w-[900px] 
                 h-[60vh] lg:h-[40vh] min-h-[640px]
                 grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
@@ -635,7 +642,7 @@
         <div id="field_info" class="text-gray-600 text-lg whitespace-pre-line"></div>
         <!-- 컨디션 바 -->
         <div id="field-condition">
-          <div class="text-gray-600  text-sm mb-1">Condition <span id="field-conditionText" class="font-semibold"></span></div>
+          <div class="text-gray-600  text-sm mb-1"><span id="field-conditionText" class="font-semibold"></span></div>
           <div class="w-full bg-gray-200  rounded-full h-4 overflow-hidden">
             <div id="field-conditionBar" class="h-full transition-all" style="width: 0%"></div>
           </div>

@@ -304,11 +304,11 @@ function zombieDropItem( zombieInven){
     let dropItem = [];
     if(zombieInven.length>0){
         for(let i =0 ;i < zombieInven.length;i++){
-            const dropitem = zombieInven[i].split('-');
-            if(Math.random() < parseFloat(dropitem[1])){
-                let item = findItem(dropitem[0]);
+            const _dropitem = zombieInven[i].split('-');
+            if(Math.random() < parseFloat(_dropitem[1])){
+                let item = findItem(_dropitem[0]);
                 if(item!=null){
-                    if(dropitem[2]!=null){
+                    if(_dropitem[2]!=null){
                         item.condition = randomInt(1,item.maxCondition);
                     }
                     dropItem.push(item );

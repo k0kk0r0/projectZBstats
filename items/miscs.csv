@@ -1,7 +1,9 @@
 type,subType,path,name,weight,condition,convert,count,info
-Misc,junk,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,1,아직 쓸모 있는 재료는 아닙니다.
+Misc,matrial,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,1,아직 쓸모 있는 재료는 아닙니다.
 Misc,junk,Base/Miscs/TinCanEmpty.png,TinCanEmpty,0.2,1,,,
 Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,,,
+Misc,matrial,Base/Miscs/Thread.png,Thread,0.1,20,,,
+Misc,tool,Base/Miscs/Needle.png,Needle,0.01,1,,,
 FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,,,
 FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,,,
 FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,,,

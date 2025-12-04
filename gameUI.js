@@ -13,6 +13,7 @@ const nextMapTxt = document.getElementById('nextMapTxt');
 //메뉴창
 const menuBt = document.getElementById('menuBt');
 const skillBt = document.getElementById('skillBt');
+const storageBt = document.getElementById('storageBt');
 const inventoryBt = document.getElementById('inventoryBt');
 
 
@@ -91,9 +92,14 @@ skillBt.addEventListener('click', ()=>{
     openSkillModal();
     closeMenuModal();
 });
+storageBt.addEventListener('click', ()=>{
+    //인벤토리와 보관함 창 열기
+    openStorageModal();
+    closeMenuModal();
+});
 inventoryBt.addEventListener('click', ()=>{
     //인벤토리 창 열기
-    openStorageModal();
+    openStorageModal(false);
     closeMenuModal();
 });
 
@@ -324,6 +330,14 @@ function findInventoryItem(route, index){
         }
     }
     return item;
+}
+function findInventoryItemData(itemname){
+    for(let i = 0 ; i <inventory.length;i++){
+        if(inventory[i].name == itemname){
+            return inventory[i];
+        }
+    }
+    return null;
 }
 
 function itemRatioColor(value, number = 0.5){

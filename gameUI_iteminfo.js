@@ -79,22 +79,26 @@
             const per = 1/( item.conditionLowerChance + Math.floor( Math.floor(   MaintenanceLv + ( weaponLv/2)  )/2 )*2 ) ;
             field_conditionLowerChance.textContent = item.conditionLowerChance? (`하락확률 : ${(per*100).toFixed(1)}%` ) : '';
             field_conditionBar.classList.add( itemRatioColor(cond/cond0) );
-            field_conditionText.textContent = `${cond}/${cond0} (${ratio}%)`;
+            field_conditionText.textContent = `내구도: ${cond}/${cond0} (${ratio}%)`;
         }
         if(item.type=='Armor'){
             //const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
             //const armorLv = parseFloat(findPlayerSkill(item.subType).lv);
-            field_conditionText.textContent = `구멍 ${cond0-cond}개, (${ratio}%)`;
+            field_conditionText.textContent = `구멍: ${cond0-cond}개, (${ratio}%)`;
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }
         else if(item.type=='FluidContainer'){
             //액체류의 경우
-            field_conditionText.textContent = `${cond/10}/${cond0/10}L (${ratio}%)`;
+            field_conditionText.textContent = `남은 양: ${cond/10}/${cond0/10}L (${ratio}%)`;
             field_conditionBar.classList.add(itemColor(item.subType));
         }else if(item.subType=='food'){
             //신선도가 있는 음식의 경우
             field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );
-            field_conditionText.textContent = `신선도 ${cond}/${cond0} (${ratio}%)`;
+            field_conditionText.textContent = `신선도: ${cond}/${cond0} (${ratio}%)`;
+        }else if(item.subType=='matrial'){
+            //재료인 경우
+            field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
+            field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;
         }else{
             field_conditionBar.classList.add("bg-yellow-400");
         }
