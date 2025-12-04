@@ -152,7 +152,7 @@
   </div>
   <!-- 게임 모달 -->
    <div id="gameModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 hidden">
-    <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[70vw] sm:min-h-[840px] lg:min-h-[720px] max-h-[800px] sm:max-h-[800px] rounded-2xl shadow-xl bg-gray-600">
+    <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[90vw] sm:min-h-[840px] lg:min-h-[720px] max-h-[70vh] sm:max-h-[800px] rounded-2xl shadow-xl bg-gray-600">
       <!-- 닫기 버튼 -->
       <button id="closeGameModalBtn" class="absolute top-2 right-2 z-50 text-white-600 hover:text-black text-2xl sm:text-4xl">
         ✕
@@ -489,12 +489,12 @@
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
     <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
-     <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] max-w-[900px] 
-              
-                h-[50vh] lg:h-[70vh] min-h-[720px]
+     <div class="bg-gray-800 text-white rounded-2xl shadow-xl 
+                w-[90vw] max-w-[900px] 
+                h-[60vh] lg:h-[40vh] min-h-[640px]
                 grid lg:grid-cols-2 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-2 gap-4">
       <!-- 보관함 -->
-      <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
+      <div id="storagePn" class="relative flex flex-col border border-gray-500 rounded-xl h-full">
         <h2 id="storage_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
         <div id="storageTag" class="mg-2 gap-2 flex p-2 flex-wrap">
           <button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
@@ -502,79 +502,79 @@
           <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
         </div>
         <div id="storage_storage"
-          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
+          class="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] md:grid-cols-[repeat(auto-fill,minmax(56px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
         </div>
-        
-      </div>
-      <checkbox id="storage_quickEquipChk" class="absolute flex items-center space-x-2 bg-slate-300/70">
+        <checkbox id="storage_quickEquipChk" class="absolute bottom-0 flex items-center space-x-2 bg-slate-300/70">
           <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
           <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
-      </checkbox>
+        </checkbox>
+      </div>
+      
       <!-- 플레이어 인벤토리 -->
-      <div class="relative flex-1 border border-gray-500 rounded-xl p-4 overflow-y-auto">
+      <div class="relative flex flex-col border border-gray-500 rounded-xl p-4 h-full">
         <h2 class="text-xl font-bold mb-2">🦺장비 슬롯 </h2>
             <!-- 장비 슬롯 -->
         <div id="equipmentSlots" class="grid grid-cols-6 gap-2 justify-items-center">
           <!-- 무기 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hidden p-4 w-24 h-24 lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_weapon_bar" class="absolute bottom-0 left-0 right-0 rounded-b "> </div>
               <img id="equipIcon_weapon" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="무기">
-              <span id="equipName_weapon" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_weapon" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               ⚔무기
               </span>
             </div>
           </div>
           <!-- 모자 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hidden p-4 w-24 h-24  lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_hat_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               
               <img id="equipIcon_hat" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="모자">
-              <span id="equipName_hat" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_hat" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               🎩모자
               </span>
             </div>
           </div>
           <!-- 방어구 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hidden p-4 w-24 h-24  lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_armor_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               <img id="equipIcon_armor" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="방어구">
-              <span id="equipName_armor" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_armor" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               👚방어구
               </span>
             </div>
           </div>
           <!-- 바지 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hiddene p-4 w-24 h-24  lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hiddene p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_pants_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               <img id="equipIcon_pants" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="바지">
-              <span id="equipName_pants" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_pants" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               👖바지
               </span>
             </div>
           </div>
            <!-- 신발 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hidden p-4 w-24 h-24  lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_shoes_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               
               <img id="equipIcon_shoes" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="신발">
-              <span id="equipName_shoes" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_shoes" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               👟신발
               </span>
             </div>
           </div>
            <!-- 악세서리 -->
           <div class="flex flex-col items-center">
-            <div class="relative overflow-hidden p-4 w-24 h-24  lg:w-16 lg:h-16 bg-gray-700 rounded flex items-center justify-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_accessory_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               
               <img id="equipIcon_accessory" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="악세서리">
-              <span id="equipName_accessory" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              <span id="equipName_accessory" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
               💍악세서리
               </span>
             </div>
@@ -585,8 +585,10 @@
         <h2 id="inventory_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
         <h2 class="text-xl font-bold mb-2">🎒플레이어 인벤토리 </h2>
         <div id ="storage_player"
-          class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
-          <!--<div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
+          >
+          <!--
+          class="overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]"
+          <div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
         </div>
         
       </div>
@@ -680,7 +682,7 @@
 <!--//////////////////////////////////////////////////////////////////////////////////////////////////////-->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    let version = "0.4.12.16"; // ← 버전 숫자 변수
+    let version = ""; // ← 버전 숫자 변수
     document.getElementById("version-text").textContent = `ver ${version}`;
     //다크모드 버튼
     document.getElementById("toggleDark").addEventListener("click", () => {

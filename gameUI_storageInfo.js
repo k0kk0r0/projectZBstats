@@ -3,6 +3,7 @@ let mousedown = false;
 let equipBool =false;
 let equipSetTimeout;
 let storageIndex =0; //현재 열려있는 보관함 인덱스
+const equipIconBoxes = storageModal.querySelectorAll(".equipiconbox");
 
 const storageTag = document.getElementById('storageTag');
 function addStorageTag(name, index, turn=-1){
@@ -132,8 +133,29 @@ function renderStorageModal(){
        inventory:0,
        bagWeight:playerstat.bagWeight
     }
+
+    let boxSize='';
+    ///////////////가변 크기
+    console.log(window.innerWidth/window.innerHeight);
+    if(window.innerWidth/window.innerHeight<0.65){
+        boxSize = `w-28 h-28`;
+        storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";
+        storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";  
+    }else if(window.innerWidth/window.innerHeight<0.9){
+        boxSize = `w-24 h-24`;
+        storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";
+        storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";  
+    }else{
+        boxSize='w-16 h-16';
+        storage_storage.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
+        storage_player.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";  
+    }
+    for(let n =0 ;n<equipIconBoxes.length; n++){
+        equipIconBoxes[n].className=`equipiconbox relative overflow-hidden p-4 bg-gray-400 rounded flex items-center justify-center ${boxSize}`;
+    }
+
     for(let i =0;i<inventory.length; i++){
-        addInventoryItem( inventory[i], storage_player, i);
+        addInventoryItem( inventory[i], storage_player, i, boxSize);
         weight.inventory += parseFloat( inventory[i].weight );
         if(inventory[i].type=="FluidContainer"){
             //액체의 경우, 무게 추가
@@ -143,7 +165,7 @@ function renderStorageModal(){
     if(storageIndex>storage.length-1){storageIndex = storage.length-1};
     const _storageInventory = storage[storageIndex].inventory;
     for(let i =0;i<_storageInventory.length; i++){
-        addInventoryItem( _storageInventory[i], storage_storage, i);
+        addInventoryItem( _storageInventory[i], storage_storage, i , boxSize);
         weight.storage += parseFloat(_storageInventory[i].weight);
         if(_storageInventory[i].type=="FluidContainer"){
             //액체의 경우, 무게 추가
@@ -157,20 +179,21 @@ function renderStorageModal(){
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
     renderEquipment();
 }
-function addInventoryItem(data , route, index){
+function addInventoryItem(data , route, index, boxSize = 'w-16 h-16'){
     //
     if(data ==null){
         return;
     }
+    
     const div = document.createElement('div');
     div.id = `item_${data}`;
-    div.className = "relative w-24 h-24 lg:w-16 lg:h-16  flex bg-white rounded aspect-square";
+    div.className = `relative flex bg-white rounded aspect-square ${boxSize}`;
     div.dataset.data = JSON.stringify(data);
     div.dataset.route = route.id;
     div.dataset.index = index;
 
     const namespan = document.createElement('span');
-    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/50 text-center rounded-b z-50";
+    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/50 text-center truncate rounded-b z-50";
     namespan.innerText = translations[currentLang][data.name]??data.name;
     div.appendChild(namespan);
 

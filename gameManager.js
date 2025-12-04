@@ -560,6 +560,9 @@ async function ResetAllGame(){
 
     radioAction(0);
     renderGameUI();
+
+    //테스트
+    openStorageModal();
 }
 //맵 이동 갱신
 function mapSetting(data) {
