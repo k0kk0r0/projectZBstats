@@ -407,7 +407,7 @@ function findMisc(itemName ){
         maxCondition: parseInt(data.condition),
         convert: data.convert.toString(),
         weight: parseFloat(data.weight),
-        //count: parseInt(data.count),
+        count: parseInt(data.count)??0,
         info: data.info.toString()
     }
     return data0;
@@ -526,7 +526,7 @@ async function ResetAllGame(){
     mapData.push( findMapData('house'));
     mapData.push( findMapData('road'));
     mapNum = 1;
-    mapData[mapNum].zombieNum = 0;
+    mapData[mapNum].zombies =[];
     mapSetting(mapData[mapNum]);
     
     stack = {
@@ -575,6 +575,7 @@ async function ResetAllGame(){
 function mapSetting(data) {
    
     
+    /*
     if(playerHasTrait("conspicuous")){
         //넘치는존재감
         txt = "<넘치는 존재감>으로";
@@ -585,6 +586,7 @@ function mapSetting(data) {
         txt = "<부족한 존재감>으로";
         log(`${txt} 좀비가 덜 이끌려 왔습니다`)
     }
+        */
 
     currentMapData = data;
     clearInterval(interval );
@@ -778,6 +780,7 @@ function randomInt(min, max) {
 
 function advanceTurn() {
      if(gameOver)return;
+     
     //좀비반격
     if(zombies.length>0){
         closeStorageModal();
@@ -798,8 +801,12 @@ function advanceTurn() {
 }
 
 function TurnEnd() {
+    renderPlayerStat();
     if(gameOver)return;
     if(!delaying) {
+        //스토리지 턴 횟수 초기화
+         storageTurn=0;
+
         //좀비소환
             callZombies(1);
         //스텟 회복

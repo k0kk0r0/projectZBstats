@@ -433,10 +433,10 @@
       <div class="fixed flex items-center bg-gray-400 px-3 py-2 z-50 hover rounded absolute bottom-10 ">
         <div class="flex gap-2 space-x-1">
         <!-- 액션 버튼들 -->
-          <div id="skillBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14">
+          <div id="playerStatBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/skillBt.png" alt="스텟 창" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              스킬 창
+              플레이어
             </span>
           </div>
            <div id="storageBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
@@ -451,7 +451,12 @@
               소지품
             </span>
           </div>
-         
+          <div id="skillBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              스킬 창
+            </span>
+          </div>
       </div>
     </div>
    
@@ -469,33 +474,22 @@
       <div id="skillList" class="grid grid-cols-2 gap-3"></div>
     </div>
   </div>
-  <!-- 
-  <div id="inventoryModal"
-  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-
-  <div class="bg-gray-800 text-white rounded-2xl shadow-xl w-[90vw] h-[70vh] max-w-[960px] p-6 flex flex-col gap-6">
-
-    
-
-    <div class="flex-1 border border-gray-600 rounded-xl p-4">
-      <h2 class="text-lg font-bold mb-2 text-center">🎒 플레이어 인벤토리</h2>
-
-      <div id="inventory_player" class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(64px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
-       
-        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
-        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
-        <div class="w-16 sm:w-24 h-16 sm:h-24 bg-gray-700 rounded"></div>
-      </div>
-    </div>
-
+   <!-- 플레이어 스텟 모달 -->
+  <div id="playerStatModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative">
+      <!-- 닫기 버튼 -->
+      <!--<button id="closeSkillModal" class="absolute top-2 right-4 text-gray-600 hover:text-black text-2xl font-bold">✕</button>
+    -->
+      <h2 class="text-2xl font-bold mb-4 text-center">🎯 플레이어 상태</h2>
+      
+      <!-- 스킬 목록이 여기에 자동으로 추가됨 -->
+      <div id="statList" class="grid grid-cols-2 gap-3"></div>
     </div>
   </div>
-  
-  인벤토리 모달 -->
 
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-    <div class="grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
+    <div class="absolute grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6">
      <div id="storagePnFrame" class="bg-gray-800 text-white rounded-2xl shadow-xl 
                 w-[90vw] max-w-[900px] 
                 h-[60vh] lg:h-[40vh] min-h-[640px]
@@ -512,10 +506,7 @@
           class="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(96px,0fr))] md:grid-cols-[repeat(auto-fill,minmax(56px,0fr))] lg:grid-cols-[repeat(auto-fill,minmax(64px,0fr))]">
           
         </div>
-        <checkbox id="storage_quickEquipChk" class="absolute bottom-0 flex items-center space-x-2 bg-slate-300/70">
-          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
-          <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
-        </checkbox>
+       
       </div>
       
       <!-- 플레이어 인벤토리 -->
@@ -598,8 +589,16 @@
           <div class="w-24 lg:w-16 bg-gray-700 rounded aspect-square"></div>-->
         </div>
         
+          
       </div>
-      
+       <checkbox id="storage_quickEquipChk" class="absolute bottom-2 flex items-center space-x-2 bg-slate-400/70">
+          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
+          <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
+        </checkbox>
+        <div class="w-40 h-8 bg-slate-400 rounded-b h-4 overflow-hidden absolute bottom-2 right-6">
+          <div id="field-inventoryBar" class="h-full transition-all bg-green-400 absolute" style="width: 0%"></div>
+          <span id="inventoryTurnTxt" class="absolute px-2">턴 넘김</span>
+        </div>
     </div>
      </div>
   </div>
@@ -611,7 +610,7 @@
     </div>
       
   </div>
-  <!-- ---------- 아이템 모달 HTML (body 끝부분에 넣으세요) ---------- -->
+  <!-- ---------- 아이템 모달 HTML ---------- -->
   <div id="itemModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 p-4">
     <div class="w-[60vw] max-w-[480px] bg-white text-black rounded-2xl shadow-xl overflow-hidden">
       <div class="flex items-center justify-between p-4 border-b">
@@ -642,11 +641,11 @@
         <div id="field_info" class="text-gray-600 text-lg whitespace-pre-line"></div>
         <!-- 컨디션 바 -->
         <div id="field-condition">
-          <div class="text-gray-600  text-sm mb-1"><span id="field-conditionText" class="font-semibold"></span></div>
-          <div class="w-full bg-gray-200  rounded-full h-4 overflow-hidden">
+          <div class="text-gray-600 text-md mb-1"><span id="field-conditionText" class="font-semibold"></span></div>
+          <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <div id="field-conditionBar" class="h-full transition-all" style="width: 0%"></div>
           </div>
-          <div class="text-xs text-gray-500 mt-1"><span id="field-conditionLowerChance"></span></div>
+          <div class="text-sm text-gray-500 mt-1"><span id="field-conditionLowerChance"></span></div>
         </div>
       </div>
       <!--

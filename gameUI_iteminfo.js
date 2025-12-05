@@ -58,6 +58,11 @@
     makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
     makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '' );
 
+    if(item.count !=null){
+      if(item.count>0){
+        makeDiv('Count',item.count);
+      }
+    }
     const info = item.info!=null? item.info.replace(";",`\n`): "";
     field_info.textContent = (info ?? ''); //아이템 설명
 
@@ -84,7 +89,12 @@
         if(item.type=='Armor'){
             //const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
             //const armorLv = parseFloat(findPlayerSkill(item.subType).lv);
-            field_conditionText.textContent = `구멍: ${cond0-cond}개, (${ratio}%)`;
+            if(cond0>cond){
+              makeDiv('구멍',`${cond0-cond}개`);
+            }else{
+              makeDiv('덧댄 천',`${cond-cond0}개`);
+            }
+            field_conditionText.textContent = `내구도: ${ratio}%`;
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }
         else if(item.type=='FluidContainer'){

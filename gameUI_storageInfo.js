@@ -3,9 +3,14 @@ let mousedown = false;
 let equipBool =false;
 let equipSetTimeout;
 let storageIndex =0; //현재 열려있는 보관함 인덱스
+let storageTurn =0;
+let storageVisible =true;
+const maxStorageTurn = 5;
 const equipIconBoxes = storageModal.querySelectorAll(".equipiconbox");
 const storagePn = document.getElementById("storagePn");
 const storagePnFrame = document.getElementById("storagePnFrame");
+const fieldInventoryBar = document.getElementById("field-inventoryBar");
+const inventoryTurnTxt = document.getElementById("inventoryTurnTxt");
 
 const storageTag = document.getElementById('storageTag');
 function addStorageTag(name, index, turn=-1){
@@ -110,9 +115,16 @@ function itemRotten(item){
     }
 }
 
-function renderStorageModal(storageVisible =true){
+function renderStorageModal(){
     closeSubOption();
     removeMatrialItem();
+
+    //턴넘김 바
+    fieldInventoryBar.style.width = `${storageTurn/maxStorageTurn*100}%`;
+    inventoryTurnTxt.innerText =`다음 턴까지 ${maxStorageTurn-storageTurn}회 남음`
+    if(storageTurn>=maxStorageTurn){
+        advanceTurn();
+    }
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
     storageTag.innerHTML ='';
@@ -149,18 +161,22 @@ function renderStorageModal(storageVisible =true){
     }
 
     let boxSize='';
+    let fontSize ='';
     ///////////////가변 크기
    // console.log(window.innerWidth/window.innerHeight);
     if(window.innerWidth/window.innerHeight<0.65){
         boxSize = `w-28 h-28`;
+        fontSize='text-2xl';
         storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";
         storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";  
     }else if(window.innerWidth/window.innerHeight<0.9){
         boxSize = `w-24 h-24`;
+        fontSize='text-lg';
         storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";
         storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";  
     }else{
         boxSize='w-16 h-16';
+        fontSize='text-md';
         storage_storage.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
         storage_player.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";  
     }
@@ -169,7 +185,7 @@ function renderStorageModal(storageVisible =true){
     }
 
     for(let i =0;i<inventory.length; i++){
-        addInventoryItem( inventory[i], storage_player, i, boxSize);
+        addInventoryItem( inventory[i], storage_player, i, boxSize, fontSize);
         weight.inventory += parseFloat( inventory[i].weight );
         if(inventory[i].type=="FluidContainer"){
             //액체의 경우, 무게 추가
@@ -179,7 +195,7 @@ function renderStorageModal(storageVisible =true){
     if(storageIndex>storage.length-1){storageIndex = storage.length-1};
     const _storageInventory = storage[storageIndex].inventory;
     for(let i =0;i<_storageInventory.length; i++){
-        addInventoryItem( _storageInventory[i], storage_storage, i , boxSize);
+        addInventoryItem( _storageInventory[i], storage_storage, i , boxSize, fontSize);
         weight.storage += parseFloat(_storageInventory[i].weight);
         if(_storageInventory[i].type=="FluidContainer"){
             //액체의 경우, 무게 추가
@@ -193,7 +209,7 @@ function renderStorageModal(storageVisible =true){
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
     renderEquipment();
 }
-function addInventoryItem(data , route, index, boxSize = 'w-16 h-16'){
+function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`text-md`){
     //
     if(data ==null){
         return;
@@ -207,7 +223,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16'){
     div.dataset.index = index;
 
     const namespan = document.createElement('span');
-    namespan.className = "absolute bottom-0 left-0 right-0 text-md text-white bg-black/50 text-center truncate rounded-b z-50";
+    namespan.className = `absolute bottom-0 left-0 right-0 ${fontSize} text-white bg-black/50 text-center truncate rounded-b z-50`;
     namespan.innerText = translations[currentLang][data.name]??data.name;
     div.appendChild(namespan);
 
@@ -250,6 +266,16 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16'){
     if(data.subType=='matrial'){
         durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
         durabilityBar.style.height = `${ratio * 100}%`;
+    }
+    if(data.count !=null){
+        if(data.count>0){
+            //숫자를 세는 경우
+            const namespan2 = document.createElement('span');
+            namespan2.className = `absolute top-0 right-0 ${fontSize} px-1 text-black text-bold text-center truncate z-50`;
+            namespan2.innerText = data.count;
+            div.appendChild(namespan2);
+        }
+        
     }
     //div.dataset.durabilityId = `durability_${index}`;
    // durabilityBar.id = div.dataset.durabilityId;
@@ -336,6 +362,7 @@ function renderEquipment(){
 }
 //
 function itemMove(data, dataset){
+    storageTurn++;
      if(dataset.route == storage_player.id){
         //가방으로 이동
         storage[storageIndex].inventory.push( data);
@@ -466,6 +493,7 @@ function unequip(key){
      //짧은 터치, 장비해제
     const data =equipments[key];
     if(data!=null){
+        console.log(storageTurn);
         inventory.push( data );
         equipments[key] = null;
     }
@@ -518,6 +546,12 @@ function removeMatrialItem(subtype="matrial"){
     for(let i =0;i<inventory.length;i++){
         if(inventory[i].subType==subtype){
             if(inventory[i].condition<=0){
+                inventory.splice(i,1);
+                i--;
+            }
+        }
+        if(inventory[i].count!=null){
+            if(inventory[i].count<=0){
                 inventory.splice(i,1);
                 i--;
             }

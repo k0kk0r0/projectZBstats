@@ -318,9 +318,14 @@ function playerIsDamaged(value){
     }
     //slowhealer, fasthealer, thinskinned, thickskinned
     let defend=false;
-    const clothDefendPer =0.65;
+    let clothDefendPer =0.65;
     if(equipments.armor != null){
         if(equipments.armor.condition>1){
+            const addRag = equipments.armor.condition - equipments.armor.maxCondition;
+            if(addRag>0){
+                //덧댄 천이 있다면?
+                clothDefendPer += addRag*0.1;
+            }
             //방어구 장착시 상처 확률 감소
             const armorRng = Math.random();
             if( armorRng < clothDefendPer){
@@ -335,28 +340,32 @@ function playerIsDamaged(value){
     }
     if(rng< 0.1 +per){
         //물림
-        wound.push( {tag:"bitten", heal:-1, turn:(100+healer*4)} );
-        wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
+        pushWound("bitten", (100+healer*4));
+        pushWound("zombie", (100+healer*4));
         log(`${ ((0.1+per)*100).toFixed(1) }% 확률로 좀비에게 [물렸]습니다.` ,true);
     }else if(rng<0.4+per){
         //찢어진상처
-        wound.push( {tag:"scratched", heal:-1, turn:randomInt(20+healer,40+healer)} );
+        pushWound("scratched", randomInt(20+healer,40+healer) );
         log(`${ ((0.4 +per)*100).toFixed(1) }% 확률로 좀비에게 [찢어진 상처]를 입었습니다.` );
         if(zbrng<0.25){
             //감염
-            wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
+            pushWound("zombie", (100+healer*4));
         }
     }else{
         //긁힘
-        wound.push( {tag:"lacerated", heal:-1, turn:randomInt(17+healer,25+healer)} );
+        pushWound("lacerated", randomInt(17+healer,25+healer) );
         log(`${ ((0.6 +per)*100).toFixed(1) }% 확률로 좀비에게 [긁혔]습니다.`);
         if(zbrng<0.07){
             //감염
-            wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
+            pushWound("zombie", (100+healer*4));
+
         }
     }
     
     renderGameUI();
+}
+function pushWound(_tag, _turn){
+    wound.push({tag:_tag, heal:-1, turn:_turn , turn0:_turn}); 
 }
 function woundHealingCalculate(){
     let wndCount=0;
@@ -473,7 +482,7 @@ function playerDrink( fluidType , item ){
         item.condition--;
          if(fluidType=="bleach"){
             //락스
-            wound.push({tag:fluidType, heal:-1, turn:20 , turn0:20}); 
+            pushWound(fluidType, 20);
             log(`끔찍한 선택을 했군요... 락스를 마셨습니다.`,true);
             closeStorageModal();
         }else if(fluidType =="water"){

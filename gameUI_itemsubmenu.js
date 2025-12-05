@@ -27,10 +27,15 @@ function itemsubMenu(data, dataset){
             closeSubOption();
         });
     }
-    const zombieIsAlived = zombies.length>0? true : false;
+    let zombieIsAlived = zombies.length>0? true : false;
+    if(storageTurn>=maxStorageTurn){
+        zombieIsAlived=true;
+    }
+
     if(dataset==null){
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착 해제${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
+                storageTurn++;
                 unequip(data.type.toLowerCase());
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();
@@ -41,6 +46,7 @@ function itemsubMenu(data, dataset){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착하기${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
+                storageTurn++;
                 setEquipment(data, dataset);
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();
@@ -49,36 +55,41 @@ function itemsubMenu(data, dataset){
         }
         if(data.type=='Armor'){
             //방어구인 경우
-            makeBox(`옷 수선하기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
-                if(findInventoryItemData('Needle')){
-                    const thread = findInventoryItemData('Thread');
-                    if(thread!=null && thread.condition>0){
-                        const rag = findInventoryItemData("Rag");
-                        if(rag!=null){
-                            rag.subType='matrial';
-                            rag.condition=0;
-                            
-                            data = changeItemCondition(data, thread,1);
-                            findInventoryItem(dataset.route, dataset.index).condition = data.condition;
-                            addSkillXp("Tailoring",125);
-                            advanceTurn();
+            if(data.condition< data.maxCondition*2){
+                makeBox(`${data.condition>=data.maxCondition?'옷 덧대기':'옷 수선하기'}${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
+                    const needle = findInventoryItemData('Needle');
+                    if(needle!=null ){
+                        const thread = findInventoryItemData('Thread');
+                        if(thread!=null && thread.condition>0){
+                            const rag = findInventoryItemData("Rag");
+                            if(rag!=null){
+                                rag.subType='matrial';
+                                rag.condition=0;
+                                
+                                
+                                thread.condition--;
+                                data.condition++;
+
+                                findInventoryItem(dataset.route, dataset.index).condition = data.condition;
+                                addSkillXp("Tailoring",125);
+                                advanceTurn();
+                            }else{
+                                log(`남은 ${translations[currentLang].Rag}이 없습니다.`,true);
+                            }
                         }else{
-                            log(`남은 ${translations[currentLang].Rag}이 없습니다.`,true);
+                            log(`남은 실이 없습니다.`,true);
                         }
                     }else{
-                        log(`남은 실이 없습니다.`,true);
+                        //바늘이 없는 경우
+                        log(`바늘이 없습니다.`,true);
                     }
-                }else{
-                    //바늘이 없는 경우
-                    log(`바늘이 없습니다.`,true);
-                }
-                
-                closeSubOption();
-                renderStorageModal();
+                    
+                    closeSubOption();
+                    renderStorageModal();
 
-            });
-
-        }
+                });
+            }
+            }
 
         if(data.convert != null){
             if(data.type != 'food'){
@@ -272,6 +283,7 @@ function itemsubMenu(data, dataset){
             //////////////////////////////////////////////////////////////
             
                  makeBox(`${storage[0].name=="ground"?"바닥에 버리기":"보관함에 넣기"}${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
+                    
                     itemMove(data, dataset);
                     closeSubOption();
                     if(zombieIsAlived)advanceTurn();
@@ -282,9 +294,6 @@ function itemsubMenu(data, dataset){
         }
         else if(dataset.route == storage_storage.id){
             //보관함에 있을 때
-
-
-
             makeBox(`가방에 넣기${zombieIsAlived?'(턴 넘김)':''}`).addEventListener('click', ()=>{
                 itemMove(data, dataset);
                 closeSubOption();

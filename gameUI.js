@@ -13,6 +13,7 @@ const nextMapTxt = document.getElementById('nextMapTxt');
 //메뉴창
 const menuBt = document.getElementById('menuBt');
 const skillBt = document.getElementById('skillBt');
+const playerStatBt = document.getElementById("playerStatBt");
 const storageBt = document.getElementById('storageBt');
 const inventoryBt = document.getElementById('inventoryBt');
 
@@ -39,24 +40,51 @@ function renderSkill(){
   skillList.innerHTML = ""; // 초기화
 
   for (const [name, data] of Object.entries(skills)) {
-    // XP 비율 계산
-    const percent = data.maxXp > 0 ? (data.xp / data.maxXp) * 100 : 0;
+        // XP 비율 계산
+        const percent = data.maxXp > 0 ? (data.xp / data.maxXp) * 100 : 0;
 
-    // 스킬 하나의 HTML 구성
-    const skillItem = document.createElement("div");
-    skillItem.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
+        // 스킬 하나의 HTML 구성
+        const item = document.createElement("div");
+        item.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
 
-    skillItem.innerHTML = `
-      <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
-      <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
-        <span>${translations[currentLang][name]??name} (Lv.${data.lv})</span>
-        <span>${data.xp} / ${data.maxXp}</span>
-      </span>
-    `;
+        item.innerHTML = `
+        <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
+        <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
+            <span>${translations[currentLang][name]??name} (Lv.${data.lv})</span>
+            <span>${data.xp} / ${data.maxXp}</span>
+        </span>
+        `;
 
-    skillList.appendChild(skillItem);
+        skillList.appendChild(item);
   }
 }
+
+function renderPlayerStat(){
+    //플레이어 스텟 표시
+    const statList = document.getElementById("statList");
+    statList.innerHTML='';//초기화
+    for(let i =0 ;i <wound.length; i++){
+        const data = wound[i];
+        const percent = data.turn > 0 ? (data.turn / data.turn0) * 100 : 0;
+        //wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
+        // 스킬 하나의 HTML 구성
+        const item = document.createElement("div");
+        item.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
+
+        item.innerHTML = `
+        <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
+        <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
+            <span>${translations[currentLang][data.tag]??data.tag} ${ data.heal>0?'(치료 중)':''}</span>
+            <span>${data.turn} / ${data.turn0}</span>
+        </span>
+        `;
+
+        statList.appendChild(item);
+    }
+}
+
+
+
 const skillmodal = document.getElementById("skillModal")
  // 모달 바깥 클릭 시 닫기
 skillmodal.addEventListener("click", (e) => {
@@ -80,13 +108,28 @@ menuModal.addEventListener("click", (e) => {
         closeMenuModal();
     }
 });
+
+const playerStatModal = document.getElementById("playerStatModal");
+playerStatModal.addEventListener("click", (e) => {
+    if (e.target === playerStatModal) {
+        playerStatModal.classList.add("hidden");
+    }
+});
+function openPlayerStatModal(){
+    renderPlayerStat();
+    playerStatModal.classList.remove('hidden');
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //버튼함수
 menuBt.addEventListener('click', () => {
     //메뉴 창 열기
     openMenuModal();
 });
-
+playerStatBt.addEventListener('click', ()=>{
+    //플레이어 스텟 창 열기
+    openPlayerStatModal();
+    closeMenuModal();
+});
 skillBt.addEventListener('click', ()=>{
     //스킬 창 열기
     openSkillModal();
@@ -94,12 +137,14 @@ skillBt.addEventListener('click', ()=>{
 });
 storageBt.addEventListener('click', ()=>{
     //인벤토리와 보관함 창 열기
+    storageVisible=true;
     openStorageModal();
     closeMenuModal();
 });
 inventoryBt.addEventListener('click', ()=>{
     //인벤토리 창 열기
-    openStorageModal(false);
+    storageVisible=false;
+    openStorageModal();
     closeMenuModal();
 });
 
@@ -370,7 +415,9 @@ function setEquipment(data, dataset){
                 
             }
             if(equipments[key]==null){
+                //storageTurn++;
                 equipments[key] = data;
+                
                 if(dataset.route == storage_player.id ){
                     inventory.splice(dataset.index,1);
                 }else if(dataset.route == storage_storage.id ){
