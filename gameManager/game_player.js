@@ -118,6 +118,7 @@ function stopResting(){
 }
 function playerAttack(multiHit){
     const stat = playerStat();
+    thirst-=0.5;
     if(equipments.weapon ==null){
         if(zombies.length>0){
             //좀비가 1명 이상
@@ -218,11 +219,17 @@ function playerAttack(multiHit){
             debuf.push(["stressed", stat.stressed*-10]);
         }
         //스태미나 고갈(Endurance)
-        if(stat.endurance==-1){ damage *= 0.5; debuf.push(["endurance", -50]);}
-        if(stat.endurance==-2){damage *=0.2; debuf.push(["endurance", -80]);}
-        if(stat.endurance==-3){damage *=0.1; debuf.push(["endurance", -90]);}
-        if(stat.endurance==-4){damage *=0.05; debuf.push(["endurance", -95]);}
-
+        if(stat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
+        if(stat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
+        if(stat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
+        if(stat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
+        //피로(fatique))
+        /*
+        if(stat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
+        if(stat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
+        if(stat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
+        if(stat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
+        */
         if(damage>355){
             //임시 리미트
             damage =355;
@@ -480,6 +487,7 @@ function playerDrink( fluidType , item ){
     }
     if(item.condition>0){
         item.condition--;
+
          if(fluidType=="bleach"){
             //락스
             pushWound(fluidType, 20);
@@ -487,6 +495,8 @@ function playerDrink( fluidType , item ){
             closeStorageModal();
         }else if(fluidType =="water"){
             //물 섭취
+            thirst+=10;
+            if(thirst>100){thirst=100;}
             log(`물을 마셨습니다.(${item.condition}/${item.maxCondition})`,true );
         }
     }else{
@@ -500,6 +510,9 @@ function playerEatFood(item, div=1){
         return
     }
     //배고픔 해결
+    const kcal = 30; //음식 회복량
+    hunger+= div*kcal;
+    if(hunger>200){hunger=200;}
     item.div -= div;
     item.weight = Math.round((item.weight-item.weightDiv*div)*100)/100;
     log(`${translations[currentLang][item.name]??item.name} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );

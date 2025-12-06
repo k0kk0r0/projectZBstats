@@ -35,7 +35,7 @@ function itemsubMenu(data, dataset){
     if(dataset==null){
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착 해제${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
-                storageTurn++;
+                
                 unequip(data.type.toLowerCase());
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();
@@ -46,7 +46,7 @@ function itemsubMenu(data, dataset){
         const item = findInventoryItem(dataset.route, dataset.index) ?? null; //아이템 미리 찾아두기, 장비창에서는 null값 리턴
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착하기${zombieIsAlived?'(턴 넘김)':''}`,`bg-blue-400`).addEventListener('click', ()=>{
-                storageTurn++;
+                
                 setEquipment(data, dataset);
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();

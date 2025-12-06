@@ -103,15 +103,40 @@ const playerZb = document.getElementById('playerZb');
 const equipWp = document.getElementById('equipWp');
 
 //무들 아이콘
-const moodleNames = ["Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
-const moodles = moodleNames.map(name => ({
-  name: name,
-  icon: document.getElementById(`Moodle_Icon_${name}`),
-  bar: document.getElementById(`pgBar_${name}`),
-  value: 0
-}));
+//gameModal.querySelectorAll('.moodleIcon');
+const moodleNames = ["Hungry", "Thirsty", "Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
+const slot = document.getElementById('moodleSlot');
 
+// moodleNames 배열을 순회하며 요소를 생성하고 즉시 참조를 저장
+const moodles = moodleNames.map(name => {
+    
+    // 1. 최상위 <div> 컨테이너 생성
+    const moodleContainer = document.createElement('div');
+    
+    // 2. 내부 HTML 문자열 생성
+    const innerHTML = `
+        <div id="Moodle_Icon_${name}" class="relative w-16 h-12 rounded bg-gray-600/80">
+            <img id="IconImg_${name}" src="uxicons/Moodle_Icon_${name}.png" alt="${name}" class="absolute w-12 h-12 z-50">
+            <img id="pgBar_${name}" src="uxicons/pgbar-1.png" alt="" class="absolute w-16 h-12 z-40">
+        </div>
+    `;
+    moodleContainer.innerHTML = innerHTML;
+    // 3. 생성된 HTML에서 실제 참조를 추출
+    // *주의: innerHTML을 사용했기 때문에, DOM에 추가하기 전에 querySelector로 참조를 즉시 추출해야 합니다.
+    const iconDiv = moodleContainer.querySelector(`#Moodle_Icon_${name}`);
+    const barImg = moodleContainer.querySelector(`#pgBar_${name}`);
+    
+    // 4. 슬롯에 추가 (innerHTML로 넣었기 때문에 container의 첫 번째 자식을 추가)
+    slot.appendChild(moodleContainer.firstElementChild);
 
+    // 5. Moodle 객체를 반환 (moodles 배열에 저장됨)
+    return {
+        name: name,
+        icon: iconDiv, // Moodle_Icon_{name} div 참조
+        bar: barImg,   // pgBar_{name} img 참조
+        value: 0,
+    };
+});
 
 
 
@@ -125,13 +150,7 @@ const Scene = document.getElementById("Scene");
 const bg = document.getElementById('mainBg');
 const weatherBg = document.getElementById('weatherBg');
 
-//아이템리스트
-let weaponDatas = []; //무기리스트
-let clothDatas = []; //의상리스트
-let mapDatas = [];//맵리스트
-let miscDatas = [];//기타 아이템 리스트
-let foodDatas = [];
-let modDatas = [];//모드 데이터
+
 
 //게임 상태 변수
 //턴 진행 함수
@@ -174,6 +193,8 @@ let inventory ;
 let storage;
 let stamina;
 let health;
+let hunger;
+let thirst;
 let wound = [];//상처 배열
 let skills = {};
 let job;
@@ -264,179 +285,6 @@ function maintenenceCalculate(item){
     }
     
 }
-// PapaParse를 이용해 CSV 파일을 불러오는 함수 (기존 함수 재활용)
-function loadCSVData(link) {
-    return new Promise((resolve) => {
-        Papa.parse(link, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                // PapaParse의 결과 중 실제 데이터만 resolve
-                resolve(results.data);
-            }
-        });
-    });
-}
-
-// 일반 텍스트 파일(예: script.js)의 내용을 불러오는 함수
-async function loadTextFile(link) {
-    const response = await fetch(link);
-    if (!response.ok) {
-        throw new Error(`파일 로드 실패: ${response.statusText} (${link})`);
-    }
-    return response.text();
-}
-async function loadModFiles(modName) {
-    const basePath = `Mods/${modName}`;
-    const scriptPath = `${basePath}/script.js`;
-    const dataPath = `${basePath}/data.csv`;
-
-    const [scriptContent, csvData] = await Promise.all([
-        loadTextFile(scriptPath), // 1. script.js 텍스트 로드
-        loadCSVData(dataPath)     // 2. data.csv 데이터 로드
-    ]);
-
-    // 3. 📌 스크립트 텍스트를 실행하여 모듈 API 객체를 얻습니다. (중요)
-    const modAPI = new Function(scriptContent)(); 
-
-    // 4. 모듈 API와 다른 데이터를 함께 반환합니다.
-    return {
-        api: modAPI, // 실행 가능한 함수(main, itemsubmenu 등)가 담긴 객체
-        data: csvData,
-        // ... (필요한 다른 데이터)
-    };
-}
-//데이터 호출
-function loadItemDatas( link ) {
-  return new Promise((resolve) => {
-    Papa.parse(link, {
-      download: true,
-      header: true,
-      complete: function(results) {
-        resolve(results.data);
-      }
-    });
-  });
-}
-async function init() {
-    
-    mapDatas = await loadItemDatas("mapDatas.csv");
-    weaponDatas = await loadItemDatas("items/weapons.csv");
-    miscDatas = await loadItemDatas("items/miscs.csv");
-    foodDatas = await loadItemDatas("items/foods.csv");
-    clothDatas = await loadItemDatas("items/cloths.csv"); 
-    
-    const modData = await loadModFiles('TheyKnew');
-
-    // 2. 📌 modData.api를 통해 main 함수에 접근하여 호출합니다.
-    if (modData.api && modData.api.main) {
-        // main 함수에 필요한 dataPath를 인수로 전달하여 호출
-        await modData.api.main(`Mods/TheyKnew/data.csv`); 
-        modDatas.push(modData);
-    } else {
-        console.error('모듈 API 또는 main 함수를 찾을 수 없습니다.');
-    }
-    
-}
-init();
-function findItem(itemName){
-    let item = findWeapon(itemName);
-    if(item!=null){ return item }
-    
-    item = findMisc(itemName);
-    if(item!=null){ return item }
-    
-    item = findFood(itemName);
-    if(item!=null){ return item}
-
-    item = findCloth(itemName);
-    if(item!=null){ return item}
-
-
-    return null;
-}
-function findWeapon(itemName ){
-    //무기데이터 검색 및 가공해서 반환
-    const data = weaponDatas.find(w => w.name === itemName);
-    if(data==null){ return null }
-    let data0 ={
-        path: data.path.toString(),
-        rotate: parseInt(data.rotate),
-        name: data.name.toString(),
-        type: data.type.toString(),
-        subType: data.subType.toString(),
-        multiHit: parseInt(data.multiHit),
-        condition: parseInt(data.condition),
-        maxCondition: parseInt(data.condition),
-        conditionLowerChance: parseInt(data.conditionLowerChance),
-        stamina: parseInt(data.stamina),
-        damage: parseFloat(data.damage),
-        damageMax: parseFloat(data.damage),
-        cri: parseFloat(data.cri),
-        criXp: parseFloat(data.criXp),
-        weight: parseFloat(data.weight)
-    }
-    return data0;
-}
-function findCloth(itemName ){
-    //의상 데이터 검색 및 가공해서 반환
-    const data = clothDatas.find(w => w.name === itemName);
-    if(data==null){ return null }
-    let data0 ={
-        path: data.path.toString(),
-        name: data.name.toString(),
-        type: data.type.toString(),
-        subType: data.subType.toString(),
-        condition: parseInt(data.condition),
-        maxCondition: parseInt(data.condition),
-        convert: data.convert.toString(),
-        weight: parseFloat(data.weight)
-    }
-    return data0;
-}
-function findMisc(itemName ){
-    //기타 아이템 데이터 검색 및 가공해서 반환
-    const data = miscDatas.find(w => w.name === itemName);
-    if(data==null){ return null }
-    let data0 ={
-        path: data.path.toString(),
-        name: data.name.toString(),
-        type: data.type.toString(),
-        subType: data.subType.toString(),
-        condition: parseInt(data.condition),
-        maxCondition: parseInt(data.condition),
-        convert: data.convert.toString(),
-        weight: parseFloat(data.weight),
-        count: parseInt(data.count)??0,
-        info: data.info.toString()
-    }
-    return data0;
-}
-function findFood(itemName ){
-    //음식 아이템 데이터 검색 및 가공해서 반환
-    const data = foodDatas.find(w => w.name === itemName);
-    const xp = 24*6; //24시간*6턴
-    if(data==null){ return null }
-    let data0 ={
-        path: data.path.toString(),
-        name: data.name.toString(),
-        type: data.type.toString(),
-        subType: data.subType.toString(),
-        condition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp: data.rottenDays*xp): data.condition ),
-        maxCondition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp : data.rottenDays*xp ): data.condition  ),
-        weight: parseFloat(data.weight),
-        freshDays: parseInt(data.freshDays*24),
-        rottenDays: parseInt(data.rottenDays*24),
-        cookTime: parseInt( data.cookTime ),
-        hunger: parseInt(data.hunger),
-        convert: data.convert.toString(),
-        div:4,
-        maxDiv:4,
-        weightDiv: parseFloat(data.weight/4),
-        info: data.info.toString()
-    }
-    return data0;
-}
 
 function setWeapon( itemName= "random"){
     
@@ -451,38 +299,7 @@ function setWeapon( itemName= "random"){
 function getWeapon(){
     return equipments.weapon;
 }
-function findMapData(itemName){
-    //맵 데이터 검색 및 가공해서 반환
-    const data = mapDatas.find(d => d.name === itemName);
-    let dropItemsArray=[];
-    const dropTable = data.dropItems.split(";");
-    for(let i =0;i<dropTable.length ; i++){
-        _dropitem = dropTable[i].split("-");
-        let rng = Math.random();
-        if(rng < parseFloat(_dropitem[1])){
-           // console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
-           let item = findItem( _dropitem[0]);
-           if(_dropitem[2]!=null){
-                item.condition = randomInt(1, item.maxCondition);
-           }
-            dropItemsArray.push( item);
-        }
-    }
 
-    let data0 ={
-        name: data.name,
-        outdoor: JSON.parse(data.outdoor),
-        zombies:[],
-        src: data.src,
-        thisFacilities: data.thisFacilities.split(";"),
-        storages:[{name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray}]
-    }
-    data0.thisFacilities.push('storage','livestock');//항상 추가
-    for(let i =0; i< parseInt( data.zombieNum) ;i++){
-        data0.zombies.push( spawnZombie( 'random') );
-    }
-    return data0
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //게임 초기화 함수
 //ResetAllGame(); //나중에 버튼으로 추가
@@ -514,6 +331,8 @@ async function ResetAllGame(){
     wound = [];
     health = 100;
     stamina = 100;
+    hunger = 100;
+    thirst = 100;
     zombieKillCount=0;
      setPlayerTrait();
 
@@ -813,7 +632,14 @@ function TurnEnd() {
         stamina++;
         if(stamina>100){stamina=100}
         if(health>100){health=100}
-
+        //배고픔, 목마름
+        hunger -=1;
+        thirst -=1;
+        if(hunger<0){hunger=0;}
+        if(thirst<0){thirst=0;}
+        
+        setMoodleValue("Hungry", hunger<100 ? -Math.floor((100-hunger)/20): +Math.ceil((hunger-100)/25) );
+        setMoodleValue("Thirsty", thirst<100 ? -Math.floor((100-thirst)/20): 0 );
         changeweather();//날씨변경
         
         woundHealingCalculate(); //부상계산
@@ -865,6 +691,8 @@ function findMoodle(_moodleName){
     return moodles.find(m => m.name == _moodleName);
 }
 function setMoodleValue(_moodleName, _value){
+    if(_value>4){_value=4}
+    if(_value<-4){_value=-4}
     let moodle = findMoodle(_moodleName);
     moodle.value = _value;
     return moodle;
@@ -1019,22 +847,24 @@ function renderGameUI(){
     checkGameOver();
 }
 function checkGameOver(){
-    if(!gameOver && health<=0){
-        resetAllMoodleValue();
-        playerStat();
-        stopResting();
-        commandBtsVisible(false);
-        interval =null;
-        gameOver =true;
-        delaying= true;
-        //게임오버
-        clearInterval(interval );
-        renderPlayer();
-        renderMoodles();
-        const _hour = hour-7;
-        log(`=== 게임오버 ===`);
-        log(`당신은 ${day-1}일, ${ (_hour<0? _hour+17:_hour ) }시간 동안 생존하였습니다.`);
-        log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
+    if(!gameOver){
+        if(health<=0 || hunger<=0 || thirst<=0){
+            resetAllMoodleValue();
+            playerStat();
+            stopResting();
+            commandBtsVisible(false);
+            interval =null;
+            gameOver =true;
+            delaying= true;
+            //게임오버
+            clearInterval(interval );
+            renderPlayer();
+            renderMoodles();
+            const _hour = hour-7;
+            log(`=== 게임오버 ===`);
+            log(`당신은 ${day-1}일, ${ (_hour<0? _hour+17:_hour ) }시간 동안 생존하였습니다.`);
+            log(`당신은 생존하는 동안 ${zombieKillCount} 마리의 좀비를 처치하였습니다.`);
+        }
     }
 }
 

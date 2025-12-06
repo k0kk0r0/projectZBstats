@@ -63,19 +63,27 @@ function renderPlayerStat(){
     //플레이어 스텟 표시
     const statList = document.getElementById("statList");
     statList.innerHTML='';//초기화
+
+    makeBox(translations[currentLang].hungry??'hungry',`${hunger.toFixed(0)}/100`, hunger, itemColor("food"));
+    makeBox(translations[currentLang].thirsty??'thirsty',`${thirst.toFixed(0)}/100`,thirst, itemColor("water"));
     for(let i =0 ;i <wound.length; i++){
         const data = wound[i];
         const percent = data.turn > 0 ? (data.turn / data.turn0) * 100 : 0;
         //wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
-        // 스킬 하나의 HTML 구성
+        makeBox( `${translations[currentLang][data.tag]??data.tag} ${data.heal>0?'(치료 중)':''}`,
+            `${data.turn} / ${data.turn0}`, percent, (data.heal>0)?"bg-green-300":"bg-pink-300");
+    }
+
+    function makeBox(name, subName, size, color='bg-yellow-400'){
+        // HTML 구성 아이템
         const item = document.createElement("div");
         item.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
 
         item.innerHTML = `
-        <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
+        <div class="h-full ${color} transition-all duration-300" style="width: ${size}%;"></div>
         <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
-            <span>${translations[currentLang][data.tag]??data.tag} ${ data.heal>0?'(치료 중)':''}</span>
-            <span>${data.turn} / ${data.turn0}</span>
+            <span>${name}</span>
+            <span>${subName}</span>
         </span>
         `;
 
@@ -327,30 +335,8 @@ equipNames.forEach(name => {
     conditionBar : document.getElementById(`equipIcon_${name}_bar`)
   };
 });
- // 모달 바깥 클릭 시 닫기
- /*
- //인벤토리
-const inventoryModal = document.getElementById("inventoryModal");
-const inventory_player = document.getElementById("inventory_player");
 
-function openInventoryModal(){
-    inventoryModal.classList.remove('hidden');
-    renderInventoryModal();
-}
-function renderInventoryModal(){
-    inventory_player.innerHTML = '';
-    //storage_storage.innerHTML = '';
-    for(let i =0;i<inventory.length; i++){
-        addInventoryItem( inventory[i], inventory_player, i);
-    }
-    
-}
-    inventoryModal.addEventListener("click", (e) => {
-    if (e.target === inventoryModal) {
-        inventoryModal.classList.add("hidden");
-    }
-});
-    */
+ // 모달 바깥 클릭 시 닫기
 function getInventoryItemType(type, typename="subType"){
     const item = inventory.find( (item) => item[typename]=== type );
     return item;
@@ -390,6 +376,8 @@ function itemRatioColor(value, number = 0.5){
 }
 function itemColor(subType){
     switch(subType.split(';')[0]){
+        case "food":
+            return "bg-green-300";
         case "water":
             return "bg-cyan-300";
 
