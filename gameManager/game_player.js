@@ -419,6 +419,10 @@ function woundHealingCalculate(){
                 }
                 
             }
+            if(data.tag =="foodPoisoning"){
+                health-= 3;
+                setMoodleValue('Sick',-1);
+            }
             if(data.heal<0){
                 if(data.tag=="scratched" || data.tag == "bitten"){
                     wndCount++;
@@ -486,23 +490,34 @@ function playerDrink( fluidType , item ){
         return
     }
     if(item.condition>0){
-        item.condition--;
-
-         if(fluidType=="bleach"){
+        while (true){
+            if(item.condition<=0){
+                break;
+            }
+            if(thirst>100){
+                thirst=100;
+                break;
+            }
+            thirst+=10;
+            item.condition--;
+        }
+        if(fluidType=='bleach'){
             //락스
             pushWound(fluidType, 20);
             log(`끔찍한 선택을 했군요... 락스를 마셨습니다.`,true);
             closeStorageModal();
-        }else if(fluidType =="water"){
-            //물 섭취
-            thirst+=10;
-            if(thirst>100){thirst=100;}
-            log(`물을 마셨습니다.(${item.condition}/${item.maxCondition})`,true );
+
+        }else{
+            log(`${translations[currentLang][fluidType]??fluidType}을 마셨습니다.${item.maxCondition!=null? '('+item.condition+'/'+item.maxCondition+')':''}`,true );
+            if(fluidType=='taintedWater'){
+                //
+                pushWound('foodPoisoning', 20);
+            }
         }
+        advanceTurn();
     }else{
         log(`통이 비어있습니다.`,true);
     }
-   
 }
 //먹기
 function playerEatFood(item, div=1){
@@ -529,5 +544,5 @@ function playerEatFood(item, div=1){
             }
         }
     }
-
+    advanceTurn();
 }

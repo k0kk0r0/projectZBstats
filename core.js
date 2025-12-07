@@ -10,12 +10,25 @@
     let items = [];
 
     let selectedItems=[];
-    function addSelectedItem(_name, _value, _imgsrc=null){
-      let data = selectedItems.find(n => n.name ===_name);
+    function addSelectedItem(_name, _value, _type, _imgsrc=null){
+      const data = selectedItems.find(n => n.name ===_name);
+      const defaltIcon ='icons/default.png';
+      const item ={name:_name, value:_value, type:_type, imgsrc:_imgsrc??defaltIcon};
         if(data!=null){
-          data.value += _value;
+          if(data.type=="Trait"){
+            const trait = selectedItems.find(n=>n.name ===_name);
+            if(trait==null){
+              selectedItems.push(item);
+              //console.log(item);
+            }
+          }else{
+            data.value += _value;
+            //console.log(data);
+          }
+          
         }else{
-          selectedItems.push({name:_name, value:_value, imgsrc:_imgsrc});
+          selectedItems.push(item);
+          //console.log(item);
         }
     }
     function clearSelectedItemList(){
@@ -334,6 +347,7 @@
           // 배열에 같은 src 가진 게 이미 있는지 체크
           const exists = selectedIcons.some(icon => icon.src === iconSrc);
           if (!exists) {
+            //console.log(input.dataset);
               selectedIcons.push({
                   src: iconSrc,
                   name: input.dataset.displayName, // 툴팁에 표시할 이름
@@ -371,7 +385,8 @@
             let value = parseInt(input.dataset[key]) || 0;
             //console.log( value);
             statsTotal[statName] = (statsTotal[statName] || 0) + value;
-            addSelectedItem( statName, value);
+            
+            addSelectedItem( statName, value, 'Skill');
           }
         }
 
@@ -446,8 +461,8 @@
       }
     }
 
-    addSelectedItem("strength", strength);
-    addSelectedItem("fitness", fitness);
+    addSelectedItem("strength", strength, "strength");
+    addSelectedItem("fitness", fitness, "fitness");
     //addSelectedItem("maxStrength", maxstrength);
     //addSelectedItem("maxFitenss",maxfitness);
     
@@ -472,6 +487,7 @@
     const img = document.createElement("img");
     img.src = icon.src;
     img.title = icon.name;
+    const rawName = (icon.src.split("_")[1]).split(".")[0];
     if (img.src.includes("Profession") ){
       //직업 추가
         const label = document.createElement("label");
@@ -485,7 +501,7 @@
             </div>
             `;
         jobIconsContainer.appendChild(label);
-        addSelectedItem("Profession", (icon.src.split("_")[1]).split(".")[0] , icon.src.toString());
+        addSelectedItem(rawName, displayName, "Profession" , icon.src.toString()); //(icon.src.split("_")[1]).split(".")[0]
             /*
         img.className = "lg:w-16 lg:h-16 sm:w-32 sm:h-32 rounded shadow"; // Tailwind 기준 큰 아이콘
         jobIconsContainer.appendChild(img);
@@ -506,7 +522,7 @@
             </div>
             `;
         otherIconsContainer.appendChild(label);
-        addSelectedItem("Trait", (icon.src.split("_")[1]).split(".")[0] , icon.src.toString());
+        addSelectedItem(rawName, displayName,"Trait", icon.src.toString());//(icon.src.split("_")[1]).split(".")[0] 
     }
     
     

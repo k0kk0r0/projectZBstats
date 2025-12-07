@@ -390,7 +390,17 @@ function itemColor(subType){
     return 
 }
 
-
+function unequip(key){
+     //짧은 터치, 장비해제
+    const data =equipments[key];
+    if(data!=null){
+       // console.log(storageTurn);
+       storageTurn++;
+        inventory.push( data );
+        equipments[key] = null;
+    }
+    renderStorageModal();
+}
 function setEquipment(data, dataset){
     for(let i =0 ;i < equipNames.length ;i++){
         const key = equipNames[i];
@@ -403,7 +413,7 @@ function setEquipment(data, dataset){
                 
             }
             if(equipments[key]==null){
-                //storageTurn++;
+                storageTurn++;
                 equipments[key] = data;
                 
                 if(dataset.route == storage_player.id ){

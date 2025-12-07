@@ -127,7 +127,7 @@ function itemsubMenu(data, dataset){
                  const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
                 makeBox(`${drinkname} 마시기${zombieIsAlived?'(턴 넘김)':''}`, itemColor(drinkType)).addEventListener('click', ()=>{
                     playerDrink( data.subType.split(';')[0], item );
-                    advanceTurn();
+                    
                     renderStorageModal();
                     //closeSubOption();
                 });
@@ -136,9 +136,8 @@ function itemsubMenu(data, dataset){
             if(item.condition < item.maxCondition){
 
                 let waterSource =null;
-                const faucet = getFacilityEnable("faucet");
-                console.log(getFacilityEnable("water"));  
-                if(faucet){
+                const faucet = getFacilityIcon("faucet");
+                if(getFacilityEnable("faucet")){
                     waterSource = 'water';
                 }else if( getFacilityEnable("water")){
                     waterSource = 'taintedWater';
@@ -155,17 +154,22 @@ function itemsubMenu(data, dataset){
                                 
                             }else{
                                 //물이 끊긴 경우 수전의 물 사용
-                                while( true ){
-                                    //
-                                    
-                                    if(parseFloat(faucet.needs.amount)<=0 || item.condition>= item.maxCondition){
-                                        advanceTurn();
-                                        break;
-                                    }else{
-                                        item.condition++;
-                                        faucet.needs.amount--;
+                                if(faucet.needs.amount>0){
+                                    while( true ){
+                                        //
+                                        console.log(faucet.needs);
+                                        if(parseFloat(faucet.needs.amount)<=0 || item.condition>= item.maxCondition){
+                                            advanceTurn();
+                                            break;
+                                        }else{
+                                            item.condition++;
+                                            faucet.needs.amount--;
+                                        }
                                     }
+                                }else{
+                                    log(`${translations[currentLang].faucet}에 물이 없습니다.`,true);
                                 }
+                                
                             }
                             
                         }
@@ -237,14 +241,12 @@ function itemsubMenu(data, dataset){
                     makeBox("1/4 먹기", "bg-slate-300").addEventListener('click', ()=>{
                         playerEatFood(item, 1);
                         closeSubOption();
-                        advanceTurn();
                         renderStorageModal();
                     }); 
                     if(item.div>=2){
                         makeBox("1/2 먹기", "bg-slate-300").addEventListener('click', ()=>{
                             playerEatFood(item, 2);
                             closeSubOption();
-                            advanceTurn();
                             renderStorageModal();
                         }); 
                     }

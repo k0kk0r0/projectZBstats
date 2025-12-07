@@ -65,11 +65,16 @@ const facilityIcons = facilityNames.map(name =>({
                     //물이 필요한 경우
                     if(waterEndTurn>0){
                         //물 끊기기 전
+                        playerDrink('water',{condition:1000});
                         log(`물을 마셨습니다.`);
+                        //advanceTurn();
                     }else{
                         if(needs.amount>0){
-                            needs.amount--;
+                            const item ={condition:needs.amount,maxCondition:10 };
+                            playerDrink('water',item);
+                            needs.amount = item.condition;
                             log(`물을 마셨습니다. 남은 물: ${needs.amount}`)
+                            //advanceTurn();
                         }else{
                             log('물이 없습니다');
                         }
@@ -219,30 +224,56 @@ function setPlayerTrait(){
     //생활스킬
     skills.Tailoring = {lv:0, xp:0, maxXp: xpData[0]};
 
-
+    traits=[];
     for(let i =0 ; i< data.length; i++){
-        let value = data[i].value;
-       if(data[i].name =="strength"){
+        const value = data[i].value;
+       if(data[i].type =="strength"){
             skills.strength = {lv:value, xp:0, maxXp: xpData[value]};
        } 
-       else if(data[i].name =="fitness") {
+       else if(data[i].type =="fitness") {
             skills.fitness = {lv:value, xp:0, maxXp:xpData[value]};
        }
-       else if(data[i].name =="Profession"){
-            job = {name:value, src:data[i].imgsrc};
+       else if(data[i].type =="Profession"){
+            job = {name:data[i].name, value:value, type:data[i].type, src:data[i].imgsrc};
+            traits.unshift(job);
        }
-       else if(data[i].name=="Trait"){
-            traits.push( {name:value} );
-            
-       }else{
+       else if(data[i].type =="Trait"){
+            traits.push( {name:data[i].name, value:value, type:data[i].type, src:data[i].imgsrc} );
+          
+       }
+      else{
             if(value>0){
                 skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
+                // console.log(data[i].name);
             }else{
                 //변수0, 둔감함 같은 경우
-                traits.push( {name:data[i].name} );
+                //traits.push( {name:data[i].name} );
+                traits.push( {name:data[i].name, value:value, src:data[i].imgsrc} );
             }
             
        }
+    }
+    const professionList = document.getElementById("professionList");
+    const jobNtraits = document.getElementById("jobNtraits");
+    professionList.innerHTML ='';
+    jobNtraits.innerHTML='';//초기화
+    for(let i =0;i<traits.length;i++){
+         const label = document.createElement("label");
+        label.className = `flex items-center justify-between p-1 border rounded-lg cursor-pointer ${'bg-slate-200'} ${textColorClass}`; 
+        const displayName = translations[currentLang][traits[i].name]?? traits[i].value;
+        label.innerHTML = `
+            <div class="flex items-center">
+                <img src="${traits[i].src}" class="${i==0?'w-24 h-24':'w-8 h-8'}" alt="icon">
+                <span class="text-black-600 lg:text-md sm:text-xl text-bold truncate ">${displayName}</span>
+            </div>
+            `;
+        if(i==0){
+            jobNtraits.classList.add('hidden');
+            professionList.appendChild(label);
+        }else{
+            jobNtraits.classList.remove('hidden');
+            jobNtraits.appendChild(label);
+        }
     }
     //console.log(data);
     //console.log(traits);
@@ -714,7 +745,7 @@ function renderPlayer(){
         playerZb.classList.toggle('hidden', false);
         return;
      }else{
-         player.classList.toggle('hidden', isResting);
+        player.classList.toggle('hidden', isResting);
         playerRest.classList.toggle('hidden', !isResting);
         playerZb.classList.toggle('hidden', true);
      }

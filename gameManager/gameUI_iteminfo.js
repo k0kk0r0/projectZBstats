@@ -101,6 +101,8 @@
             //액체류의 경우
             field_conditionText.textContent = `남은 양: ${cond/10}/${cond0/10}L (${ratio}%)`;
             field_conditionBar.classList.add(itemColor(item.subType));
+            makeDiv('액체 종류',`${translations[currentLang][item.subType]??item.subType}`);
+            itemName.textContent += ` (${translations[currentLang][item.subType]??item.subType})`;
         }else if(item.subType=='food'){
             //신선도가 있는 음식의 경우
             field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );

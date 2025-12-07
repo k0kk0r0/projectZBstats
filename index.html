@@ -150,6 +150,30 @@
 
     </div>
   </div>
+  <!-- 결과값 모달-->
+  <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
+      <!-- 닫기 버튼 -->
+      <button id="closeResultModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl sm:text-4xl">
+        ✕
+      </button>
+      
+      <h2 class="text-4xl lg:text-xl  font-bold mb-4">결과 출력하기 </h2>
+      <div id="detailedResults" class="text-2xl lg:text-lg space-y-4">
+        <!-- 상세 결과 내용이 여기에 추가됩니다. -->
+      </div>
+      
+     
+      <div class="mt-4 text-center space-x-4">
+        <button id="saveImgBt" class="px-4 py-6 mg-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>  
+        
+        <!--
+        <button id="gameStartBt" class="px-4 py-6 mg-4 bg-blue-500 text-white rounded-lg sm:text-4xl lg:text-2xl"> ???:진행시켜 </button>
+        -->
+      </div>
+     
+    </div>
+  </div>
   <!-- 게임 모달 -->
    <div id="gameModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 hidden">
     <div class="relative bg-gray-600 w-[95vw] lg:w-[960px] lg:max-w-[90vw] sm:min-h-[840px] lg:min-h-[720px] max-h-[70vh] sm:max-h-[800px] rounded-2xl shadow-xl bg-gray-600">
@@ -454,14 +478,20 @@
   </div>
    <!-- 플레이어 스텟 모달 -->
   <div id="playerStatModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative">
+    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative ">
       <!-- 닫기 버튼 -->
       <!--<button id="closeSkillModal" class="absolute top-2 right-4 text-gray-600 hover:text-black text-2xl font-bold">✕</button>
     -->
       <h2 class="text-2xl font-bold mb-4 text-center">🎯 플레이어 상태</h2>
-      
-      <!-- 스킬 목록이 여기에 자동으로 추가됨 -->
-      <div id="statList" class="grid grid-cols-2 gap-3"></div>
+      <!-- 플레이어 직업 및 트레잇-->
+          <div id="professionList" class="p-2">
+
+          </div>
+          <div id="jobNtraits" class="grid grid-cols-4 gap-2 p-2">
+
+          </div>
+      <!-- 플레이어 상태 목록이 여기에 자동으로 추가됨 -->
+      <div id="statList" class="grid grid-cols-2 gap-3 p-2"></div>
     </div>
   </div>
 
@@ -475,7 +505,7 @@
       <!-- 보관함 -->
       <div id="storagePn" class="relative flex flex-col border border-gray-500 rounded-xl h-full">
         <h2 id="storage_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
-        <div id="storageTag" class="mg-2 gap-2 flex p-2 flex-wrap">
+        <div id="storageTag" class="mg-2 gap-2 flex p-2 flex-wrap w-[90%]">
           <button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
           <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
           <button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
@@ -569,15 +599,15 @@
         
           
       </div>
-       <checkbox id="storage_quickEquipChk" class="absolute bottom-2 flex items-center space-x-2 bg-slate-400/70">
-          <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
-          <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
-        </checkbox>
-        <div class="w-40 h-8 bg-slate-400 rounded-b h-4 overflow-hidden absolute bottom-2 right-6">
-          <div id="field-inventoryBar" class="h-full transition-all bg-green-400 absolute" style="width: 0%"></div>
-          <span id="inventoryTurnTxt" class="absolute px-2">턴 넘김</span>
-        </div>
-    </div>
+        <checkbox id="storage_quickEquipChk" class="absolute bottom-2 flex items-center space-x-2 bg-slate-400/70">
+            <input type="checkbox" id="storage_quickEquipChkInput" class="w-8 h-8"> 
+            <label for="storage_quickEquipChk" class="text-lg font-bold">항목 체크 시 아이템을 꾹 눌러야 메뉴창이 활성화됩니다</label>
+          </checkbox>
+          <div class="w-40 h-8 bg-slate-400 rounded-b h-4 overflow-hidden absolute bottom-2 right-6">
+            <div id="field-inventoryBar" class="h-full transition-all bg-green-400 absolute" style="width: 0%"></div>
+            <span id="inventoryTurnTxt" class="absolute px-2">턴 넘김</span>
+          </div>
+      </div>
      </div>
   </div>
   <!-- 상세메뉴 모달 -->
@@ -586,7 +616,6 @@
       <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
         
     </div>
-      
   </div>
   <!-- ---------- 아이템 모달 HTML ---------- -->
   <div id="itemModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 p-4">
@@ -639,30 +668,8 @@
       <span id="infoModalTxt" class="text-2xl text-white text-center">턴 넘기는 중...</span>
     </div>
   </div>
-  <!-- 결과값 모달-->
-  <div id="resultModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl lg:max-w-xl p-6 relative">
-      <!-- 닫기 버튼 -->
-      <button id="closeResultModalBtn" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl sm:text-4xl">
-        ✕
-      </button>
-      
-      <h2 class="text-4xl lg:text-xl  font-bold mb-4">결과 출력하기 </h2>
-      <div id="detailedResults" class="text-2xl lg:text-lg space-y-4">
-        <!-- 상세 결과 내용이 여기에 추가됩니다. -->
-      </div>
-      
-     
-      <div class="mt-4 text-center space-x-4">
-        <button id="saveImgBt" class="px-4 py-6 mg-2 bg-gray-200 rounded-lg sm:text-4xl lg:text-2xl">저장하기</button>  
-        
-        <!--
-        <button id="gameStartBt" class="px-4 py-6 mg-4 bg-blue-500 text-white rounded-lg sm:text-4xl lg:text-2xl"> ???:진행시켜 </button>
-        -->
-      </div>
-     
-    </div>
-  </div>
+  
+  
 <!--//////////////////////////////////////////////////////////////////////////////////////////////////////-->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
@@ -743,6 +750,7 @@
     const closeResultBtn = document.getElementById("closeResultModalBtn");
     //const closeResultBtn2 = document.getElementById("closeResultModalBtn2");
     openBtnResult.addEventListener("click", () => {
+      
       resultModal.classList.remove("hidden");
       //내용추가
       const value1 = document.getElementById("result-icons").innerHTML;
@@ -767,11 +775,6 @@
     closeResultBtn.addEventListener("click", () => {
       resultModal.classList.add("hidden");
     });
-    /*
-    closeResultBtn2.addEventListener("click", () => {
-      resultModal.classList.add("hidden");
-    });
-    */
     // 모달 바깥 클릭 시 닫기
     resultModal.addEventListener("click", (e) => {
       if (e.target === resultModal) {
@@ -790,16 +793,16 @@
           link.click();
         });
       });
-  </script>
+    </script>
 
-  <script src="core.js">ㅤ</script>
-  <script src="gameManager/gameData.js"></script>
-  <script src="gameManager/gameManager.js"></script>
-  <script src="gameManager/gameUI.js"></script>
-  <script src="gameManager/gameUI_iteminfo.js"></script>
-  <script src="gameManager/gameUI_storageInfo.js"></script>
-  <script src="gameManager/gameUI_itemsubmenu.js"></script>
-  <script src="gameManager/game_zombie.js"></script>
-  <script src="gameManager/game_player.js"></script> 
-</body>
+    <script src="core.js">ㅤ</script>
+    <script src="gameManager/gameData.js"></script>
+    <script src="gameManager/gameManager.js"></script>
+    <script src="gameManager/gameUI.js"></script>
+    <script src="gameManager/gameUI_iteminfo.js"></script>
+    <script src="gameManager/gameUI_storageInfo.js"></script>
+    <script src="gameManager/gameUI_itemsubmenu.js"></script>
+    <script src="gameManager/game_zombie.js"></script>
+    <script src="gameManager/game_player.js"></script> 
+  </body>
 </html>

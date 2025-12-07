@@ -489,16 +489,7 @@ function itemEquip_mouseUp(e){
         return;
     }
 }
-function unequip(key){
-     //짧은 터치, 장비해제
-    const data =equipments[key];
-    if(data!=null){
-        console.log(storageTurn);
-        inventory.push( data );
-        equipments[key] = null;
-    }
-    renderStorageModal();
-}
+
 
 function pushItemToInventory(_inventory, itemName){
     //당장은 안 쓰는 함수임..갯수구현 힘듬.
