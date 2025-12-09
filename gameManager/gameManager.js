@@ -12,95 +12,6 @@ const helathTxt = document.getElementById("healthTxt");
 const staminaBar = document.getElementById("staminaBar");
 const staminaTxt = document.getElementById("staminaTxt");
 
-//장소의 상단 설비 아이콘들
-const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","water"];
-const facilityIcons = facilityNames.map(name =>({
-    name:name,
-    icon: document.getElementById(`Icon_${name}`),    
-    enabledIcon: document.getElementById(`Enable_${name}`),
-    enabled:false,
-    visible:false,
-    needs:null
- }));
-
- getFacilityIcon('generator').needs = {name:'fuel', amount:0};
- getFacilityIcon('radio').needs = {name:'battery', amount:10};
- getFacilityIcon('fridge').needs = {name:'generator'};
- getFacilityIcon('oven').needs = {name:'generator'};
- getFacilityIcon('micro').need= {name:'generator'};
- getFacilityIcon('faucet').needs= {name:'water', amount:10};
- //console.log(facilityIcons);
-
- for(let i=0;i<facilityIcons.length;i++){
-    const data = facilityIcons[i];
-    if(data.needs ==null){
-        data.enabled=true;
-    }
-
-    data.icon.addEventListener('click', ()=>{
-        if(data.needs !=null ){
-            const needs = data.needs;
-                stopResting();
-                if(needs.name=='generator'){
-                    //필요로 하는 물품이 발전기인 경우
-                    if(powerEndTurn>0){
-                        setFacilityEnable( data.name, !data.enabled);
-                        log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
-
-                    }else if(getFacilityIconVisiblity(needs.name) ){
-                        //발전기가 있으면
-                        if(getFacilityEnable(needs.name)  ){
-                            //발전기가 켜져있으면
-                            setFacilityEnable( data.name, !data.enabled);
-                            log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
-                        }else{
-                            log(`전력 공급이 중단되었거나 발전기가 꺼져있습니다.`);
-                        }
-                    }
-                    else{
-                        //발전기가 없음
-                        log(`전력 공급 혹은 발전기가 필요합니다.`);
-                    }
-                }else if(needs.name=='water'){
-                    //물이 필요한 경우
-                    if(waterEndTurn>0){
-                        //물 끊기기 전
-                        playerDrink('water',{condition:1000});
-                        log(`물을 마셨습니다.`);
-                        //advanceTurn();
-                    }else{
-                        if(needs.amount>0){
-                            const item ={condition:needs.amount,maxCondition:10 };
-                            playerDrink('water',item);
-                            needs.amount = item.condition;
-                            log(`물을 마셨습니다. 남은 물: ${needs.amount}`)
-                            //advanceTurn();
-                        }else{
-                            log('물이 없습니다');
-                        }
-                    }
-                }
-                else if(needs.name=='fuel' || needs.name=='battery'){
-                    if(needs.amount<=0){
-                         //자원이 없는 경우
-                        log(`${needs.name}가 필요합니다.`);
-                    }else{
-                        //자원이 있는 경우 작동
-                        setFacilityEnable( data.name, !data.enabled);
-                        log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
-                    }
-                }else{
-                    setFacilityEnable( data.name, !data.enabled);
-                    log(`${data.name} ${(data.enabled?'작동시켰습니다.':'껐습니다.')}`);
-                }
-      
-           
-        }else{
-
-        }
-    });
- }
-
 //게임 매니저 객체
 const player = document.getElementById('player');
 const playerRest = document.getElementById('playerRest');
@@ -328,7 +239,12 @@ function setWeapon( itemName= "random"){
 }
 
 function getWeapon(){
-    return equipments.weapon;
+    if(equipments.weapon==null){
+        return null
+    }else{
+        return equipments.weapon;
+    }
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -450,8 +366,7 @@ function mapSetting(data) {
     //맵 아이템
     storageIndex=0;
     storage = currentMapData.storages;
-    renderStorageModal();
-    renderGameUI();
+
 }
 //날씨변경
 function changeweather(){
@@ -590,7 +505,13 @@ function bgLightDark(data){
 }
 function log(text, popup=false) {
   const p = document.createElement("p"); // 한 줄씩 추가
-  p.textContent = `${hour}:${min.toString().padStart(2, '0') } : ` + text ;
+  if(equipments.accessory!=null){
+    //시계 착용 중인 경우
+    p.textContent = `${hour}:${min.toString().padStart(2, '0') } : ` + text ;
+  }else{
+    p.textContent = `--:-- : ` + text ;
+  }
+  
   p.className = "text-white text-left text-lg"; // Tailwind 스타일 적용
   logtxt.appendChild( p);
   // 자동 스크롤: 맨 아래로
@@ -603,7 +524,7 @@ function log(text, popup=false) {
 }
 const infoModal = document.getElementById('infoModal');//팝업창
 const infoModalTxt = document.getElementById('infoModalTxt');
-function log_popup(text ='', timedelay = 0){
+function log_popup(text ='', timedelay = 600){
     if(text.length>0){
         infoModal.classList.remove('hidden');
         infoModalTxt.innerText = text;
@@ -681,8 +602,9 @@ function TurnEnd() {
             if(powerEndTurn<=0){
                 log(`⚡쿠궁! 전기가 끊겼습니다⚡`, true);
                 bgLightDark(currentMapData);
-                resetFacilityIcons();//
+                renderFacilityIcons();//
                 stopResting();
+                
             }
         }
         if(waterEndTurn>0){
@@ -714,8 +636,9 @@ function TurnEnd() {
     }
     
    // log_popup();//감추기
-   renderStorageTurn();//아이템부패처리
+   
    renderGameUI();
+   renderStorageTurn();//아이템부패처리
 }
 
 function findMoodle(_moodleName){
@@ -772,30 +695,9 @@ function renderGameUI(){
     staminaTxt.textContent = parseInt(stamina) +"/100";
 
 
-    //시설 표시
-    for(let i=0; i<facilityNames.length; i++){
-        const data= getFacilityIcon( facilityNames[i] );
-        let found = currentMapData.thisFacilities.find(item => item.includes(data.name)); 
-        if (found) {
-            if (found.endsWith("_off")) {
-                //console.log(data.name + "는 꺼져 있습니다.");
-                 setFacilityIconVisiblity(data.name, true);
-                 setFacilityEnable(data.name, false);
-            } else if (found.endsWith("_on")) {
-                //console.log(data.name + "는 켜져 있습니다.");
-                 setFacilityIconVisiblity(data.name, true);
-                 setFacilityEnable(data.name, true);
-            } else {
-                setFacilityIconVisiblity(data.name, true);
-                setFacilityEnable(data.name, true);
-            }
-        }else{
-            //못 찾은 경우
-            setFacilityIconVisiblity(data.name, false);
-            setFacilityEnable(data.name, false);
-        }
+    //시설 표시(수정중)
+    renderFacilityIcons();
 
-    }
     //console.log(currentMapData.thisFacilities);
     renderMoodles();
     renderZombie();
@@ -874,6 +776,7 @@ function renderGameUI(){
         zombieNumTxt.classList.add('hidden');
     }   
     renderPlayer();
+    renderStorageModal();
     //플레이어 사망, 게임오버 검사
     checkGameOver();
 }
@@ -901,85 +804,3 @@ function checkGameOver(){
 
 
 
-//상단설비 호출 함수
-function getFacilityIcon(name) {
-    return facilityIcons.find(m => m.name == name);
-}
-function getFacilityIconVisiblity(name){
-    return getFacilityIcon(name).visible;
-}
-function setFacilityIconVisiblity(name, value) {
-    const icon = getFacilityIcon(name).icon;
-    icon.classList.toggle('hidden', !value);
-    icon.visible = value;
-}
-function getFacilityEnable(name){
-    const enabled = getFacilityIcon(name).enabled;
-    if(enabled==true){
-        return true;
-    }else {
-        return false;
-    }
-}
-function setFacilityEnable(name, value){
-    const icon = getFacilityIcon(name);
-    if(value==null){
-        icon.enabledIcon.classList.toggle( 'hidden', true);
-        icon.value =null;
-    }
-    else{
-       
-        icon.enabled = value;
-        let index = currentMapData.thisFacilities.findIndex(item => item.includes(name));
-
-        if(value==false){
-            //작동중단
-            icon.enabledIcon.classList.toggle( 'hidden', false);
-            if (index !== -1) {
-                currentMapData.thisFacilities[index] = currentMapData.thisFacilities[index].replace('_on', '_off');
-            }
-        }else{
-            icon.enabledIcon.classList.toggle( 'hidden', true);
-            if (index !== -1) {
-                currentMapData.thisFacilities[index] = currentMapData.thisFacilities[index].replace('_off', '_on');
-            }   
-        }
-        //console.log(currentMapData.thisFacilities);
-            
-        
-    }
-}
-function resetFacilityIcons(){
-    for(let i=0;i<facilityIcons.length;i++){
-        const data = facilityIcons[i];
-        if(data.needs !=null){
-            if(data.needs.name=='generator'){
-                  if(powerEndTurn>0 || getFacilityEnable('generator')){
-                    //전력공급중이거나 generator 가 있다면
-                    setFacilityEnable(data.name, true);
-
-                }else{
-                    if(data.needs !=null){
-                        if(data.needs.name=='generator'){
-                            //발전기가 필요한 경우 전원 내리기
-                            if(getFacilityEnable('generator') ==false){
-                                //발전기가 꺼져있는 경우
-                                setFacilityEnable(data.name, false);
-                            }
-                        }
-                    }
-                }
-            }
-            else if(data.needs.name=='water'){
-                if(waterEndTurn>0){
-                    //물이 안 끊긴 경우, (빗물받이통?)
-                    setFacilityEnable(data.name, true);
-                }else{
-                    setFacilityEnable(data.name, false);
-                }
-            }
-        }
-      
-    }
-    
-}

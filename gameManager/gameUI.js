@@ -34,6 +34,102 @@ function commandBtsVisible(value){
     }
     closeMenuModal();
 }
+/////////////////////// 시설물 관리 ////////////////////////////////
+//장소의 상단 설비 아이콘들
+const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
+const facilityIcons = facilityNames.map(name =>{
+    const icon = document.getElementById(`Icon_${name}`);
+    icon.addEventListener('click', (e)=>{
+        //상부 시설물 아이콘 버튼
+        //console.log(name);
+        closeMenuModal();
+        switch (name){
+            case "storage":
+                storageVisible=true;
+                openStorageModal();
+            break;
+            default:
+                //나머지 항목들은 서브메뉴 호출
+                facilitySubMenu(name);
+            break;
+        }
+
+    });
+    return {
+        name: name,
+        icon: icon,    
+        enabledIcon: document.getElementById(`Enable_${name}`),
+    }
+ });
+ function getPower(){
+    let power =false;
+    if(powerEndTurn>0){
+        power =true;
+    }else if(getFacilityEnable("generator")){
+        //발전기가 있으면
+        power = true;
+    }
+    return power;
+ }
+//상단설비 호출 함수
+function getFacility(name){
+    return currentMapData.thisFacilities.find(n => n.name==name);
+}
+function getFacilityIcon(name) {
+    return facilityIcons.find(m => m.name == name);
+}
+function getFacilityEnable(name){
+    const facility = getFacility(name);
+    if(facility==null){return false}
+    return facility.enabled;
+}
+function setFacilityEnable(name, value){
+    const icon = getFacility(name);
+    icon.enabled = value;
+    renderFacilityIcons();
+}
+function removeFacility(name){
+    //시설을 제거하고 인벤토리에 아이템 넣기
+    inventory.push( getFacility(name).item );
+    for(let i =0 ; i < currentMapData.thisFacilities.length; i++){
+        if(currentMapData.thisFacilities[i].name == name){
+            currentMapData.thisFacilities.splice(i,1);
+            break;
+        }
+    }
+    renderFacilityIcons();
+}
+function renderFacilityIcons(){
+    let power = getPower();
+    let water = false;
+    if(waterEndTurn>0){
+        water =true;
+    }
+
+    for(let i=0; i<facilityNames.length; i++){
+        const facilityIcon= getFacilityIcon( facilityNames[i] );
+        facilityIcon.icon.classList.add('hidden');
+    }
+    for(let i =0 ; i < currentMapData.thisFacilities.length; i++){
+        const facildata = currentMapData.thisFacilities[i];
+        const facilityIcon = getFacilityIcon( facildata.name);
+        //console.log(facildata);
+        
+        if(facildata.needItem=='power'){
+            if(power==false){
+                facildata.enabled = power;
+            }
+        }
+
+        facilityIcon.icon.classList.remove('hidden');
+        facilityIcon.enabledIcon.classList.toggle('hidden', facildata.enabled);
+       
+        
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////
 
 function renderSkill(){
   const skillList = document.getElementById("skillList");
@@ -194,33 +290,7 @@ attackBt.addEventListener('click', () => {
     callZombies(1);//좀비추가
 });
 restBt.addEventListener('click', () => {
-    //휴식 및 턴 넘기기
-     if(gameOver)return;
-    if(delaying) return; //딜레이 중이면 무시
-    if(isResting){
-        stopResting();
-        return;
-    }
-    isResting = true;
-    log("휴식중...");
-    renderGameUI();
-    interval =  setInterval(() => {
-        //스태미나, 체력 회복
-        if(stamina<100 || health < 100){
-             stamina += 10;
-             health += 5;
-            if(stamina>=100)stamina=100;
-            if(health>=100)health=100;
-            if(stamina>=100 && health>=100){
-                //회복하다가 한 번 멈춤
-                stopResting();
-            }
-        }
-        
-       
-        advanceTurn();
-        renderGameUI();
-    },400); 
+    startResting();
 });
 nextMapBt.addEventListener('click',() =>{
      if(gameOver)return;

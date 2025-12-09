@@ -46,8 +46,6 @@ function addStorageList(name, items, turnLimit=-1){
     renderStorageModal();
 }
 
-backpackIcon.addEventListener('click', openStorageModal);
-document.getElementById('Icon_storage').addEventListener('click', openStorageModal);
 
 Object.entries(equipIcons).forEach(([key]) => {
     const target = equipIcons[key];
@@ -75,6 +73,22 @@ function renderStorageTurn(){
     for(let i =0 ; i< inventory.length ; i++){
        itemRotten(inventory[i]);
     }
+    for(let n =0; n<storage.length;n++){
+        for(let i =0 ; i< storage[n].inventory.length ; i++){
+            if(n==0){
+                //보관함(냉장고 구현못함)
+                 if(getFacilityEnable("fridge")){
+                    //냉장고가 있는 경우
+                    itemRotten(storage[n].inventory[i], 0.5);
+                }else{
+                    itemRotten(storage[n].inventory[i]);
+                }
+            }
+           
+            
+        }
+    }
+    
     //시체 보관함 턴 감소
     for(let j =0; j< mapData.length; j++){
         const storage = mapData[j].storages;
@@ -93,10 +107,11 @@ function renderStorageTurn(){
   
     renderStorageModal();
 }
-function itemRotten(item){
+function itemRotten(item, rottonPoint = 1){
     if(item.subType=="food"){
         if(item.condition>0){
-            item.condition--;
+            
+            item.condition-=rottonPoint;
             if(item.condition<=0){
                 item.freshDays =null;
                 item.rottenDays = null;
@@ -123,7 +138,10 @@ function renderStorageModal(){
     fieldInventoryBar.style.width = `${storageTurn/maxStorageTurn*100}%`;
     inventoryTurnTxt.innerText =`다음 턴까지 ${maxStorageTurn-storageTurn}회 남음`
     if(storageTurn>=maxStorageTurn){
+         storageTurn=0;
         advanceTurn();
+       
+        return;
     }
     storage_player.innerHTML = '';
     storage_storage.innerHTML = '';
@@ -237,7 +255,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
     // 내구도 게이지 바
     const durabilityBar = document.createElement('div');
     
-    durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded-b transition-all duration-300`;
+    durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded transition-all duration-300`;
     if(data.type=="Weapon" || data.type =="Armor"){
         //무기, 방어구 등인 경우...
         durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
@@ -363,6 +381,9 @@ function renderEquipment(){
 //
 function itemMove(data, dataset){
     storageTurn++;
+    if(storage[storageIndex]==null){
+        storageIndex = 0;
+    }
      if(dataset.route == storage_player.id){
         //가방으로 이동
         storage[storageIndex].inventory.push( data);

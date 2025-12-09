@@ -24,8 +24,11 @@
     let _itemname = translations[currentLang][item.name] ?? item.name;
     itemName.textContent = `${item.subType =='food' ?( item.condition>0 ? (item.condition/item.maxCondition >(item.rottenDays-item.freshDays)/item.rottenDays?'신선한 ':'신선하지 않은 ') :'' ) :''}
       ${(_itempath.endsWith("Cooked")?"요리된 ": (_itempath.endsWith("Overdone")? "타버린 ":(_itempath.endsWith("Rotten")?"상한 ":"")))}${_itemname}${_itempath.endsWith("Open")?"(열림)": ""}`;
-    itemType.textContent = `${item.type ?? '-'} / ${(item.subType.split(';').length>1? `${item.subType.split(';')[0]} 혼합액`: item.subType ) ?? '-'}`;
-
+    if(item.subType!=null){
+      itemType.textContent = `${item.type ?? '-'} / ${(item.subType.split(';').length>1? `${item.subType.split(';')[0]} 혼합액`: item.subType ) ?? '-'}`;
+    }else{
+      itemType.textContent='';
+    }
     itemLink.textContent = `${_itempath}`;
     //field_type.textContent = item.type ?? '-';
     //field_subType.textContent = item.subType ?? '-';
@@ -56,7 +59,7 @@
 
     makeDiv('FreshDays', item.freshDays? (item.freshDays<0? "보존식품" : `${(item.freshDays/24)}일`) : null);
     makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
-    makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? '-') + '' );
+    makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? null) );
 
     if(item.count !=null){
       if(item.count>0){
@@ -111,6 +114,9 @@
             //재료인 경우
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
             field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;
+        }else if(item.type=='Facility'){
+            field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;
+            field_conditionBar.classList.add("bg-yellow-400");
         }else{
             field_conditionBar.classList.add("bg-yellow-400");
         }

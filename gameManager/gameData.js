@@ -180,6 +180,72 @@ function findFood(itemName ){
     }
     return data0;
 }
+function facilityItem(facilityName){
+    //시설 추가
+    const obj = {
+        name: facilityName,
+        enabled:true,
+        item:{name:facilityName, type:'Furniture', condition:1, path:'Base/default.png'},
+        needItem:null,
+        removable:true,
+    }
+    switch (obj.name){
+        //["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","water"];
+        case "storage":
+            obj.removable=false;
+        break;
+            case "livestock":
+            obj.removable=false;
+            obj.item.info ='아직 구현되지 않았습니다.';
+        break;
+        case "waterSource":
+            obj.removable=false;
+            obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:1, path:'Base/default.png'};
+            obj.item.info = translations[currentLang].taintedWaterInfo;
+        break;
+        case "faucet":
+            obj.needItem ='water';
+            obj.item = {name:facilityName, type:'FluidContainer',subType:'water', condition:10, maxCondition:10, path:'Base/default.png'};
+             obj.item.weight = 10;
+        break;
+        case "radio":
+            obj.needItem = 'battery';
+            obj.item = {name:facilityName, type:'Furniture', condition:10, maxCondition:10, path:'Base/default.png'};
+            obj.item.info ='아직 라디오 건전지는 닳지 않습니다.';
+            obj.item.weight = 2;
+        break;
+        case "bed":
+            obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
+             obj.item.weight = 40;
+        break;
+        case "sofa":
+            obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
+             obj.item.weight = 20;
+        break;
+        case "fridge":
+            obj.needItem = 'power';
+            obj.enabled=true;
+            obj.item.info ='음식물이 상하는 속도가 1/2로 감소합니다';
+             obj.item.weight = 40;
+        break;
+        case "oven":
+            obj.needItem = 'power';
+            obj.enabled=false;
+            obj.item.info ='아직 구현되지 않았습니다.';
+             obj.item.weight = 20;
+        break;
+        case "micro":
+            obj.needItem = 'power';
+            obj.enabled=false;
+            obj.item.info ='아직 구현되지 않았습니다.';
+             obj.item.weight = 10;
+        break;
+        default:
+            
+        break;
+    }
+    return obj;
+}
 function findMapData(itemName){
     //맵 데이터 검색 및 가공해서 반환
     const data = mapDatas.find(d => d.name === itemName);
@@ -197,16 +263,21 @@ function findMapData(itemName){
             dropItemsArray.push( item);
         }
     }
-
+    const facils = data.thisFacilities.length>0? data.thisFacilities.split(";") : [];
+    facils.push('storage','livestock');//항상 추가)
+    const facilityArray =[];
+    for(let i =0 ; i<facils.length;i++){
+        const facilityName = facils[i];
+        facilityArray.push(facilityItem(facilityName));
+    }
     let data0 ={
         name: data.name,
         outdoor: JSON.parse(data.outdoor),
         zombies:[],
         src: data.src,
-        thisFacilities: data.thisFacilities.split(";"),
+        thisFacilities: facilityArray,
         storages:[{name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray}]
     }
-    data0.thisFacilities.push('storage','livestock');//항상 추가
     for(let i =0; i< parseInt( data.zombieNum) ;i++){
         data0.zombies.push( spawnZombie( 'random') );
     }

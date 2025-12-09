@@ -107,7 +107,35 @@ function playerMove(distance=40) {
   }
   requestAnimationFrame(chaMoveAnimate);
 }
-
+function startResting(timer=400){
+    //휴식 및 턴 넘기기
+     if(gameOver)return;
+    if(delaying) return; //딜레이 중이면 무시
+    if(isResting){
+        stopResting();
+        return;
+    }
+    isResting = true;
+    log("휴식중...");
+    renderGameUI();
+    interval =  setInterval(() => {
+        //스태미나, 체력 회복
+        if(stamina<100 || health < 100){
+             stamina += 10;
+             health += 5;
+            if(stamina>=100)stamina=100;
+            if(health>=100)health=100;
+            if(stamina>=100 && health>=100){
+                //회복하다가 한 번 멈춤
+                stopResting();
+            }
+        }
+        
+       
+        advanceTurn();
+        renderGameUI();
+    },timer); 
+}
 function stopResting(){
     if(!isResting) return;
     isResting = false;
@@ -534,7 +562,12 @@ function playerEatFood(item, div=1){
     if(item.div<=0){
         for(let i =0 ;i<inventory.length ; i++){  
             if(inventory[i] == item){
-                inventory[i] = findItem( item.convert );
+                if(item.convert.length>0){
+                    inventory[i] = findItem( item.convert );
+                }else{
+                    inventory[i]=null;
+                }
+                
                 if(inventory[i] == null){
                     inventory.splice(i,1);
                 }
