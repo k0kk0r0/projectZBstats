@@ -88,9 +88,35 @@ function setFacilityEnable(name, value){
     icon.enabled = value;
     renderFacilityIcons();
 }
+function addFacility(name){
+    const facilItem = facilityItem(name);
+    facilItem.item.condition = facilItem.item.maxCondition;
+    currentMapData.thisFacilities.push(facilItem);
+    if(facilItem.addStorage){
+        addStorageList( name, [] );
+    }
+}
 function removeFacility(name){
+    //시설에 포함된 보관함이 있으면?
+    for(let i =0 ; i < storage.length; i++){
+        if(storage[i].name == name){
+            //스토리지에 딸린 인벤토리이면
+            const itemlist = storage[i].inventory;
+           // console.log(`보관함 ${name}} 삭제 - ${itemlist.length}개 이동`);
+            for(let n = 0; n< itemlist.length; n++){
+                storage[0].inventory.push( itemlist[n]);
+            }
+            storage.splice(i,1);
+            break;
+        }
+    }
+
+
     //시설을 제거하고 인벤토리에 아이템 넣기
-    inventory.push( getFacility(name).item );
+    let item =getFacility(name).item ;
+    item.condition=0;
+    item.type ='Furniture';
+    inventory.push(item );
     for(let i =0 ; i < currentMapData.thisFacilities.length; i++){
         if(currentMapData.thisFacilities[i].name == name){
             currentMapData.thisFacilities.splice(i,1);
@@ -154,14 +180,19 @@ function renderSkill(){
         skillList.appendChild(item);
   }
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////
 function renderPlayerStat(){
     //플레이어 스텟 표시
     const statList = document.getElementById("statList");
     statList.innerHTML='';//초기화
 
-    makeBox(translations[currentLang].hungry??'hungry',`${hunger.toFixed(0)}/100`, hunger, itemColor("food"));
-    makeBox(translations[currentLang].thirsty??'thirsty',`${thirst.toFixed(0)}/100`,thirst, itemColor("water"));
+    makeBox(translations[currentLang].hungry??'hungry',`${stat.hunger.toFixed(0)}/100`, stat.hunger, itemColor("food"));
+    makeBox(translations[currentLang].thirsty??'thirsty',`${stat.thirst.toFixed(0)}/100`,stat.thirst, itemColor("water"));
+
+    makeStat("Stressed", stat.stressed, "bg-red-300");
+    makeStat("Sick", stat.sick, "bg-green-200");
+    //makeStat("fatique", stat.Fatique, "bg-slate-400");
+
     for(let i =0 ;i <wound.length; i++){
         const data = wound[i];
         const percent = data.turn > 0 ? (data.turn / data.turn0) * 100 : 0;
@@ -169,7 +200,12 @@ function renderPlayerStat(){
         makeBox( `${translations[currentLang][data.tag]??data.tag} ${data.heal>0?'(치료 중)':''}`,
             `${data.turn} / ${data.turn0}`, percent, (data.heal>0)?"bg-green-300":"bg-pink-300");
     }
-
+    function makeStat(name ,stat, color){
+        if(stat>0){
+            makeBox(translations[currentLang][name]??name,`${stat.toFixed(0)}/100`,stat, color);
+        }
+        
+    }
     function makeBox(name, subName, size, color='bg-yellow-400'){
         // HTML 구성 아이템
         const item = document.createElement("div");
@@ -299,34 +335,31 @@ nextMapBt.addEventListener('click',() =>{
      mapData[mapNum].zombieNum = zombies.length; //지금 맵의 좀비 수를 맵데이터에 저장
     stopResting();
     mapNum++;
-    let rng = Math.random();
+    
     if(mapNum==mapData.length-1){
-        if(currentMapData.name =="road"){
-            //현재 길거리에 있을 때에만
-            if(rng<0.15){
-                mapData.push( findMapData('store_tool'));
-            }else if(rng<0.35){
-                mapData.push( findMapData("livestock"));
-            }else if(rng<0.7){
-                mapData.push( findMapData("house"));
-            }else{
-                mapData.push( findMapData('road'));
-            }
-        }else{
-             mapData.push( findMapData('road'));
-        }
-       
-        
+        mapData.push(randomMapData());     
     }else{
-        rng =0;
+       
     }
-    let timedelay = 0;
-    if(zombies.length>0){
-        timedelay = 900;
-        delaying=true;
-        renderGameUI();
+
+    delaying=true;
+    let timedelay = 200;
+    const runRng =Math.random();
+    if( runRng > playerStat().fitness*0.1){
+        //플레이어 체력
+        if(zombies.length>0){
+            timedelay = 900;
+            
+        }
+        advanceTurn();
+    }else{
+        if(zombies.length>0){
+            log(`${((1-runRng)*100).toFixed(1)}% 확률로 도망치기 성공`);
+        }
     }
-     advanceTurn();
+    playerMove();
+     
+
      setTimeout(() => { 
         if(gameOver)return;
         mapSetting(mapData[mapNum]);
@@ -347,24 +380,37 @@ atHomeBt.addEventListener('click', ()=>{
     mapData[mapNum].zombieNum = zombies.length; //지금 맵의 좀비를 맵데이터에 저장
 
     mapNum--;
-    if(mapNum<0){
-        mapNum=0
-        return;
+    if(mapNum == 0){
+        mapData.splice(0,0,randomMapData());   
+        mapNum++;  
+    }else{
+       
     }
+    
 
-    let timedelay = 0;
-    if(zombies.length>0){
-        timedelay = 900;
-        delaying=true;
-        renderGameUI();
+    delaying=true;
+    let timedelay = 200;
+    const runRng =Math.random();
+    if( runRng > playerStat().fitness*0.1){
+        //플레이어 체력
+        if(zombies.length>0){
+            timedelay = 900;
+            
+        }
+        advanceTurn();
+    }else{
+        if(zombies.length>0){
+          log(`${((1-runRng)*100).toFixed(1)}% 확률로 도망치기 성공`);
+        }
     }
-     advanceTurn();
+    playerMove();
+
      setTimeout(() => { 
         if(gameOver)return;
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 돌아왔다. - 진행도[${mapNum+1}/${mapData.length}]`);
+        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
      },timedelay);
     
     //TurnEnd();
@@ -378,7 +424,7 @@ bandingBt.addEventListener('click', ()=>{
     const itemIndex = getInventoryItemIndexType("bandage","subType");
     if(itemIndex<0){
         //아이템이 없음
-        log(`붕대 혹은 찢어진 천이 없습니다.`,);
+        log_popup(`붕대 혹은 찢어진 천이 없습니다.`);
         return;
     }
     playerHealing(itemIndex);

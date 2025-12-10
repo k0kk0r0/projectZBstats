@@ -13,29 +13,28 @@ function facilitySubMenu(facilityName){
     function makeBox(nameTxt, turn=false, boxColor="bg-gray-500" ){
         const box = document.createElement("button");
         box.className = `text-3xl p-2 rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
-        if(turn==false){
-            turn = zombies.length>0? true : false;
-            if(storageTurn>=maxStorageTurn){
-                turn=true;
-            }
-        }
-        if(turn){
-            box.innerText = `${nameTxt} (턴 넘김)`;
-        }else{
+        if(turn ==null){
             box.innerText = nameTxt;
+        }else{
+             if(turn==false){
+                turn = zombies.length>0? true : false;
+                if(storageTurn>=maxStorageTurn){
+                    turn=true;
+                }
+            }
+            if(turn){
+                box.innerText = `${nameTxt} (턴 넘김)`;
+            }else{
+                box.innerText = nameTxt;
+            }
         }
         optionBoxes.appendChild(box);
         return box;
     }
-
-    let zombieIsAlived = zombies.length>0? true : false;
-    if(storageTurn>=maxStorageTurn){
-        zombieIsAlived=true;
-    }
     
     const data = getFacility(facilityName);
     if(data.item!=null){
-        makeBox("시설 정보").addEventListener('click', ()=>{
+        makeBox("시설 정보", null).addEventListener('click', ()=>{
             //시설 아이템 정보 호출
             showItemModal(data.item);
             closeSubOption();
@@ -102,11 +101,11 @@ function facilitySubMenu(facilityName){
 
                         }else{
                             log_popup(`파이프렌치를 장착해야 합니다.`);
-                            return;
+                            //return;
                         }
                     }else{
                         log_popup(`파이프렌치를 장착해야 합니다.`);
-                        return;
+                        //return;
                     }
                 }
                 if(facilityName=='bed' || facilityName=='sofa'){
@@ -115,11 +114,11 @@ function facilitySubMenu(facilityName){
 
                         }else{
                             log_popup(`망치를 장착해야 합니다.`);
-                            return;
+                            //return;
                         }
                     }else{
                         log_popup(`망치를 장착해야 합니다.`);
-                        return;
+                        //return;
                     }
                     
                     
@@ -154,17 +153,22 @@ function itemsubMenu(data, dataset){
     function makeBox(nameTxt,turn=false, boxColor="bg-gray-500" ){
         const box = document.createElement("button");
         box.className = `text-3xl p-2 rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
-        if(turn==false){
-            turn = zombies.length>0? true : false;
-            if(storageTurn>=maxStorageTurn){
-                turn=true;
+        if(turn ==null){
+            box.innerText = nameTxt;
+        }else{
+             if(turn==false){
+                turn = zombies.length>0? true : false;
+                if(storageTurn>=maxStorageTurn){
+                    turn=true;
+                }
+            }
+            if(turn){
+                box.innerText = `${nameTxt} (턴 넘김)`;
+            }else{
+                box.innerText = nameTxt;
             }
         }
-        if(turn){
-            box.innerText = `${nameTxt} (턴 넘김)`;
-        }else{
-            box.innerText = nameTxt;
-        }
+       
         optionBoxes.appendChild(box);
         return box;
     }
@@ -174,7 +178,7 @@ function itemsubMenu(data, dataset){
     }
 
     if(data!=null){
-        makeBox("아이템 정보").addEventListener('click', ()=>{
+        makeBox("아이템 정보", null).addEventListener('click', ()=>{
             //아이템 정보 호출
             showItemModal(data);
             closeSubOption();
@@ -301,7 +305,7 @@ function itemsubMenu(data, dataset){
                             if(waterEndTurn>0){
                                 item.condition = item.maxCondition;
                                 advanceTurn();
-                                log(`물을 채웠습니다.`,true);
+                                log(`${translations[currentLang][faucet.name]??faucet.name}으로 물을 채웠습니다.`,true);
                             }else{
                                 //물이 끊긴 경우 수전의 물 사용
                                 if(faucet.item.condition>0){
@@ -309,7 +313,7 @@ function itemsubMenu(data, dataset){
                                         //
                                         if(parseFloat(faucet.item.condition)<=0 || item.condition>= item.maxCondition){
                                             advanceTurn();
-                                            log(`${translations[currentLang].faucet}로 물을 채웠습니다.`,true);
+                                            log(`${translations[currentLang][faucet.name]??faucet.name}으로 물을 채웠습니다.`,true);
                                             break;
                                         }else{
                                             item.condition++;
@@ -317,7 +321,7 @@ function itemsubMenu(data, dataset){
                                         }
                                     }
                                 }else{
-                                    log_popup(`${translations[currentLang].faucet}에 물이 없습니다.`);
+                                    log_popup(`${translations[currentLang][faucet.name]??faucet.name}에 물이 없습니다.`);
                                 }
                                 
                             }
@@ -438,8 +442,8 @@ function itemsubMenu(data, dataset){
             if(item.type=='Furniture'){
                 //가구의 경우
                 makeBox('설치하기', true, "bg-slate-300").addEventListener('click', ()=>{
-                    currentMapData.thisFacilities.push(facilityItem(data.name));
-                    
+                    //currentMapData.thisFacilities.push(facilityItem(data.name));
+                    addFacility(data.name);
                     inventory.splice( dataset.index,1);
                     closeSubOption();
                     advanceTurn();

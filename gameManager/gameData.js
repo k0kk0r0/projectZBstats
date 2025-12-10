@@ -63,11 +63,11 @@ function loadItemDatas( link ) {
 }
 async function init() {
     
-    mapDatas = await loadItemDatas("mapDatas.csv");
-    weaponDatas = await loadItemDatas("items/weapons.csv");
-    miscDatas = await loadItemDatas("items/miscs.csv");
-    foodDatas = await loadItemDatas("items/foods.csv");
-    clothDatas = await loadItemDatas("items/cloths.csv"); 
+    mapDatas = await loadItemDatas("Data/mapDatas.csv");
+    weaponDatas = await loadItemDatas("Data/weapons.csv");
+    miscDatas = await loadItemDatas("Data/miscs.csv");
+    foodDatas = await loadItemDatas("Data/foods.csv");
+    clothDatas = await loadItemDatas("Data/cloths.csv"); 
     
     const modData = await loadModFiles('TheyKnew');
 
@@ -188,6 +188,7 @@ function facilityItem(facilityName){
         item:{name:facilityName, type:'Furniture', condition:1, path:'Base/default.png'},
         needItem:null,
         removable:true,
+        addStorage:false
     }
     switch (obj.name){
         //["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","water"];
@@ -206,39 +207,52 @@ function facilityItem(facilityName){
         case "faucet":
             obj.needItem ='water';
             obj.item = {name:facilityName, type:'FluidContainer',subType:'water', condition:10, maxCondition:10, path:'Base/default.png'};
-             obj.item.weight = 10;
+             obj.item.weight = 5;
+             obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png"
         break;
         case "radio":
             obj.needItem = 'battery';
             obj.item = {name:facilityName, type:'Furniture', condition:10, maxCondition:10, path:'Base/default.png'};
             obj.item.info ='아직 라디오 건전지는 닳지 않습니다.';
+            obj.item.path="Base/Furniture/RadioRed.png"
             obj.item.weight = 2;
         break;
         case "bed":
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
+            obj.item.path="Base/Furniture/Furniture_bedding_01_9+8.png"
              obj.item.weight = 40;
         break;
         case "sofa":
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
-             obj.item.weight = 20;
+             obj.item.weight = 7.5;
+             obj.item.path="Base/Furniture/Furniture_seating_indoor_02_20.png"
         break;
         case "fridge":
             obj.needItem = 'power';
             obj.enabled=true;
             obj.item.info ='음식물이 상하는 속도가 1/2로 감소합니다';
-             obj.item.weight = 40;
+            obj.item.weight = 40;
+            obj.item.path = 'Base/Furniture/Appliances_refrigeration_01_0.png';
+            obj.addStorage=true;
+            //addStorageList(facilityName, [], -1, 1);
         break;
         case "oven":
             obj.needItem = 'power';
             obj.enabled=false;
             obj.item.info ='아직 구현되지 않았습니다.';
-             obj.item.weight = 20;
+            obj.item.weight = 20;
+            obj.item.path = 'Base/Furniture/Appliances_cooking_01_5.png';
+            obj.addStorage=true;
+            //addStorageList(facilityName, [], -1, 1);
         break;
         case "micro":
             obj.needItem = 'power';
             obj.enabled=false;
-            obj.item.info ='아직 구현되지 않았습니다.';
-             obj.item.weight = 10;
+            obj.item.info ='철제 음식 재료를 넣으면 불이 날 예정입니다.';
+            obj.item.weight = 10;
+            obj.item.path = 'Base/Furniture/Appliances_cooking_01_28.png';
+            obj.addStorage=true;
+            //addStorageList(facilityName, [], -1, 1);
         break;
         default:
             
@@ -249,7 +263,21 @@ function facilityItem(facilityName){
 function findMapData(itemName){
     //맵 데이터 검색 및 가공해서 반환
     const data = mapDatas.find(d => d.name === itemName);
-    let dropItemsArray=[];
+    let storageArray = [];
+   
+    const facils = data.thisFacilities.length>0? data.thisFacilities.split(";") : [];
+    facils.push('storage','livestock');//항상 추가
+    const facilityArray =[];
+    for(let i =0 ; i<facils.length;i++){
+        const facilityName = facils[i];
+        const item = facilityItem(facilityName);
+        facilityArray.push(item);
+        if(item.addStorage){
+            storageArray.push( {name:facilityName, inventory:[] });
+        }
+    }
+
+     let dropItemsArray=[];
     const dropTable = data.dropItems.split(";");
     for(let i =0;i<dropTable.length ; i++){
         _dropitem = dropTable[i].split("-");
@@ -260,26 +288,51 @@ function findMapData(itemName){
            if(_dropitem[2]!=null){
                 item.condition = randomInt(1, item.maxCondition);
            }
-            dropItemsArray.push( item);
+           if(item.subType=='food'){
+                for(let n=0 ;n<storageArray.length; n++){
+                    if(storageArray[n].name == 'fridge'){
+                        //신선한 음식은 냉장고에 넣기
+                        storageArray[n].inventory.push( item );
+                        break;
+                    }
+                }
+           }else{
+               dropItemsArray.push( item);
+           }
+            
         }
     }
-    const facils = data.thisFacilities.length>0? data.thisFacilities.split(";") : [];
-    facils.push('storage','livestock');//항상 추가)
-    const facilityArray =[];
-    for(let i =0 ; i<facils.length;i++){
-        const facilityName = facils[i];
-        facilityArray.push(facilityItem(facilityName));
-    }
+    storageArray.splice(0,0, {name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray} );
+
     let data0 ={
         name: data.name,
         outdoor: JSON.parse(data.outdoor),
         zombies:[],
         src: data.src,
         thisFacilities: facilityArray,
-        storages:[{name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray}]
+        storages:storageArray
     }
     for(let i =0; i< parseInt( data.zombieNum) ;i++){
         data0.zombies.push( spawnZombie( 'random') );
     }
     return data0
+}
+function randomMapData(){
+    let item;
+    if(currentMapData.name =="road"){
+        //현재 길거리에 있을 때에만
+        const rng = Math.random();
+        if(rng<0.15){
+            item= findMapData('store_tool');
+        }else if(rng<0.35){
+            item=  findMapData("livestock");
+        }else if(rng<0.7){
+            item=  findMapData("house");
+        }else{
+            item= findMapData('road');
+        }
+    }else{
+        item=  findMapData('road');
+    }
+    return item;
 }

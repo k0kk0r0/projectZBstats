@@ -1,7 +1,7 @@
 //플레이어 변수 계산
 function playerStat(){
     //4~-4, 무조건표시값은 100;
-    if(health<=0){
+    if(stat.health<=0){
         setMoodleValue('Zombie',100);
         setMoodleValue('Panic',0);
         setMoodleValue('Endurance',0);
@@ -34,10 +34,10 @@ function playerStat(){
     }
    
     let enduValue = 0;
-    if(stamina<=75){enduValue-- };
-    if(stamina<=50){enduValue--};
-    if(stamina<=25){enduValue--};
-    if(stamina<=10){enduValue--};
+    if(stat.stamina<=75){enduValue-- };
+    if(stat.stamina<=50){enduValue--};
+    if(stat.stamina<=25){enduValue--};
+    if(stat.stamina<=10){enduValue--};
     setMoodleValue('Endurance', enduValue);
 
 
@@ -120,12 +120,12 @@ function startResting(timer=400){
     renderGameUI();
     interval =  setInterval(() => {
         //스태미나, 체력 회복
-        if(stamina<100 || health < 100){
-             stamina += 10;
-             health += 5;
-            if(stamina>=100)stamina=100;
-            if(health>=100)health=100;
-            if(stamina>=100 && health>=100){
+        if(stat.stamina<100 || stat.health < 100){
+             stat.stamina += 10;
+             stat.health += 5;
+            if(stat.stamina>=100)stat.stamina=100;
+            if(stat.health>=100)stat.health=100;
+            if(stat.stamina>=100 && stat.health>=100){
                 //회복하다가 한 번 멈춤
                 stopResting();
             }
@@ -146,14 +146,14 @@ function stopResting(){
 }
 function playerAttack(multiHit){
     const stat = playerStat();
-    thirst-=0.5;
+    stat.thirst-=0.5;
     if(equipments.weapon ==null){
         if(zombies.length>0){
             //좀비가 1명 이상
             if(zombies[0].isStunning>0){
-                stamina -= pushStamina;
-                if(stamina<=0){
-                    stamina = 0;
+                stat.stamina -= pushStamina;
+                if(stat.stamina<=0){
+                    stat.stamina = 0;
                 }
                 let damage = (stat.strength*4+ randomInt(0,stat.strength ));
 
@@ -172,9 +172,9 @@ function playerAttack(multiHit){
         return;
     }
     //무기 스태미나 소모
-    stamina -= equipments.weapon.stamina;
-    if(stamina<=0){
-        stamina = 0;
+    stat.stamina -= equipments.weapon.stamina;
+    if(stat.stamina<=0){
+        stat.stamina = 0;
     }
     
     
@@ -299,9 +299,9 @@ function playerAttack(multiHit){
 }
 function playerPush(multiHit){
     const stat = playerStat();
-    stamina -= pushStamina;//고정값
-    if(stamina<=0){
-        stamina = 0;
+    stat.stamina -= pushStamina;//고정값
+    if(stat.stamina<=0){
+        stat.stamina = 0;
     }
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
     log(`플레이어의 밀치기!`);
@@ -326,8 +326,8 @@ function playerPush(multiHit){
 }
 
 function playerIsDamaged(value){
-    if(health>0){
-        health -= value;
+    if(stat.health>0){
+        stat.health -= value;
         playerMove(20);
     }
 
@@ -406,12 +406,17 @@ function woundHealingCalculate(){
     let wndCount=0;
     for(let i=0;i<wound.length;i++){
         let data = wound[i];
-        data.turn += data.heal;
+        if(data.tag=='zombie'){
+            data.turn += data.heal;
+        }else{
+            data.turn --;
+        }
+        
         
         if(data.turn<=0){
             if( data.tag =="zombie" || data.tag =="bleach"){
                 //좀비화 상태의 경우 즉시 게임오버
-                health=0;
+                stat.health=0;
                 checkGameOver();
                 return;
             }
@@ -426,38 +431,37 @@ function woundHealingCalculate(){
         }else{
             //질환 도중
             if(data.tag =="zombie"){
-                if(data.turn/data.turn0  <= 0.2){
-                    setMoodleValue('Sick',-2);
-                    setMoodleValue('Stressed',-4);
-                }else  if(data.turn/data.turn0  <= 0.3){
-                    setMoodleValue('Sick',-1);
-                    setMoodleValue('Stressed',-3);
-                }else if(data.turn/data.turn0  <= 0.5){
-                    setMoodleValue('Stressed',-2);
-                }else if(data.turn/data.turn0  <= 0.8){
-                    setMoodleValue('Stressed',-1);
+                if(data.turn/data.turn0  <= 0.5){
+                    //setMoodleValue('Stressed',-2);
+                    stat.sick -= data.heal;
+                }
+                if(data.turn/data.turn0  <= 0.9){
+                    //setMoodleValue('Stressed',-1);
+                    stat.stressed -= data.heal;
                 }
             }
             if(data.tag =="bleach"){
                 if(data.turn/data.turn0  <= 0.5){
-                    health-= 20;
-                    setMoodleValue('Sick',-2);
+                    stat.health-= 20;
+                    stat.sick +=5;
+                    
                 }else{
-                    setMoodleValue('Sick',-1);
+                    //setMoodleValue('Sick',-1);
+                    stat.sick=25;
                 }
                 
             }
             if(data.tag =="foodPoisoning"){
-                health-= 3;
-                setMoodleValue('Sick',-1);
+                stat.health-= 3;
+                stat.sick +=2;
             }
             if(data.heal<0){
                 if(data.tag=="scratched" || data.tag == "bitten"){
                     wndCount++;
-                    health -=2;;
+                    stat.health -=2;;
                 }
                 if(data.tag=="lacerated"){
-                    health -=1.5;
+                    stat.health -=1.5;
                     wndCount++;
                 }
             }
@@ -471,7 +475,7 @@ function playerHealing(itemIndex){
     if(bool){
         advanceTurn();
     }else{
-        log(`치료할 상처가 없습니다`,true);
+        log_popup(`치료할 상처가 없습니다`);
     }
 }
 function playerBanding(itemIndex){
@@ -522,11 +526,11 @@ function playerDrink( fluidType , item ){
             if(item.condition<=0){
                 break;
             }
-            if(thirst>100){
-                thirst=100;
+            if(stat.thirst>100){
+                stat.thirst=100;
                 break;
             }
-            thirst+=10;
+            stat.thirst+=10;
             item.condition--;
         }
         if(fluidType=='bleach'){
@@ -544,7 +548,7 @@ function playerDrink( fluidType , item ){
         }
         advanceTurn();
     }else{
-        log(`통이 비어있습니다.`,true);
+        log_popup(`통이 비어있습니다.`);
     }
 }
 //먹기
@@ -554,8 +558,8 @@ function playerEatFood(item, div=1){
     }
     //배고픔 해결
     const kcal = 30; //음식 회복량
-    hunger+= div*kcal;
-    if(hunger>200){hunger=200;}
+    stat.hunger+= div*kcal;
+    if(stat.hunger>200){stat.hunger=200;}
     item.div -= div;
     item.weight = Math.round((item.weight-item.weightDiv*div)*100)/100;
     log(`${translations[currentLang][item.name]??item.name} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );

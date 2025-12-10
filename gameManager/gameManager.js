@@ -104,13 +104,25 @@ const equipments = {
   shoes: null,
   accessory: null
 };
+let weight;
 let backpack;
 let inventory ;
 let storage;
-let stamina;
-let health;
-let hunger;
-let thirst;
+let stat ;
+function resetStat(){
+    return {
+        stamina:100,
+        health:100,
+        hunger:100,
+        thirst:100,
+        stressed:0,
+        sick:0,
+        panic:0,
+        pain:0,
+        //Fatique:10,
+        
+    }
+}
 let wound = [];//상처 배열
 let skills = {};
 let job;
@@ -276,10 +288,7 @@ async function ResetAllGame(){
     storage = [];
     inventory = [];
     wound = [];
-    health = 100;
-    stamina = 100;
-    hunger = 100;
-    thirst = 100;
+    stat = resetStat();
     zombieKillCount=0;
      setPlayerTrait();
 
@@ -581,17 +590,28 @@ function TurnEnd() {
         //좀비소환
             callZombies(1);
         //스텟 회복
-        stamina++;
-        if(stamina>100){stamina=100}
-        if(health>100){health=100}
+        stat.stamina++;
+        if(stat.stamina>100){stat.stamina=100}
+        if(stat.health>100){stat.health=100}
         //배고픔, 목마름
-        hunger -=1;
-        thirst -=1;
-        if(hunger<0){hunger=0;}
-        if(thirst<0){thirst=0;}
+        stat.hunger -=1;
+        stat.thirst -=1;
+        stat.stressed -= 0.2;
+        stat.sick -= 0.2;
+        if(stat.hunger<0){stat.hunger=0;}
+        if(stat.thirst<0){stat.thirst=0;}
+
+        if(stat.sick<0){stat.sick=0;}
+        if(stat.sick>100){stat.sick=100}
+        if(stat.stressed<0){stat.stressed=0;}
+        if(stat.stressed>100){stat.stressed=100}
         
-        setMoodleValue("Hungry", hunger<100 ? -Math.floor((100-hunger)/20): +Math.ceil((hunger-100)/25) );
-        setMoodleValue("Thirsty", thirst<100 ? -Math.floor((100-thirst)/20): 0 );
+        setMoodleValue("Hungry", stat.hunger<100 ? -Math.floor((100-stat.hunger)/20): +Math.ceil((stat.hunger-100)/25) );
+        setMoodleValue("Thirsty", stat.thirst<100 ? -Math.floor((100-stat.thirst)/20): 0 );
+
+        setMoodleValue("Stressed", -Math.floor((stat.stressed)/20) );
+        setMoodleValue("Sick", -Math.floor((stat.sick)/20) );
+
         changeweather();//날씨변경
         
         woundHealingCalculate(); //부상계산
@@ -689,10 +709,10 @@ function renderMoodles(){
 function renderGameUI(){
     //플레이어 스텟 
     playerStat();
-    healthBar.style.width = ( health )+"%";
-    helathTxt.textContent = parseInt(health) +"/100";
-    staminaBar.style.width = ( stamina )+"%";
-    staminaTxt.textContent = parseInt(stamina) +"/100";
+    healthBar.style.width = ( stat.health )+"%";
+    helathTxt.textContent = parseInt(stat.health) +"/100";
+    staminaBar.style.width = ( stat.stamina )+"%";
+    staminaTxt.textContent = parseInt(stat.stamina) +"/100";
 
 
     //시설 표시(수정중)
@@ -719,10 +739,16 @@ function renderGameUI(){
     mapNameTxt.textContent = `${translations[currentLang].Louisville} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
     
     if(mapNum-1> -1 ){
-         prevMapTxt.innerText = translations[currentLang][mapData[mapNum-1].name];
-         atHomeBt.classList.remove('hidden');
+        if(mapNum ==1){
+            prevMapTxt.innerText = translations[currentLang].prevMap;
+        }else{
+            prevMapTxt.innerText = translations[currentLang][mapData[mapNum-1].name];
+        }
+         
+        // atHomeBt.classList.remove('hidden');
     }else{
-        atHomeBt.classList.add('hidden');
+        
+        //atHomeBt.classList.add('hidden');
     }
     if(mapNum+1 < mapData.length){
         if(mapNum+2 >= mapData.length){
@@ -782,7 +808,7 @@ function renderGameUI(){
 }
 function checkGameOver(){
     if(!gameOver){
-        if(health<=0 || hunger<=0 || thirst<=0){
+        if(stat.health<=0 || stat.hunger<=0 || stat.thirst<=0 || stat.sick>=100){
             resetAllMoodleValue();
             playerStat();
             stopResting();

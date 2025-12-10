@@ -27,8 +27,18 @@ function addStorageTag(name, index, turn=-1){
         case 'corpse':
             icon ='⚰';
             break;
+        case 'oven':
+            icon ='🔥';
+            break;
+        case 'micro':
+            icon ='🔥';
+            break;
+        case 'fridge':
+            icon ='🧊';
+            break;
         default:
             icon ='📦';
+            break;
     }
     const btn = document.createElement('button');
     btn.className = "text-xl font-bold p-2 border rounded bg-blue-400 storageBtn";
@@ -41,9 +51,18 @@ function addStorageTag(name, index, turn=-1){
     storageTag.appendChild(btn);
 }
 
-function addStorageList(name, items, turnLimit=-1){
-    storage.push( {name:name, inventory:items, turn:turnLimit} );
-    renderStorageModal();
+function addStorageList(name, items, turnLimit=-1, index=-1){
+    setTimeout(() => {
+         if(index>0){
+            storage.splice(index, 0, {name:name, inventory:items, turn:turnLimit} );
+        }else{
+            //맨 뒤에 추가
+            storage.push( {name:name, inventory:items, turn:turnLimit} );
+        }
+        
+        renderStorageModal();
+    },50);
+   
 }
 
 
@@ -73,21 +92,25 @@ function renderStorageTurn(){
     for(let i =0 ; i< inventory.length ; i++){
        itemRotten(inventory[i]);
     }
-    for(let n =0; n<storage.length;n++){
-        for(let i =0 ; i< storage[n].inventory.length ; i++){
-            if(n==0){
-                //보관함(냉장고 구현못함)
-                 if(getFacilityEnable("fridge")){
-                    //냉장고가 있는 경우
-                    itemRotten(storage[n].inventory[i], 0.5);
+    for(let m =0 ;m < mapData.length ; m++){
+        const storages = mapData[m].storages;
+        for(let n =0; n<storages.length;n++){
+            for(let i =0 ; i< storages[n].inventory.length ; i++){
+                
+                //보관함(냉장고)
+                if(getFacilityEnable("fridge") && storages[n].name=='fridge'){
+                    //냉장고가 있고 작동중인 경우
+                    itemRotten(storages[n].inventory[i], 0.5);
                 }else{
-                    itemRotten(storage[n].inventory[i]);
+                    itemRotten(storages[n].inventory[i]);
                 }
-            }
-           
+                
             
+                
+            }
         }
     }
+    
     
     //시체 보관함 턴 감소
     for(let j =0; j< mapData.length; j++){
@@ -172,7 +195,7 @@ function renderStorageModal(){
         }
     });
     const playerstat = playerStat() ?? {bagWeight:20};
-    let weight ={
+    weight ={
        storage:0,
        inventory:0,
        bagWeight:playerstat.bagWeight
@@ -226,6 +249,7 @@ function renderStorageModal(){
     storage_weightTxt.innerText = `${weight.storage.toFixed(2)}/50`;
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
     renderEquipment();
+   
 }
 function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`text-md`){
     //

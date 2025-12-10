@@ -204,7 +204,7 @@
 
 
           <div id="Icon_generator" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/generator.png" alt="발전기(켜짐)" class="w-full h-full p-2">
+            <img src="images/generator.png" alt="발전기" class="w-full h-full p-2">
             <img src="images/Enabled.png" id="Enable_generator" class="absolute inset-0 w-full h-full object-contain">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               발전기
@@ -236,7 +236,7 @@
             <img src="images/waterSource.png" alt="수원" class="w-full h-full p-2">
             <img src="images/Enabled.png" id="Enable_waterSource" class="absolute inset-0 w-full h-full object-contain">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              수전
+              수원
             </span>
           </div>
           <div id="Icon_oven" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
@@ -703,7 +703,7 @@
         let html = `<p class="mb-2 text-xl">📢 ${data.version} 업데이트 안내</p>`;
         html += "<ul>";
         data.changes.forEach(item => {
-          html += `<li class="mb-1 lg:text-2xl sm:text-2xl "> ${item.startsWith("0.")? 'ver. ': ' -'}${item}</li>`;
+          html += `<li class="mb-1 lg:text-2xl sm:text-2xl "> ${item.startsWith("0.")? 'ver. ': ' - '}${item}</li>`;
         });
         //html += "</ul><p class='mt-2 text-2xl lg:text-lg text-gray-600'>" + data.note + "</p>";
         noticeContent.innerHTML = html;
