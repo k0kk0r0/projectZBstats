@@ -155,7 +155,7 @@ function findMisc(itemName ){
     }
     return data0;
 }
-const foodStatusTxt=["", "신선한 ","신선하지 않은 ","상한 ","잘 익은 ","타버린 "]; //캔(-1) 기본값(0)
+const foodStatusTxt=["", "신선한 ","신선하지 않은 ","상한 ","타버린 "]; //캔(-1) 기본값(0)
 function findFood(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
     const data = foodDatas.find(w => w.name === itemName);
@@ -170,12 +170,15 @@ function findFood(itemName ){
         maxCondition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp : data.rottenDays*xp ): data.condition  ),
         weight: parseFloat(data.weight),
 
-        foodStatus: parseInt(data.foodStatus), 
+        
         cookable:JSON.parse(data.cookable),
         freshDays: parseInt(data.freshDays*24),
         rottenDays: parseInt(data.rottenDays*24),
         cookTime: parseInt( data.cookTime ),
-        hunger: parseInt(data.hunger),//kcal 총량, 섭취 시 1/4로 나눔
+
+        foodStatus: parseInt(data.foodStatus), 
+        hunger: `;${data.hunger};`.toString(),// ;로 나눔, kcal 총량, 섭취 시 1/4로 나눔
+        
         poisoning: parseFloat(data.poisoning),
 
         convert: data.convert.toString(),
@@ -208,7 +211,7 @@ function facilityItem(facilityName){
         case "waterSource":
             obj.removable=false;
             obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:1, path:'Base/default.png'};
-            obj.item.info = translations[currentLang].taintedWaterInfo;
+            obj.item.info = translating("taintedWaterInfo");
         break;
         case "faucet":
             obj.needItem ='water';
@@ -218,8 +221,8 @@ function facilityItem(facilityName){
         break;
         case "radio":
             obj.needItem = 'battery';
-            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:10, maxCondition:10, path:'Base/default.png'};
-            obj.item.info ='아직 라디오 건전지는 닳지 않습니다.';
+            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:100, maxCondition:100, path:'Base/default.png'};
+            obj.item.info ='라디오를 틀어놓으면 건전지가 소모됩니다.';
             obj.item.path="Base/Furniture/RadioRed.png"
             obj.item.weight = 2;
         break;
@@ -236,7 +239,7 @@ function facilityItem(facilityName){
         case "fridge":
             obj.needItem = 'power';
             obj.enabled=true;
-            obj.item.info ='음식물이 상하는 속도가 1/2로 감소합니다';
+            obj.item.info ='음식물이 상하는 속도가 1/2로 감소합니다.';
             obj.item.weight = 40;
             obj.item.path = 'Base/Furniture/Appliances_refrigeration_01_0.png';
             obj.addStorage=true;
@@ -294,7 +297,7 @@ function findMapData(itemName){
            if(_dropitem[2]!=null){
                 item.condition = randomInt(1, item.maxCondition);
            }
-           if(item.subType=='food'){
+           if(item.subType=='food' || item.subType=='water'){
                 for(let n=0 ;n<storageArray.length; n++){
                     if(storageArray[n].name == 'fridge'){
                         //신선한 음식은 냉장고에 넣기

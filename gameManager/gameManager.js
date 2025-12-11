@@ -162,7 +162,7 @@ function setPlayerTrait(){
        }
        else if(data[i].type =="Trait"){
             traits.push( {name:data[i].name, value:value, type:data[i].type, src:data[i].imgsrc} );
-          
+          console.log({name:data[i].name, value:value, src:data[i].imgsrc});
        }
       else{
             if(value>0){
@@ -171,7 +171,7 @@ function setPlayerTrait(){
             }else{
                 //변수0, 둔감함 같은 경우
                 //traits.push( {name:data[i].name} );
-                traits.push( {name:data[i].name, value:value, src:data[i].imgsrc} );
+                traits.push( {name:data[i].name, value:translating(data[i].name), src:data[i].imgsrc} );
             }
             
        }
@@ -183,7 +183,7 @@ function setPlayerTrait(){
     for(let i =0;i<traits.length;i++){
          const label = document.createElement("label");
         label.className = `flex items-center justify-between p-1 border rounded-lg cursor-pointer ${'bg-slate-200'} ${textColorClass}`; 
-        const displayName = translations[currentLang][traits[i].name]?? traits[i].value;
+        const displayName = translating(i==0? traits[i].name: traits[i].value);
         label.innerHTML = `
             <div class="flex items-center">
                 <img src="${traits[i].src}" class="${i==0?'w-24 h-24':'w-8 h-8'}" alt="icon">
@@ -337,8 +337,8 @@ async function ResetAllGame(){
     
     //준비완료
     logtxt.innerHTML='';
-    log(translations[currentLang].ment);
-    log_popup(translations[currentLang].ment,1200);
+    log(translating("ment"));
+    log_popup(translating("ment"),1200);
 
     radioAction(0);
     renderGameUI();
@@ -446,18 +446,26 @@ function changeWeatherBg(){
 function radioAction(num){
     //라디오 작동
     let txt = '';
+    const radio = getFacility("radio");
     if(getFacilityEnable('radio')){
-        if(num==0){ 
-            log(`pzzz.. ABS 비상방송...pzzz... 날씨는... <${translations[currentLang][stack.weather] ?? stack.weather}> pzzz...`);
-        }
-        if(num==10){
-            log(`pzzz... 앞으로 ${stack.weatherTime}턴 동안 ...날씨가 지속된 후... pzzz... <${translations[currentLang][stack.nextWeather]??stack.nextWeather}>.. pzzz...`)
-        }
-        if(num==20){
-            if(powerEndTurn>0){
-                 log(`pzzz... 비상전력 시스템...pzz... ${powerEndTurn}턴 뒤... pzzz... 전력 끊김... pzzz...`)
+        if(radio.item.condition>0){
+            radio.item.condition--;
+            switch (num){
+                case 0:
+                    log(`pzzz.. ABS 비상방송...pzzz... 날씨는... <${translating(stack.weather)}> pzzz...`);
+                break;
+                case 10:
+                    log(`pzzz... 앞으로 ${stack.weatherTime}턴 동안 ...날씨가 지속된 후... pzzz... <${translating(stack.nextWeather)}>.. pzzz...`)
+                break;
+                case 20:
+                    if(powerEndTurn>0){
+                        log(`pzzz... 비상전력 시스템...pzz... ${powerEndTurn}턴 뒤... pzzz... 전력 끊김... pzzz...`)
+                    }
+                break;
+                default:
+                    log(`pzzz.. `);
+                break;
             }
-           
         }
     }    
 }
@@ -531,6 +539,9 @@ function log(text, popup=false) {
     log_popup(text, text.length>12? 1400:800);
   }
 }
+function translating(name){
+    return translations[currentLang][name]??name.toString();
+}
 const infoModal = document.getElementById('infoModal');//팝업창
 const infoModalTxt = document.getElementById('infoModalTxt');
 function log_popup(text ='', timedelay = 600){
@@ -586,6 +597,8 @@ function TurnEnd() {
     if(!delaying) {
         //스토리지 턴 횟수 초기화
          storageTurn=0;
+        console.log(`${hour}:${min}`);
+
 
         //좀비소환
             callZombies(1);
@@ -653,12 +666,15 @@ function TurnEnd() {
         if(min<= 20){
             radioAction(min);
         }
+
+        renderGameUI();
+        renderStorageTurn();//아이템부패처리
+        renderStorageModal();
     }
     
    // log_popup();//감추기
    
-   renderGameUI();
-   renderStorageTurn();//아이템부패처리
+  
 }
 
 function findMoodle(_moodleName){
@@ -714,8 +730,8 @@ function renderGameUI(){
     staminaBar.style.width = ( stat.stamina )+"%";
     staminaTxt.textContent = parseInt(stat.stamina) +"/100";
 
-
-    //시설 표시(수정중)
+    removeMatrialItem();
+    //시설 표시
     renderFacilityIcons();
 
     //console.log(currentMapData.thisFacilities);
@@ -736,13 +752,13 @@ function renderGameUI(){
     
     timerTxt.textContent = `${timeTxt} ${delaying? " (대기중...)": isResting? " (휴식중...)": ""}`;     ;
     //맵이름
-    mapNameTxt.textContent = `${translations[currentLang].Louisville} : ${translations[currentLang][currentMapData.name]}[${mapNum+1}/${mapData.length}]`;
+    mapNameTxt.textContent = `${translating('Louisville')} : ${translating(currentMapData.name)}[${mapNum+1}/${mapData.length}]`;
     
     if(mapNum-1> -1 ){
         if(mapNum ==1){
-            prevMapTxt.innerText = translations[currentLang].prevMap;
+            prevMapTxt.innerText = translating('prevMap');
         }else{
-            prevMapTxt.innerText = translations[currentLang][mapData[mapNum-1].name];
+            prevMapTxt.innerText = translating(mapData[mapNum-1].name);
         }
          
         // atHomeBt.classList.remove('hidden');
@@ -752,15 +768,15 @@ function renderGameUI(){
     }
     if(mapNum+1 < mapData.length){
         if(mapNum+2 >= mapData.length){
-            nextMapTxt.innerText = translations[currentLang].nextMap;
+            nextMapTxt.innerText = translating("nextMap");
         }else{
-            nextMapTxt.innerText = translations[currentLang][mapData[mapNum+1].name];
+            nextMapTxt.innerText = translating(mapData[mapNum+1].name);
         }
         
         nextMapBt.classList.remove('hidden');
     }else{
         if(mapNum+1 == mapData.length){
-            nextMapTxt.innerText = translations[currentLang].nextMap;
+            nextMapTxt.innerText = translating("nextMap");
             nextMapBt.classList.remove('hidden');
         }else{
             nextMapBt.classList.add('hidden');
@@ -792,9 +808,9 @@ function renderGameUI(){
             }
         }
        if(zombieCountable){
-            zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ${zombies.length}`;
+            zombieNumTxt.textContent =`${translating("remainZombie")} : ${zombies.length}`;
        }else{
-            zombieNumTxt.textContent =`${translations[currentLang].remainZombie} : ???`;
+            zombieNumTxt.textContent =`${translating("remainZombie")} : ???`;
        }
         
         zombieNumTxt.classList.remove('hidden');

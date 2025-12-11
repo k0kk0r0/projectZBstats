@@ -117,7 +117,7 @@ function addFacility(name){
     if(facilItem.addStorage){
         addStorageList( name, [] );
     }
-    log_popup(`${translations[currentLang][name]??name}를 설치했습니다.`);
+    log_popup(`${translating(name)}를 설치했습니다.`);
 }
 function removeFacility(name){
     //시설에 포함된 보관함이 있으면?
@@ -198,7 +198,7 @@ function renderSkill(){
         item.innerHTML = `
         <div class="h-full bg-yellow-400 transition-all duration-300" style="width: ${percent}%;"></div>
         <span class="absolute inset-0 flex justify-between items-center px-3 text-lg font-semibold text-black">
-            <span>${translations[currentLang][name]??name} (Lv.${data.lv})</span>
+            <span>${translating(name)} (Lv.${data.lv})</span>
             <span>${data.xp} / ${data.maxXp}</span>
         </span>
         `;
@@ -212,8 +212,8 @@ function renderPlayerStat(){
     const statList = document.getElementById("statList");
     statList.innerHTML='';//초기화
 
-    makeBox(translations[currentLang].hungry??'hungry',`${stat.hunger.toFixed(0)}/100`, stat.hunger, itemColor("food"));
-    makeBox(translations[currentLang].thirsty??'thirsty',`${stat.thirst.toFixed(0)}/100`,stat.thirst, itemColor("water"));
+    makeBox(translating('hungry'),`${stat.hunger.toFixed(0)}/100`, stat.hunger, itemColor("food"));
+    makeBox(translating('thirsty'),`${stat.thirst.toFixed(0)}/100`,stat.thirst, itemColor("water"));
 
     makeStat("Stressed", stat.stressed, "bg-red-300");
     makeStat("Sick", stat.sick, "bg-green-200");
@@ -223,12 +223,12 @@ function renderPlayerStat(){
         const data = wound[i];
         const percent = data.turn > 0 ? (data.turn / data.turn0) * 100 : 0;
         //wound.push({tag:"zombie", heal:-1, turn:(100+healer*4) , turn0:(100+healer*4)}); 
-        makeBox( `${translations[currentLang][data.tag]??data.tag} ${data.heal>0?'(치료 중)':''}`,
+        makeBox( `${translating(data.tag)} ${data.heal>0?'(치료 중)':''}`,
             `${data.turn} / ${data.turn0}`, percent, (data.heal>0)?"bg-green-300":"bg-pink-300");
     }
     function makeStat(name ,stat, color){
         if(stat>0){
-            makeBox(translations[currentLang][name]??name,`${stat.toFixed(0)}/100`,stat, color);
+            makeBox(translating(name),`${stat.toFixed(0)}/100`,stat, color);
         }
         
     }
@@ -391,7 +391,7 @@ nextMapBt.addEventListener('click',() =>{
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
+        log(`${translating(currentMapData.name)}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
      },timedelay);
     
     //TurnEnd();
@@ -436,7 +436,7 @@ atHomeBt.addEventListener('click', ()=>{
         mapSetting(mapData[mapNum]);
         delaying=false;
         renderGameUI();
-        log(`${translations[currentLang][currentMapData.name]}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
+        log(`${translating(currentMapData.name)}으로 이동했다. - 진행도[${mapNum+1}/${mapData.length}]`);
      },timedelay);
     
     //TurnEnd();

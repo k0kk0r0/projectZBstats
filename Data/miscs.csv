@@ -1,16 +1,16 @@
 type,subType,path,name,weight,condition,convert,count,info
 Misc,matrial,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,,아직 쓸모 있는 재료는 아닙니다.
+Misc,matrial,Base/Miscs/Battery.png,Battery,0.1,100,,,
 Misc,junk,Base/Miscs/TinCanEmpty.png,TinCanEmpty,0.2,1,,,
 Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,,,
-Misc,matrial,Base/Miscs/Thread.png,Thread,0.1,20,,,
+Misc,matrial,Base/Miscs/Thread.png,Thread,0.1,20,,,옷을 수선할 때 사용됩니다
 Misc,tool,Base/Miscs/Needle.png,Needle,0.01,1,,,
 FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,,,
 FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,,,
-FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,,,
+FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,,,옷을 기우거나 붕대 대용으로 사용할 수 있습니다.
 FluidContainer,bleach,Base/Miscs/Bleach.png,Bleach,0.1,10,,,경고!! 락스는 마시면 고통스럽게 죽습니다.;절대 따라하지 마세요!!
 FluidContainer,water,Base/Miscs/WaterBottle.png,WaterBottle,0.1,10,,,
 FluidContainer,water,Base/Miscs/PopBottle.png,PopBottle,0.1,20,,,
 Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,ElectronicsScrap,,
 Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,ElectronicsScrap,,
 Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,ElectronicsScrap,,
-Facility,watersource,Base/default.png,Faucet,10,10,,,

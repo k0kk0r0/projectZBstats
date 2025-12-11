@@ -21,16 +21,16 @@
     // item: { name,type,subType,multiHit,condition,conditionLowerChance,stamina,damage,weight, path? }
     const _pathsplit =item.path.replace(".png","").split('/');
     const _itempath =( item.path.startsWith("Base")? `${_pathsplit[0]}.${_pathsplit[_pathsplit.length-1]}` :`[Mod]${_pathsplit[1]}.${_pathsplit[2]}` );
-    let _itemname = translations[currentLang][item.name] ?? item.name;
+    let _itemname = translating(item.name);
     if(item.foodStatus!=null){
       //const foodStatusTxt=["", "신선한","신선하지 않은","상한","잘 익은","타버린"];
       //itemName.textContent = `${item.subType =='food' ?( item.condition>0 ? (item.condition/item.maxCondition >(item.rottenDays-item.freshDays)/item.rottenDays?'신선한 ':'신선하지 않은 ') :'' ) :''}
       //${(_itempath.endsWith("Cooked")?"요리된 ": (_itempath.endsWith("Overdone")? "타버린 ":(_itempath.endsWith("Rotten")?"상한 ":"")))}${_itemname}${_itempath.endsWith("Open")?"(열림)": ""}`;
       const foodstatus = item.foodStatus<=0? 0 : item.foodStatus;
-      itemName.textContent = `${foodStatusTxt[foodstatus]}${(translations[currentLang][item.name] ?? item.name)}`;
+      itemName.textContent = `${foodStatusTxt[foodstatus]}${translating(item.name)}`;
 
     }else{
-      itemName.textContent = translations[currentLang][item.name] ?? item.name;
+      itemName.textContent = translating(item.name);
     }
     
     if(item.subType!=null){
@@ -66,12 +66,15 @@
     makeDiv('Critical(%)', item.cri? `${item.cri*100}%`:null);
     makeDiv('Critical Multify', item.criXp? `x${item.criXp}`:null);
 
+    makeDiv('Cooking', item.cooktime!=null? '가열 중': null);
     makeDiv('Cookable', item.cookable!=null? (item.cookable?"조리 가능":"조리 불가") : null );
-    makeDiv('Nutrition', item.hunger!=null? `${item.hunger} Kcal` : null );
+    makeDiv('Nutrition', item.hunger!=null? `${item.hunger.split(";")[ item.foodStatus>0? item.foodStatus: 1]} Kcal` : null );
     makeDiv('Poisoning chance', item.poisoning!=null? `${item.poisoning*100}%`: null);
     makeDiv('FreshDays', item.freshDays? (item.freshDays<0? "보존식품" : `${(item.freshDays/24)}일`) : null);
     makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
+
     makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? null) );
+
 
     if(item.count !=null){
       if(item.count>0){
@@ -92,6 +95,9 @@
         field_conditionBar.style.width = `${ratio}%`;
         field_conditionBar.className ="h-full transition-all";
         field_conditionLowerChance.textContent ='';
+
+
+
 
         if(item.type=="Weapon" ){ //무기, 방어구 등등...
             const MaintenanceLv = parseFloat(findPlayerSkill("Maintenance").lv);
@@ -116,8 +122,8 @@
             //액체류의 경우
             field_conditionText.textContent = `남은 양: ${cond/10}/${cond0/10}L (${ratio}%)`;
             field_conditionBar.classList.add(itemColor(item.subType));
-            makeDiv('액체 종류',`${translations[currentLang][item.subType]??item.subType}`);
-            itemName.textContent += ` (${translations[currentLang][item.subType]??item.subType})`;
+            makeDiv('액체 종류',`${translating(item.subType)}`);
+            itemName.textContent += ` (${translating(item.subType)})`;
         }else if(item.subType=='food'){
             //신선도가 있는 음식의 경우
             field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );
@@ -126,8 +132,8 @@
             //재료인 경우
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
             field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;
-        }else if(item.type=='Facility'){
-
+        }else if(item.type=="Furniture"){
+            console.log(item.needItem);
             if(item.needItem=='water'){
                field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;
               field_conditionBar.classList.add(itemColor(item.needItem));

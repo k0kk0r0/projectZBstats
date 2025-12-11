@@ -42,7 +42,7 @@ function addStorageTag(name, index, turn=-1){
     }
     const btn = document.createElement('button');
     btn.className = "text-xl font-bold p-2 border rounded bg-blue-400 storageBtn";
-    btn.innerText = `${icon}${translations[currentLang][name]??name}${turn>0? "("+turn+")":``}`;
+    btn.innerText = `${icon}${translating(name)}${turn>0? "("+turn+")":``}`;
     btn.dataset.index = index;
     btn.dataset.name = name;
     btn.addEventListener('click', ()=>{
@@ -106,8 +106,16 @@ function renderStorageTurn(){
                     itemRotten(storages[n].inventory[i]);
                 }
                 
-            
-                
+                //보관함(오븐) -요리하기
+                if(getFacilityEnable("oven") && storages[n].name=='oven'){
+                    
+                    itemCook(storages[n].inventory[i] , storages[n].inventory);
+                }
+                if(getFacilityEnable("micro") && storages[n].name=='micro'){
+                    
+                    itemCook(storages[n].inventory[i] , storages[n].inventory);
+                }
+
             }
         }
     }
@@ -121,7 +129,6 @@ function renderStorageTurn(){
                 storage[i].turn--;
                 if(storage[i].turn<=0){
                     //시체 사라짐
-                    //log(`${translations[currentLang][storage[i].name]}의 보관 기간이 만료되어 내용물이 사라졌습니다.`, true);
                     storage.splice(i,1);
                     i--;
                 }
@@ -130,6 +137,79 @@ function renderStorageTurn(){
     }
   
     renderStorageModal();
+}
+function itemCook(item, cookedInventory){
+    //요리, 물 끓이기
+    if(item.type=="FluidContainer"){
+        //액체류인 경우
+        if(item.subType =='taintedWater'){
+            //썩은 물의 경우
+            if(item.cookTime==null){
+                item.cookTime=30;
+            }
+            if(item.cooktime==null){
+                item.cooktime=0;
+                return;
+            }
+            item.cooktime+= 10;
+            if(item.cooktime>=item.cookTime){
+                item.subType='water';
+                item.cookTime=null;
+                item.cooktime=null;
+                log_popup(`물이 정화되었습니다`);
+            }
+        }
+    }
+    if(item.type=='Food'){
+        //const foodStatusTxt=["", "1신선한 ","2신선하지 않은 ","3상한 ","4타버린 "]; //캔(-1) 기본값(0)
+        if(item.foodStatus==1 ||item.foodStatus==2 ){
+            if(item.cookable==false){
+                return;
+            }
+            //요리 가능한 음식의 경우
+            if(item.cooktime==null){
+                item.cooktime=0;
+                return;
+            }
+            item.cooktime+=10;
+            if(item.cooktime>=item.cookTime){
+                //요리완료
+                item.cooktime = null;
+                if(item.name.endsWith("Cooked")==false){
+                    
+                    for(let i =0; i<cookedInventory.length;i++){
+                        if(cookedInventory[i] == item){
+                            const cooked =findFood(`${item.name}Cooked`);
+                            console.log(cooked.cooktime);
+                            if(cooked!=null){
+                                cookedInventory[i] = cooked ;
+                                cooked.div = item.div;
+                                console.log(cookedInventory[i]);
+                            }
+                            break;
+                        }
+                    }
+                    /*
+                   item.foodStatus=1;
+                   item.path = item.path.replace(".png","Cooked.png");
+                   item.poisoning=0;
+                    */
+                   // log(`요리가 완료되었습니다`);
+                   // stopResting();
+                }else{
+                    item.foodStatus=4;
+                    item.path = item.path.replace("Open","").replace("Cooked","").replace(".png", "Overdone.png");
+                    item.condition=0;
+                    item.poisoning=1;
+                   // log(`요리가 타버렸습니다`);
+                    //stopResting();
+                }
+                
+                
+                //renderStorageModal();
+            }
+        }
+    }
 }
 function itemRotten(item, rottonPoint = 1){
     if(item.subType=="food"){
@@ -140,11 +220,7 @@ function itemRotten(item, rottonPoint = 1){
                  //console.log(`${item.name} ${(item.rottenDays-item.freshDays)/item.rottenDays}`);
                   if(item.foodStatus==1){
                     if(item.condition/item.maxCondition <= (item.rottenDays-item.freshDays)/item.rottenDays ){
-                        const staleitem = findFood(`${item.name}Stale}`);
-                        if(staleitem!=null){
-                            item.path = staleitem.path;
-                            item.hunger = staleitem.hunger;
-                        }
+                        
                         item.foodStatus= 2;
                         //신선하지 않은
                     }
@@ -175,7 +251,7 @@ function itemRotten(item, rottonPoint = 1){
 
 function renderStorageModal(){
     closeSubOption();
-    removeMatrialItem();
+    
 
     //턴넘김 바
     fieldInventoryBar.style.width = `${storageTurn/maxStorageTurn*100}%`;
@@ -314,7 +390,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
 
     const namespan = document.createElement('span');
     namespan.className = `absolute bottom-0 left-0 right-0 ${fontSize} text-white bg-black/50 text-center truncate rounded-b z-50`;
-    namespan.innerText = translations[currentLang][data.name]??data.name;
+    namespan.innerText = translating(data.name);
     div.appendChild(namespan);
 
     // 내구도 배경 박스
@@ -328,52 +404,70 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
     const durabilityBar = document.createElement('div');
     
     durabilityBar.className = `absolute bottom-0 left-0 right-0 rounded transition-all duration-300`;
-    if(data.type=="Weapon" || data.type =="Armor"){
-        //무기, 방어구 등인 경우...
-        durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
-        durabilityBar.style.height = `${ratio * 100}%`;
-    }
-    if(data.type=="FluidContainer"){
-        //액체류의 경우
+    //요리 중
+    if(data.cooktime!=null){
         
-        durabilityBar.classList.add(itemColor(data.subType));
-        durabilityBar.style.height = `${ratio * 100}%`;
+        const _cookBar = document.createElement('div');
+        //cookBar.style.width = `${ data.cooktime/data.cookTime * 100}%`;
+        _cookBar.className = `absolute top-2 left-2 right-2 ${boxSize=='w-16 h-16'?'h-2':'h-4'} bg-slate-600 rounded z-50`;
+        box.appendChild(_cookBar);
+
+        const cookBar = document.createElement('div');
+        cookBar.style.width = `${ data.cooktime/data.cookTime * 100}%`;
+        cookBar.className = `w-full h-full bg-red-600 rounded transition-all duration-300 z-50`;
+        _cookBar.appendChild(cookBar);
     }
-    if(data.subType=='food'){
-        //음식의 경우
-        const freshratio =(data.rottenDays-data.freshDays)/data.rottenDays;
-        durabilityBar.classList.add(itemRatioColor(ratio, freshratio ));
-        durabilityBar.style.height=`${data.div/data.maxDiv*100}%`;
-        /*
-        if(data.condition<=0){
-            durabilityBar.style.height = `100%`;
-        }else{
-            //50%까지는 감소
-           durabilityBar.style.height = `${ ratio> freshratio ? ratio * 100: 100}%`;
+
+    if(data.condition>0){
+    
+        if(data.type=="Weapon" || data.type =="Armor" || data.type=="Furniture"){
+            //무기, 방어구 등인 경우...
+            durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+            durabilityBar.style.height = `${ratio * 100}%`;
         }
-           */
-    }
-    if(data.subType=='matrial'){
-        durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
-        durabilityBar.style.height = `${ratio * 100}%`;
-    }
-    if(data.count !=null){
-        if(data.count>0){
-            //숫자를 세는 경우
-            const namespan2 = document.createElement('span');
-            namespan2.className = `absolute top-0 right-0 ${fontSize} px-1 text-black text-bold text-center truncate z-50`;
-            namespan2.innerText = data.count;
-            div.appendChild(namespan2);
+        if(data.type=="FluidContainer"){
+            //액체류의 경우
+            
+            durabilityBar.classList.add(itemColor(data.subType));
+            durabilityBar.style.height = `${ratio * 100}%`;
         }
-        
+        if(data.subType=='food'){
+            //음식의 경우
+            const freshratio =(data.rottenDays-data.freshDays)/data.rottenDays;
+            durabilityBar.classList.add(itemRatioColor(ratio, freshratio ));
+            durabilityBar.style.height=`${data.div/data.maxDiv*100}%`;
+            /*
+            if(data.condition<=0){
+                durabilityBar.style.height = `100%`;
+            }else{
+                //50%까지는 감소
+            durabilityBar.style.height = `${ ratio> freshratio ? ratio * 100: 100}%`;
+            }
+            */
+        }
+
+        if(data.subType=='matrial'){
+            durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
+            durabilityBar.style.height = `${ratio * 100}%`;
+        }
+        if(data.count !=null){
+            if(data.count>0){
+                //숫자를 세는 경우
+                const namespan2 = document.createElement('span');
+                namespan2.className = `absolute top-0 right-0 ${fontSize} px-1 text-black text-bold text-center truncate z-50`;
+                namespan2.innerText = data.count;
+                div.appendChild(namespan2);
+            }
+            
+        }
+        //div.dataset.durabilityId = `durability_${index}`;
+    // durabilityBar.id = div.dataset.durabilityId;
+        box.appendChild(durabilityBar);
     }
-    //div.dataset.durabilityId = `durability_${index}`;
-   // durabilityBar.id = div.dataset.durabilityId;
-    box.appendChild(durabilityBar);
 
     const img = document.createElement('img');
     img.src = data.path;
-    img.className = "absolute w-full h-full object-contain p-2 z-50";
+    img.className = "absolute w-full h-full object-contain p-2 z-40";
     box.appendChild(img);
 
     //div.addEventListener('click', itemMove);
@@ -388,7 +482,7 @@ function renderEquipment(){
         const data =equipments[key];
         if(data!=null){
             if(data.condition<=0){
-                log(`와장창!! ${translations[currentLang][data.name]}가 파괴되었습니다.`, true);
+                log(`와장창!! ${translating(data.name)}가 파괴되었습니다.`, true);
                 equipments[key] =null;
             }
         }
@@ -407,7 +501,7 @@ function renderEquipment(){
             
         }
         weaponImg.src = equipments.weapon.path;
-        weaponName.textContent = translations[currentLang][equipments.weapon.name]; }
+        weaponName.textContent = translating(equipments.weapon.name); }
     else if(equipments.weapon == null){
         equipWp.src = 'icons/default.png'; //들고있는 무기아이콘
         weaponImg.src = 'icons/default.png';
@@ -428,7 +522,7 @@ function renderEquipment(){
         if(data!=null){
             const ratio = data.condition/data.maxCondition;
             target.icon.src = data.path;
-            target.nameTxt.innerText = translations[currentLang][data.name]??data.name;
+            target.nameTxt.innerText = translating(data.name);
             target.conditionBar.style.height =`${(ratio*100)}%`;
             target.conditionBar.classList.remove("bg-green-300", "bg-yellow-200", "bg-red-200");
             if(data.type=="FluidContainer"){
@@ -456,6 +550,8 @@ function itemMove(data, dataset){
     if(storage[storageIndex]==null){
         storageIndex = 0;
     }
+
+    data.cooktime = null;
      if(dataset.route == storage_player.id){
         //가방으로 이동
         storage[storageIndex].inventory.push( data);

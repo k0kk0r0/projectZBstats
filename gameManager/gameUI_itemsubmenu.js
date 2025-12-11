@@ -23,7 +23,7 @@ function facilitySubMenu(facilityName){
         const _windowRatio = windowRatio();
         
         if(_windowRatio=='phone'){
-            textSize ='text-5xl';
+            textSize ='text-4xl';
             boxSize='p-8';
         }else if(_windowRatio=='tablet'){
             textSize ='text-4xl';
@@ -51,7 +51,12 @@ function facilitySubMenu(facilityName){
         optionBoxes.appendChild(box);
         return box;
     }
-    
+    let zombieIsAlived = zombies.length>0? true : false;
+    if(storageTurn>=maxStorageTurn){
+        zombieIsAlived=true;
+    }
+
+
     const data = getFacility(facilityName);
     if(data.item!=null){
         makeBox("시설 정보", null).addEventListener('click', ()=>{
@@ -64,7 +69,7 @@ function facilitySubMenu(facilityName){
             if(data.item.condition>0){
                 //물 마시기
                 const drinkType = data.item.subType;
-                    const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
+                    const drinkname = translating(drinkType);
                 makeBox(`${drinkname} 마시기`,true, itemColor(drinkType)).addEventListener('click', ()=>{
                     if(waterEndTurn>0){
                         playerDrink( drinkType, {condition:1});
@@ -83,21 +88,66 @@ function facilitySubMenu(facilityName){
             if(getFacilityEnable(facilityName)){
                 makeBox("전원 끄기").addEventListener('click', ()=>{
                     setFacilityEnable(facilityName, false);
-                    //advanceTurn();
+                    if(zombieIsAlived)advanceTurn();
                     closeSubOption();
                 });
             }else{
-                makeBox("전원 켜기").addEventListener('click', ()=>{
-                    if(getPower()){
-                        setFacilityEnable(facilityName, true);
-                        //advanceTurn();
-                    }else{
-                        log_popup(`전력 공급이 없습니다.`);
+                makeBox("전원 켜기",false,"bg-blue-300").addEventListener('click', ()=>{
+                    if(data.needItem =="power" ){
+                         if(getPower()){
+                         setFacilityEnable(facilityName, true);
+                            if(zombieIsAlived)advanceTurn();
+                        }else{
+                            log_popup(`전력 공급이 없습니다.`);
+                        }
+                    }else if(data.needItem =="battery"){
+                        //배터리의 경우
+                        if(data.item.condition>0){
+                            //배터리 잔량이 있는 경우
+                            setFacilityEnable(facilityName, true);
+                        }else{
+                            log_popup(`건전지가 없습니다.`);
+                        }
                     }
+                   
                     
                     closeSubOption();
                 });
             }
+        }
+        if(data.needItem=='battery'){
+            if(data.item.condition>0){
+                makeBox("배터리 제거하기",true, "bg-pink-300").addEventListener('click', ()=>{
+                    const battery = findMisc("Battery");
+                    battery.condition =  parseInt( data.item.condition);
+                    data.item.condition = 0;
+                    inventory.push( battery);
+                    setFacilityEnable(data.name,false);
+                    renderStorageModal();
+                    closeSubOption();
+                    
+                    log(`${data.name}에서 건전지를 제거했습니다.`);
+                });
+            }else{
+                //배터리 장착
+                makeBox("배터리 장착하기",true).addEventListener('click', ()=>{
+                    const battery = findInventoryItemData('Battery');
+                    if(battery==null){
+                        log_popup(`배터리가 없습니다.`);
+                        closeSubOption();
+                    }else{
+                        data.item.condition = parseInt(battery.condition);
+                        console.log(data.item);
+                        battery.condition=0;
+                        setFacilityEnable(data.name,true);
+                        log(`${data.name}에서 건전지를 삽입했습니다.`);
+                        renderStorageModal();
+                        closeSubOption();
+                        advanceTurn();
+                    }
+                });
+            }
+            
         }
         if(facilityName=='bed' || facilityName =='sofa'){
             //침대 및 소파
@@ -180,7 +230,7 @@ function itemsubMenu(data, dataset){
         const _windowRatio = windowRatio();
         
         if(_windowRatio=='phone'){
-            textSize ='text-5xl';
+            textSize ='text-4xl';
             boxSize='p-8';
         }else if(_windowRatio=='tablet'){
             textSize ='text-4xl';
@@ -265,7 +315,7 @@ function itemsubMenu(data, dataset){
                                 addSkillXp("Tailoring",125);
                                 advanceTurn();
                             }else{
-                                log_popup(`남은 ${translations[currentLang].Rag}이 없습니다.`);
+                                log_popup(`남은 ${translating("Rag")}이 없습니다.`);
                             }
                         }else{
                             log_popup(`남은 실이 없습니다.`);
@@ -293,7 +343,7 @@ function itemsubMenu(data, dataset){
                   if(data.subType== "clothing" || data.subType== "watch"){
                 //의상 찢기, 분해
                     optionBoxesDivide();
-                    makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, true, "bg-slate-300").addEventListener('click', ()=>{
+                    makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, true, "bg-pink-300").addEventListener('click', ()=>{
                         inventory.push( findItem(data.convert) );
                         //pushItemToInventory(inventory, data.convert);
                         if(dataset.route == storage_storage.id){
@@ -314,8 +364,8 @@ function itemsubMenu(data, dataset){
             //액체류 마시기, 채우기, 비우기
            
             if(item.condition>0){
-                const drinkType = (data.subType.split(';').length>1? `${translations[currentLang][ data.subType.split(';')[0]] } 혼합액` : data.subType);
-                 const drinkname = translations[currentLang][ drinkType ] ?? drinkType;
+                const drinkType = (data.subType.split(';').length>1? `${translating( data.subType.split(';')[0] ) } 혼합액` : data.subType);
+                 const drinkname = translating( drinkType);
                 makeBox(`${drinkname} 마시기`,true, itemColor(drinkType)).addEventListener('click', ()=>{
                     playerDrink( data.subType.split(';')[0], item );
                     
@@ -336,13 +386,13 @@ function itemsubMenu(data, dataset){
 
                 // console.log(waterSource);
                 if(waterSource!=null){
-                    const addFluidname = translations[currentLang][waterSource] ?? waterSource;
+                    const addFluidname = translating(waterSource);
                     makeBox(`${addFluidname} 채우기`,true, itemColor(waterSource)).addEventListener('click', ()=>{
                         if(faucet!=null){
                             if(waterEndTurn>0){
                                 item.condition = item.maxCondition;
                                 advanceTurn();
-                                log(`${translations[currentLang][faucet.name]??faucet.name}으로 물을 채웠습니다.`,true);
+                                log(`${translating(faucet.name)}으로 물을 채웠습니다.`,true);
                             }else{
                                 //물이 끊긴 경우 수전의 물 사용
                                 if(faucet.item.condition>0){
@@ -350,7 +400,7 @@ function itemsubMenu(data, dataset){
                                         //
                                         if(parseFloat(faucet.item.condition)<=0 || item.condition>= item.maxCondition){
                                             advanceTurn();
-                                            log(`${translations[currentLang][faucet.name]??faucet.name}으로 물을 채웠습니다.`,true);
+                                            log(`${translating(faucet.name)}으로 물을 채웠습니다.`,true);
                                             break;
                                         }else{
                                             item.condition++;
@@ -358,7 +408,7 @@ function itemsubMenu(data, dataset){
                                         }
                                     }
                                 }else{
-                                    log_popup(`${translations[currentLang][faucet.name]??faucet.name}에 물이 없습니다.`);
+                                    log_popup(`${translating(faucet.name)}에 물이 없습니다.`);
                                 }
                                 
                             }
@@ -448,7 +498,7 @@ function itemsubMenu(data, dataset){
                 }
                 
             }
-            
+          
             
             if(data.subType =="consume"){
                 
@@ -467,7 +517,7 @@ function itemsubMenu(data, dataset){
                         if(string!=null){
                         makeBox("사용하기",true, "bg-slate-300").addEventListener('click', ()=>{
                             cureWound(string);
-                            log(`${translations[currentLang][data.name]??data.name} 아이템을 사용했습니다`, true);
+                            log(`${translating(data.name)} 아이템을 사용했습니다`, true);
                             inventory.splice(dataset.index,1);
                             renderStorageModal();
                             advanceTurn();
@@ -491,8 +541,41 @@ function itemsubMenu(data, dataset){
                     closeStorageModal();
                     
                 });
+                //건전지 넣기
+                if(item.needItem=='battery'){
+                    if(item.condition>0){
+                        makeBox("배터리 제거하기",true, "bg-pink-300").addEventListener('click', ()=>{
+                            const battery = findMisc("Battery");
+                            battery.condition =  parseInt( item.condition);
+                            item.condition = 0;
+                            inventory.push( battery);
+                            renderStorageModal();
+                            closeSubOption();
+                            advanceTurn();
+                            log(`${item.name}에서 건전지를 제거했습니다.`);
+                        });
+                    }else{
+                        //배터리 장착
+                        makeBox("배터리 장착하기",true).addEventListener('click', ()=>{
+                            const battery = findInventoryItemData('Battery');
+                            if(battery==null){
+                                log_popup(`배터리가 없습니다.`);
+                                closeSubOption();
+                            }else{
+                                item.condition = parseInt(battery.condition);
+                                console.log(data);
+                                battery.condition=0;
+                                log(`${item.name}에서 건전지를 삽입했습니다.`);
+                                advanceTurn();
+                                renderStorageModal();
+                                closeSubOption();
+                            }
+                        });
+                    }
+                 }
+
             }
-            makeBox(`${storage[storageIndex].name=="ground"?"바닥에 버리기":`${translations[currentLang][storage[storageIndex].name]??storage[storageIndex].name}에 넣기`}`).addEventListener('click', ()=>{
+            makeBox(`${storage[storageIndex].name=="ground"?"바닥에 버리기":`${translating(storage[storageIndex].name)}에 넣기`}`).addEventListener('click', ()=>{
                 
                 itemMove(data, dataset);
                 closeSubOption();

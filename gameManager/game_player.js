@@ -73,7 +73,7 @@ function addSkillXp(name, value){
                 data.lv ++;
                 data.xp -= data.maxXp;
                 data.maxXp = xpData[ data.lv ];
-                log(`[${translations[currentLang][name]}] Level ${data.lv}로 레벨업!`);
+                log(`[${translating(name)}] Level ${data.lv}로 레벨업!`);
             }
         }
        
@@ -145,7 +145,7 @@ function stopResting(){
     log("휴식 끝");
 }
 function playerAttack(multiHit){
-    const stat = playerStat();
+    const playerstat = playerStat();
     stat.thirst-=0.5;
     if(equipments.weapon ==null){
         if(zombies.length>0){
@@ -155,7 +155,7 @@ function playerAttack(multiHit){
                 if(stat.stamina<=0){
                     stat.stamina = 0;
                 }
-                let damage = (stat.strength*4+ randomInt(0,stat.strength ));
+                let damage = (playerstat.strength*4+ randomInt(0,playerstat.strength ));
 
                 zombieIsDamaged(0, damage);
                 addSkillXp( 'strength', damage);
@@ -180,7 +180,7 @@ function playerAttack(multiHit){
     
 
 
-    log(`플레이어의 ${translations[currentLang][equipments.weapon.name]} 무기 공격! `+ ((stat.endurance<0)? `(지침 ${-stat.endurance}단계)`:``) );
+    log(`플레이어의 ${translating(equipments.weapon.name)} 무기 공격! `+ ((playerstat.endurance<0)? `(지침 ${-playerstat.endurance}단계)`:``) );
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
 
     let skillLv = findPlayerSkill(equipments.weapon.subType).lv;
@@ -230,33 +230,33 @@ function playerAttack(multiHit){
             ; debuf.push(["zombieKnockback", +150]);
         }
         //강함, 약함
-        if(stat.strength>=9){
+        if(playerstat.strength>=9){
             damage*= 1.4;
             debuf.push(["Strong", +40]);
-        }else if(stat.strength<=1){
+        }else if(playerstat.strength<=1){
             damage *= 0.6;
             debuf.push(["Weak", -40]);
         }
         //패닉, 스트레스
-        if(stat.panic>0){
-            damage *= (10-stat.panic)/10 ;
-            debuf.push(["panic", stat.panic*-10]);
+        if(playerstat.panic>0){
+            damage *= (10-playerstat.panic)/10 ;
+            debuf.push(["panic", playerstat.panic*-10]);
         }
-        if(stat.stressed>0){
-            damage *= (10-stat.stressed)/10;
-            debuf.push(["stressed", stat.stressed*-10]);
+        if(playerstat.stressed>0){
+            damage *= (10-playerstat.stressed)/10;
+            debuf.push(["stressed", playerstat.stressed*-10]);
         }
         //스태미나 고갈(Endurance)
-        if(stat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
-        if(stat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
-        if(stat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
-        if(stat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
+        if(playerstat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
+        if(playerstat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
+        if(playerstat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
+        if(playerstat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
         //피로(fatique))
         /*
-        if(stat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
-        if(stat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
-        if(stat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
-        if(stat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
+        if(playerstat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
+        if(playerstat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
+        if(playerstat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
+        if(playerstat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
         */
         if(damage>355){
             //임시 리미트
@@ -271,18 +271,18 @@ function playerAttack(multiHit){
 
         let debuftxt ="";
         for(let n =0; n< debuf.length; n++){
-            debuftxt += `${translations[currentLang][debuf[n][0]]??debuf[n][0]}: ${debuf[n][1]>0?"+":''}${debuf[n][1]}% `;
+            debuftxt += `${translating(debuf[n][0])}: ${debuf[n][1]>0?"+":''}${debuf[n][1]}% `;
 
         }
         log( `${i+1}번째 좀비가 ${damage}의 대미지를 입었다. ${debuftxt.length>0?`\n`:''} ${debuftxt}`);
         let rng = Math.random();
-        const stunPer = 0.35 + stat.strength0*0.05;
+        const stunPer = 0.35 + playerstat.strength*0.05;
         if(rng<= stunPer){
             //확률로 넉백
             zombies[i].isStunning = 4; //스턴 턴 횟수
             zombieMove(i,10);
             zombieStun(i,4);
-            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
+            log(`근력 ${playerstat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
         }else{
             //좀비 경직을 넣을까?
             zombieMove(i,20);
@@ -298,7 +298,7 @@ function playerAttack(multiHit){
     renderGameUI();
 }
 function playerPush(multiHit){
-    const stat = playerStat();
+    const playerstat = playerStat();
     stat.stamina -= pushStamina;//고정값
     if(stat.stamina<=0){
         stat.stamina = 0;
@@ -309,10 +309,10 @@ function playerPush(multiHit){
         
         //밀치기 계산
        let rng = Math.random();
-        const stunPer = 0.35 + stat.strength*0.05;
+        const stunPer = 0.35 + playerstat.strength*0.05;
         if(rng<= stunPer){
             //확률로 넉백            
-            log(`근력 ${stat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
+            log(`근력 ${playerstat.strength}, ${(stunPer*100).toFixed(1)}% 확률로 넉백!`);
             zombieMove(i,20);
             zombieStun(i,4);
         }else{
@@ -367,7 +367,7 @@ function playerIsDamaged(value){
                 defend = true;
                 //의상으로 방어
                 equipments.armor.condition--;
-                log(`${clothDefendPer*100}% 확률로 장착한 [${translations[currentLang][equipments.armor.name]??equipments.armor.name}] 의상으로 막아냈습니다.`);
+                log(`${clothDefendPer*100}% 확률로 장착한 [${translating(equipments.armor.name)}] 의상으로 막아냈습니다.`);
                 renderGameUI();//renderEquipment()포함
                 return;
             }
@@ -485,7 +485,7 @@ function playerBanding(itemIndex){
         let data = wound[i];
         if(data.heal<0){
              if(data.tag =="lacerated" || data.tag =="scratched" || data.tag=="bitten"){
-                const txt = `${translations[currentLang][inventory[itemIndex].name]}을 소모하여 [${translations[currentLang][data.tag]}]에 붕대 감음.`;
+                const txt = `${translating(inventory[itemIndex].name)}을 소모하여 [${translating(data.tag)}]에 붕대 감음.`;
                 log(txt,true);
                 //wound.splice(i,1);
                 //i--;
@@ -540,7 +540,7 @@ function playerDrink( fluidType , item ){
             closeStorageModal();
 
         }else{
-            log(`${translations[currentLang][fluidType]??fluidType}을 마셨습니다.${item.maxCondition!=null? '('+item.condition+'/'+item.maxCondition+')':''}`,true );
+            log(`${translating(fluidType)}을 마셨습니다.${item.maxCondition!=null? '('+item.condition+'/'+item.maxCondition+')':''}`,true );
             if(fluidType=='taintedWater'){
                 //
                 pushWound('foodPoisoning', 20);
@@ -557,13 +557,13 @@ function playerEatFood(item, div=1){
         return
     }
     //배고픔 해결
-    const kcal = item.hunger/4; //음식 회복량/4
+    const kcal = item.hunger.split(";")[ item.foodStatus>0? item.foodStatus: 1] /4; //음식 회복량/4
     stat.hunger+= div*kcal;
     if(stat.hunger>200){stat.hunger=200;}
     item.div -= div;
     item.weight = Math.round((item.weight-item.weightDiv*div)*100)/100;
 
-    log(`${translations[currentLang][item.name]??item.name} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );
+    log(`${translating(item.name)} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );
 
     if(Math.random()< item.poisoning){
         //독

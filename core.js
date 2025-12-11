@@ -14,6 +14,7 @@
       const data = selectedItems.find(n => n.name ===_name);
       const defaltIcon ='icons/default.png';
       const item ={name:_name, value:_value, type:_type, imgsrc:_imgsrc??defaltIcon};
+      
         if(data!=null){
           if(data.type=="Trait"){
             const trait = selectedItems.find(n=>n.name ===_name);
@@ -28,7 +29,7 @@
           
         }else{
           selectedItems.push(item);
-          //console.log(item);
+         // console.log(item);
         }
     }
     function clearSelectedItemList(){
@@ -385,7 +386,6 @@
             let value = parseInt(input.dataset[key]) || 0;
             //console.log( value);
             statsTotal[statName] = (statsTotal[statName] || 0) + value;
-            
             addSelectedItem( statName, value, 'Skill');
           }
         }
@@ -457,6 +457,7 @@
         extraStats[statName] = div;
       } else {
         extraStats[statName].innerText = `${label} +${statsTotal[statName]}`;
+        
         addSelectedItem( statName, value);
       }
     }
@@ -501,7 +502,7 @@
             </div>
             `;
         jobIconsContainer.appendChild(label);
-        addSelectedItem(rawName, displayName, "Profession" , icon.src.toString()); //(icon.src.split("_")[1]).split(".")[0]
+        addSelectedItem( displayName,rawName, "Profession" , icon.src.toString()); //(icon.src.split("_")[1]).split(".")[0]
             /*
         img.className = "lg:w-16 lg:h-16 sm:w-32 sm:h-32 rounded shadow"; // Tailwind 기준 큰 아이콘
         jobIconsContainer.appendChild(img);
