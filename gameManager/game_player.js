@@ -122,7 +122,7 @@ function startResting(timer=400){
         //스태미나, 체력 회복
         if(stat.stamina<100 || stat.health < 100){
              stat.stamina += 10;
-             stat.health += 5;
+             stat.health += 2;
             if(stat.stamina>=100)stat.stamina=100;
             if(stat.health>=100)stat.health=100;
             if(stat.stamina>=100 && stat.health>=100){
@@ -433,7 +433,7 @@ function woundHealingCalculate(){
             if(data.tag =="zombie"){
                 if(data.turn/data.turn0  <= 0.5){
                     //setMoodleValue('Stressed',-2);
-                    stat.sick -= data.heal;
+                    stat.sick -= data.heal*3;
                 }
                 if(data.turn/data.turn0  <= 0.9){
                     //setMoodleValue('Stressed',-1);
@@ -443,7 +443,7 @@ function woundHealingCalculate(){
             if(data.tag =="bleach"){
                 if(data.turn/data.turn0  <= 0.5){
                     stat.health-= 20;
-                    stat.sick +=5;
+                    stat.sick +=10;
                     
                 }else{
                     //setMoodleValue('Sick',-1);
@@ -557,12 +557,20 @@ function playerEatFood(item, div=1){
         return
     }
     //배고픔 해결
-    const kcal = 30; //음식 회복량
+    const kcal = item.hunger/4; //음식 회복량/4
     stat.hunger+= div*kcal;
     if(stat.hunger>200){stat.hunger=200;}
     item.div -= div;
     item.weight = Math.round((item.weight-item.weightDiv*div)*100)/100;
+
     log(`${translations[currentLang][item.name]??item.name} 음식을 섭취했습니다.(${item.div}/${item.maxDiv})`,true );
+
+    if(Math.random()< item.poisoning){
+        //독
+        pushWound('foodPoisoning', 20);
+        log(`우욱... 속이 안좋은데?... ${item.poisoning*100}% 확률로 식중독에 걸렸습니다.`,true);
+    }
+    
     if(item.div<=0){
         for(let i =0 ;i<inventory.length ; i++){  
             if(inventory[i] == item){

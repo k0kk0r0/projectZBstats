@@ -2,6 +2,7 @@
   "version": "0.4.12.29",
   "changes": [
     "Stressed, Sick 재작업",
+    "ItemsubMenu 크기를 화면 비율에 따라 유동적으로 조절",
     "좌/우 이동 구현",
     "fitness가 높을 경우 도주 확률 증가",
     "0.4.12.28",

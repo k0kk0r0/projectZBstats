@@ -594,10 +594,10 @@ function TurnEnd() {
         if(stat.stamina>100){stat.stamina=100}
         if(stat.health>100){stat.health=100}
         //배고픔, 목마름
-        stat.hunger -=1;
-        stat.thirst -=1;
-        stat.stressed -= 0.2;
-        stat.sick -= 0.2;
+        stat.hunger -=0.5;
+        stat.thirst -=0.5;
+        stat.stressed -= 0.3;
+        stat.sick -= 0.3;
         if(stat.hunger<0){stat.hunger=0;}
         if(stat.thirst<0){stat.thirst=0;}
 
@@ -808,7 +808,7 @@ function renderGameUI(){
 }
 function checkGameOver(){
     if(!gameOver){
-        if(stat.health<=0 || stat.hunger<=0 || stat.thirst<=0 || stat.sick>=100){
+        if(stat.health<=0 || stat.hunger<=0 || stat.thirst<=0 || stat.sick>=100 ){
             resetAllMoodleValue();
             playerStat();
             stopResting();

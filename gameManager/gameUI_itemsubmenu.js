@@ -5,14 +5,34 @@ document.addEventListener("pointerdown", (e) => {
     point.y = e.clientY;
 });
 function closeSubOption(){itemSubOption.classList.add("hidden");}
+function optionBoxesDivide(){
+    const box = document.createElement("div");
+    box.classList=`p-2 rounded bg-slate-100`;
+    optionBoxes.appendChild(box);
+}
 function facilitySubMenu(facilityName){
     //시설물 서브메뉴
     if(facilityName ==null)return
     itemSubOption.classList.remove("hidden");
     optionBoxes.innerHTML='';
+
+    let textSize ='text-3xl';
+    let boxSize='p-2';
     function makeBox(nameTxt, turn=false, boxColor="bg-gray-500" ){
         const box = document.createElement("button");
-        box.className = `text-3xl p-2 rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
+        const _windowRatio = windowRatio();
+        
+        if(_windowRatio=='phone'){
+            textSize ='text-5xl';
+            boxSize='p-8';
+        }else if(_windowRatio=='tablet'){
+            textSize ='text-4xl';
+            boxSize='p-4';
+        }else{
+            textSize ='text-3xl';
+            boxSize='p-2';
+        }
+        box.className = `${textSize} ${boxSize} rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
         if(turn ==null){
             box.innerText = nameTxt;
         }else{
@@ -59,16 +79,18 @@ function facilitySubMenu(facilityName){
             }
         }
         
-    if(data.needItem =="power" || data.needItem =="battery"){
+        if(data.needItem =="power" || data.needItem =="battery"){
             if(getFacilityEnable(facilityName)){
-                makeBox("전원 끄기",true).addEventListener('click', ()=>{
+                makeBox("전원 끄기").addEventListener('click', ()=>{
                     setFacilityEnable(facilityName, false);
+                    //advanceTurn();
                     closeSubOption();
                 });
             }else{
-                makeBox("전원 켜기",true).addEventListener('click', ()=>{
+                makeBox("전원 켜기").addEventListener('click', ()=>{
                     if(getPower()){
                         setFacilityEnable(facilityName, true);
+                        //advanceTurn();
                     }else{
                         log_popup(`전력 공급이 없습니다.`);
                     }
@@ -92,6 +114,7 @@ function facilitySubMenu(facilityName){
 
         if(data.removable){
             //장착 해제하기
+            optionBoxesDivide();
             makeBox("떼어내기",true, "bg-slate-300").addEventListener('click', ()=>{
                 closeSubOption();
                 
@@ -101,11 +124,11 @@ function facilitySubMenu(facilityName){
 
                         }else{
                             log_popup(`파이프렌치를 장착해야 합니다.`);
-                            //return;
+                            return;
                         }
                     }else{
                         log_popup(`파이프렌치를 장착해야 합니다.`);
-                        //return;
+                        return;
                     }
                 }
                 if(facilityName=='bed' || facilityName=='sofa'){
@@ -114,11 +137,11 @@ function facilitySubMenu(facilityName){
 
                         }else{
                             log_popup(`망치를 장착해야 합니다.`);
-                            //return;
+                            return;
                         }
                     }else{
                         log_popup(`망치를 장착해야 합니다.`);
-                        //return;
+                        return;
                     }
                     
                     
@@ -150,9 +173,23 @@ function itemsubMenu(data, dataset){
     //console.log(point, innerWidth, innerHeight);
     
     optionBoxes.innerHTML='';
-    function makeBox(nameTxt,turn=false, boxColor="bg-gray-500" ){
+    let textSize ='text-3xl';
+    let boxSize='p-2';
+    function makeBox(nameTxt, turn=false, boxColor="bg-gray-500" ){
         const box = document.createElement("button");
-        box.className = `text-3xl p-2 rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
+        const _windowRatio = windowRatio();
+        
+        if(_windowRatio=='phone'){
+            textSize ='text-5xl';
+            boxSize='p-8';
+        }else if(_windowRatio=='tablet'){
+            textSize ='text-4xl';
+            boxSize='p-4';
+        }else{
+            textSize ='text-3xl';
+            boxSize='p-2';
+        }
+        box.className = `${textSize} ${boxSize} rounded ${boxColor} ${boxColor=="bg-gray-500"?"text-white":"text-black"}`;
         if(turn ==null){
             box.innerText = nameTxt;
         }else{
@@ -255,7 +292,7 @@ function itemsubMenu(data, dataset){
                  }
                   if(data.subType== "clothing" || data.subType== "watch"){
                 //의상 찢기, 분해
-                
+                    optionBoxesDivide();
                     makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, true, "bg-slate-300").addEventListener('click', ()=>{
                         inventory.push( findItem(data.convert) );
                         //pushItemToInventory(inventory, data.convert);
@@ -352,6 +389,7 @@ function itemsubMenu(data, dataset){
                 }
             }
             if(item.condition>0){
+                optionBoxesDivide();
                  makeBox(`비우기`,true, "bg-slate-300").addEventListener('click', ()=>{
                     item.condition = 0;
                     item.subType = 'empty';
@@ -375,18 +413,21 @@ function itemsubMenu(data, dataset){
                     closeSubOption();
                 }); 
             }
-            if(data.subType == "canned"){
-                //캔 따기
-                makeBox("캔 따기",true, "bg-slate-300").addEventListener('click', ()=>{
-                    //playerHealing(dataset.index);
-                    const opendItem = findItem(`${data.name}Open`);
-                    opendItem.name = data.name;
-                    inventory.push(opendItem);
-                    inventory.splice( dataset.index,1);
-                    closeSubOption();
-                    advanceTurn();
-                    renderStorageModal();
-                }); 
+            if(data.type == "Food"){
+                if(data.foodStatus==-1){
+                    //캔 따기
+                    makeBox("캔 따기",true, "bg-slate-300").addEventListener('click', ()=>{
+                        //playerHealing(dataset.index);
+                        const opendItem = findItem(`${data.name}Open`);
+                        opendItem.name = data.name;
+                        inventory.push(opendItem);
+                        inventory.splice( dataset.index,1);
+                        closeSubOption();
+                        advanceTurn();
+                        renderStorageModal();
+                    }); 
+                }
+                
             }
             if(data.subType == "food"){
                 //먹기
@@ -447,6 +488,8 @@ function itemsubMenu(data, dataset){
                     inventory.splice( dataset.index,1);
                     closeSubOption();
                     advanceTurn();
+                    closeStorageModal();
+                    
                 });
             }
             makeBox(`${storage[storageIndex].name=="ground"?"바닥에 버리기":`${translations[currentLang][storage[storageIndex].name]??storage[storageIndex].name}에 넣기`}`).addEventListener('click', ()=>{

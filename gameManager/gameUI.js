@@ -34,6 +34,16 @@ function commandBtsVisible(value){
     }
     closeMenuModal();
 }
+///////////////////////////////////////////////////////////////////
+function windowRatio(){
+    if(window.innerWidth/window.innerHeight<0.65){
+        return 'phone'
+    }else if(window.innerWidth/window.innerHeight<0.9){
+        return 'tablet'
+    }else{
+        return 'desktop'  
+    }
+}
 /////////////////////// 시설물 관리 ////////////////////////////////
 //장소의 상단 설비 아이콘들
 const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
@@ -90,11 +100,24 @@ function setFacilityEnable(name, value){
 }
 function addFacility(name){
     const facilItem = facilityItem(name);
-    facilItem.item.condition = facilItem.item.maxCondition;
+    if(facilItem.needItem=='water'){
+        if(waterEndTurn>0){
+            //물이 끊기지 않은 경우
+            facilItem.item.condition = facilItem.item.maxCondition;
+        }else if(getFacilityEnable("waterBarrel")){
+            //빗물받이통이 있는 경우
+
+        }else{
+            //아무것도 없는 경우
+            facilItem.item.condition = 0;
+        }
+    }
+    
     currentMapData.thisFacilities.push(facilItem);
     if(facilItem.addStorage){
         addStorageList( name, [] );
     }
+    log_popup(`${translations[currentLang][name]??name}를 설치했습니다.`);
 }
 function removeFacility(name){
     //시설에 포함된 보관함이 있으면?
@@ -114,7 +137,10 @@ function removeFacility(name){
 
     //시설을 제거하고 인벤토리에 아이템 넣기
     let item =getFacility(name).item ;
-    item.condition=0;
+    if(item.needItem=='water'){
+         item.condition=0;
+    }
+   
     item.type ='Furniture';
     inventory.push(item );
     for(let i =0 ; i < currentMapData.thisFacilities.length; i++){

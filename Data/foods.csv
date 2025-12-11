@@ -1,4 +1,9 @@
-type,subType,path,name,weight,freshDays,rottenDays,cookTime,hunger,convert,info
-Food,canned,Base/Foods/CannedCornedBeef.png,CannedCornedBeef,0.8,-1,,,24,CannedCornedBeefOpen,
-Food,food,Base/Foods/CannedCornedBeefOpen.png,CannedCornedBeefOpen,0.8,2,4,10,24,TinCanEmpty,
-Food,food,Base/Foods/Ham.png,Ham,1,5,10,20,60,,
+type,subType,path,name,weight,foodStatus,freshDays,rottenDays,cookTime,hunger,cookable,poisoning,convert,info
+Food,canned,Base/Foods/CannedCornedBeef.png,CannedCornedBeef,0.8,-1,-1,,,24,false,0,CannedCornedBeefOpen,캔따개가 없어도 개봉할 수 있습니다
+Food,food,Base/Foods/CannedCornedBeefOpen.png,CannedCornedBeefOpen,0.8,1,2,4,10,24,false,0,TinCanEmpty,
+Food,food,Base/Foods/Ham.png,Ham,1,1,5,10,20,60,false,0,,
+Food,food,Base/Foods/Steak.png,Steak,1,1,2,4,50,40,true,0.75,,
+Food,food,Base/Foods/Steak.png,SteakStale,1,1,2,4,50,30,true,0.75,,
+Food,food,Base/Foods/SteakCooked.png,SteakCooked,1,2,2,4,0,52,false,0,,
+Food,food,Base/Foods/SteakCooked.png,SteakStaleCooked,1,2,2,4,0,30,false,0,,
+Food,food,Base/default.png,dummy,1,2,2,2,20,60,true,0,,status 캔(-1) 기본값(0) 신선한(1) 신선하지않은(2) 상한(3)...

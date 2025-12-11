@@ -155,6 +155,7 @@ function findMisc(itemName ){
     }
     return data0;
 }
+const foodStatusTxt=["", "신선한 ","신선하지 않은 ","상한 ","잘 익은 ","타버린 "]; //캔(-1) 기본값(0)
 function findFood(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
     const data = foodDatas.find(w => w.name === itemName);
@@ -168,10 +169,15 @@ function findFood(itemName ){
         condition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp: data.rottenDays*xp): data.condition ),
         maxCondition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp : data.rottenDays*xp ): data.condition  ),
         weight: parseFloat(data.weight),
+
+        foodStatus: parseInt(data.foodStatus), 
+        cookable:JSON.parse(data.cookable),
         freshDays: parseInt(data.freshDays*24),
         rottenDays: parseInt(data.rottenDays*24),
         cookTime: parseInt( data.cookTime ),
-        hunger: parseInt(data.hunger),
+        hunger: parseInt(data.hunger),//kcal 총량, 섭취 시 1/4로 나눔
+        poisoning: parseFloat(data.poisoning),
+
         convert: data.convert.toString(),
         div:4,
         maxDiv:4,
@@ -206,13 +212,13 @@ function facilityItem(facilityName){
         break;
         case "faucet":
             obj.needItem ='water';
-            obj.item = {name:facilityName, type:'FluidContainer',subType:'water', condition:10, maxCondition:10, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'FluidContainer',subType:'water', needItem:'water',condition:10, maxCondition:10, path:'Base/default.png'};
              obj.item.weight = 5;
              obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png"
         break;
         case "radio":
             obj.needItem = 'battery';
-            obj.item = {name:facilityName, type:'Furniture', condition:10, maxCondition:10, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:10, maxCondition:10, path:'Base/default.png'};
             obj.item.info ='아직 라디오 건전지는 닳지 않습니다.';
             obj.item.path="Base/Furniture/RadioRed.png"
             obj.item.weight = 2;

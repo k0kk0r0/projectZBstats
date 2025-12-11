@@ -44,6 +44,7 @@ function addStorageTag(name, index, turn=-1){
     btn.className = "text-xl font-bold p-2 border rounded bg-blue-400 storageBtn";
     btn.innerText = `${icon}${translations[currentLang][name]??name}${turn>0? "("+turn+")":``}`;
     btn.dataset.index = index;
+    btn.dataset.name = name;
     btn.addEventListener('click', ()=>{
         storageIndex = btn.dataset.index;
         renderStorageModal();
@@ -133,13 +134,32 @@ function renderStorageTurn(){
 function itemRotten(item, rottonPoint = 1){
     if(item.subType=="food"){
         if(item.condition>0){
-            
+           
             item.condition-=rottonPoint;
+            if(item.foodStatus>0){
+                 //console.log(`${item.name} ${(item.rottenDays-item.freshDays)/item.rottenDays}`);
+                  if(item.foodStatus==1){
+                    if(item.condition/item.maxCondition <= (item.rottenDays-item.freshDays)/item.rottenDays ){
+                        const staleitem = findFood(`${item.name}Stale}`);
+                        if(staleitem!=null){
+                            item.path = staleitem.path;
+                            item.hunger = staleitem.hunger;
+                        }
+                        item.foodStatus= 2;
+                        //신선하지 않은
+                    }
+                    
+                }
+            }
+            
             if(item.condition<=0){
                 item.freshDays =null;
                 item.rottenDays = null;
                 //item.condition = null;
                 //item.maxCondition = null;
+                item.foodStatus =3;
+                item.cookable=false;
+                item.poisoning = 1;
                 item.path = item.path.replace("Open","").replace("Cooked","").replace("Overdone","").replace(".png", "Rotten.png");
                 //console.log(item.path);
             /* if(item.path.endsWith("Open.png")){
@@ -184,8 +204,35 @@ function renderStorageModal(){
         addStorageTag( storage[i].name , i, storage[i].turn );
     }
 
-    //스토리지 인덱스선택
+    //스토리지 인덱스선택, 가동 여부
     storageTag.querySelectorAll('.storageBtn').forEach( (btn) => {
+        
+        const facilityEnableList=["fridge", "oven", "micro"];
+        for(let i =0; i< facilityEnableList.length;i++){
+            const facil = getFacility(facilityEnableList[i]);
+            if(facil==null){
+                
+            }else if(facil.addStorage){
+                 if(btn.dataset.name == facil.name ){
+                    if(facil.enabled){
+                       // console.log(`${facil.name} 가동중`);
+                        btn.innerText.replace("(꺼짐)","");
+                        btn.innerText+='(켜짐)';
+                        btn.classList.remove('bg-slate-400');
+                        btn.classList.add('bg-green-400');
+                        break;
+                    }else{
+                       // console.log(`${facil.name} 꺼짐`);
+                        btn.innerText.replace("(켜짐)","");
+                         btn.innerText+='(꺼짐)';
+                         btn.classList.remove('bg-green-400');
+                         btn.classList.add('bg-slate-400');
+                        break;
+                    }
+                }
+            }
+           
+        }
         if(btn.dataset.index == storageIndex){
             btn.classList.remove('bg-slate-400');
             btn.classList.add('bg-blue-400');
@@ -205,17 +252,18 @@ function renderStorageModal(){
     let fontSize ='';
     ///////////////가변 크기
    // console.log(window.innerWidth/window.innerHeight);
-    if(window.innerWidth/window.innerHeight<0.65){
+    const _windowRatio = windowRatio();
+    if(_windowRatio=='phone'){
         boxSize = `w-28 h-28`;
         fontSize='text-2xl';
         storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";
         storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(128px,0fr))]";  
-    }else if(window.innerWidth/window.innerHeight<0.9){
+    }else if(_windowRatio=='tablet'){
         boxSize = `w-24 h-24`;
         fontSize='text-lg';
         storage_storage.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";
         storage_player.className ="p-2 overflow-y-auto grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,0fr))]";  
-    }else{
+    }else {
         boxSize='w-16 h-16';
         fontSize='text-md';
         storage_storage.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
