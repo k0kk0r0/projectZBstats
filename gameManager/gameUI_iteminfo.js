@@ -140,6 +140,9 @@
             }if(item.needItem=='battery'){
               field_conditionText.textContent = `배터리 잔여량: ${cond}/${cond0} (${ratio}%)`;
               field_conditionBar.classList.add( itemRatioColor(cond/cond0) );
+            }if(item.needItem=='gasoline'){
+              field_conditionText.textContent = `연료 잔여량: ${cond/10}/${cond0/10}L (${ratio}%)`;
+              field_conditionBar.classList.add( itemColor(item.needItem) );
             }else{
               field_conditionText.textContent = '';
               field_conditionBar.classList.add("bg-yellow-400");

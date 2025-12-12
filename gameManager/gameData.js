@@ -178,7 +178,7 @@ function findFood(itemName ){
 
         foodStatus: parseInt(data.foodStatus), 
         hunger: `;${data.hunger};`.toString(),// ;로 나눔, kcal 총량, 섭취 시 1/4로 나눔
-        
+
         poisoning: parseFloat(data.poisoning),
 
         convert: data.convert.toString(),
@@ -197,7 +197,8 @@ function facilityItem(facilityName){
         item:{name:facilityName, type:'Furniture', condition:1, path:'Base/default.png'},
         needItem:null,
         removable:true,
-        addStorage:false
+        addStorage:false,
+        defalutPath:'Base/default.png'
     }
     switch (obj.name){
         //["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","water"];
@@ -213,15 +214,25 @@ function facilityItem(facilityName){
             obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:1, path:'Base/default.png'};
             obj.item.info = translating("taintedWaterInfo");
         break;
+        case "generator":
+            obj.needItem = 'gasoline';
+            obj.item = {name:facilityName, type:'Furniture', needItem:'gasoline', condition:randomInt(0,100), maxCondition:100, path:'Base/default.png'};
+            obj.item.info ='발전기는 설치된 건물의 전력을 공급합니다.;(추후 최대 3타일의 전기를 공급할 예정입니다)';
+            obj.item.path="Base/Furniture/Generator.png"
+            obj.item.weight = 40;
+            obj.item.repair = 100;//발전기최대내구도
+            obj.enabled=false;
+        break;
         case "faucet":
             obj.needItem ='water';
-            obj.item = {name:facilityName, type:'FluidContainer',subType:'water', needItem:'water',condition:10, maxCondition:10, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'FluidContainer',subType:'water',  needItem:'water',condition:10, maxCondition:10, path:'Base/default.png'};
              obj.item.weight = 5;
+             obj.item.needTool ='PipeWrench';
              obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png"
         break;
         case "radio":
             obj.needItem = 'battery';
-            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:100, maxCondition:100, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:randomInt(0,50), maxCondition:50, path:'Base/default.png'};
             obj.item.info ='라디오를 틀어놓으면 건전지가 소모됩니다.';
             obj.item.path="Base/Furniture/RadioRed.png"
             obj.item.weight = 2;
@@ -229,6 +240,7 @@ function facilityItem(facilityName){
         case "bed":
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
             obj.item.path="Base/Furniture/Furniture_bedding_01_9+8.png"
+            obj.item.needTool ='Hammer';
              obj.item.weight = 40;
         break;
         case "sofa":
@@ -248,7 +260,7 @@ function facilityItem(facilityName){
         case "oven":
             obj.needItem = 'power';
             obj.enabled=false;
-            obj.item.info ='아직 구현되지 않았습니다.';
+            obj.item.info ='조리 가능한 음식을 요리하거나 오염된 물을 정화할 수 있습니다.';
             obj.item.weight = 20;
             obj.item.path = 'Base/Furniture/Appliances_cooking_01_5.png';
             obj.addStorage=true;
@@ -257,7 +269,7 @@ function facilityItem(facilityName){
         case "micro":
             obj.needItem = 'power';
             obj.enabled=false;
-            obj.item.info ='철제 음식 재료를 넣으면 불이 날 예정입니다.';
+            obj.item.info ='조리 가능한 음식을 요리하거나 오염된 물을 정화할 수 있습니다.;(철제 음식 재료를 넣으면 불이 날 예정입니다.)';
             obj.item.weight = 10;
             obj.item.path = 'Base/Furniture/Appliances_cooking_01_28.png';
             obj.addStorage=true;

@@ -441,8 +441,9 @@ function woundHealingCalculate(){
                 }
             }
             if(data.tag =="bleach"){
+                stat.health-= 3;
                 if(data.turn/data.turn0  <= 0.5){
-                    stat.health-= 20;
+                    stat.health-= 12;
                     stat.sick +=10;
                     
                 }else{
@@ -450,6 +451,10 @@ function woundHealingCalculate(){
                     stat.sick=25;
                 }
                 
+            }
+            if(data.tag =="gasoline"){
+                stat.health-= 3;
+                stat.sick +=4;                
             }
             if(data.tag =="foodPoisoning"){
                 stat.health-= 3;
@@ -533,10 +538,10 @@ function playerDrink( fluidType , item ){
             stat.thirst+=10;
             item.condition--;
         }
-        if(fluidType=='bleach'){
+        if(fluidType=='bleach' || fluidType=='gasoline'){
             //락스
-            pushWound(fluidType, 20);
-            log(`끔찍한 선택을 했군요... 락스를 마셨습니다.`,true);
+            pushWound(fluidType, 50);
+            log(`끔찍한 선택을 했군요... ${translating(fluidType)}를 마셨습니다.`,true);
             closeStorageModal();
 
         }else{

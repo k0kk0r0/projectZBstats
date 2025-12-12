@@ -44,11 +44,26 @@ function windowRatio(){
         return 'desktop'  
     }
 }
+//////////////////////////////////////////////////////////////////
+//하단 턴 넘김
+const turnModal = document.getElementById("turnModal");
+const Bt_stop = document.getElementById("Bt_stop");
+const Bt_turn = document.getElementById("Bt_turn");
+Bt_stop.addEventListener('click', ()=>{
+    stopResting();
+});
+Bt_turn.addEventListener('click', ()=>{
+    advanceTurn();
+});
+function turnPanelVisible(value=false){
+    turnModal.classList.toggle('hidden', !value);
+}
 /////////////////////// 시설물 관리 ////////////////////////////////
 //장소의 상단 설비 아이콘들
 const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
 const facilityIcons = facilityNames.map(name =>{
     const icon = document.getElementById(`Icon_${name}`);
+
     icon.addEventListener('click', (e)=>{
         //상부 시설물 아이콘 버튼
         //console.log(name);
@@ -67,7 +82,8 @@ const facilityIcons = facilityNames.map(name =>{
     });
     return {
         name: name,
-        icon: icon,    
+        icon: icon,
+        img: document.getElementById(`Img_${name}`), 
         enabledIcon: document.getElementById(`Enable_${name}`),
     }
  });
@@ -98,8 +114,7 @@ function setFacilityEnable(name, value){
     icon.enabled = value;
     renderFacilityIcons();
 }
-function addFacility(name){
-    const facilItem = facilityItem(name);
+function addFacility(facilItem, item=null){
     if(facilItem.needItem=='water'){
         if(waterEndTurn>0){
             //물이 끊기지 않은 경우
@@ -112,12 +127,18 @@ function addFacility(name){
             facilItem.item.condition = 0;
         }
     }
+    if(facilItem.needItem=='battery' || facilItem.needItem=='gasoline'){
+        facilItem.item.condition = parseInt(item.condition);
+    }
+    if(facilItem.item.condition<=0){
+        facilItem.enabled=false;
+    }
     
     currentMapData.thisFacilities.push(facilItem);
     if(facilItem.addStorage){
-        addStorageList( name, [] );
+        addStorageList( facilItem.name, [] );
     }
-    log_popup(`${translating(name)}를 설치했습니다.`);
+    log_popup(`${translating(facilItem.name)}를 설치했습니다.`);
 }
 function removeFacility(name){
     //시설에 포함된 보관함이 있으면?
@@ -149,6 +170,7 @@ function removeFacility(name){
             break;
         }
     }
+    log_popup(`${translating(item.name)}를 떼어냈습니다.`);
     renderFacilityIcons();
 }
 function renderFacilityIcons(){
@@ -161,6 +183,8 @@ function renderFacilityIcons(){
     for(let i=0; i<facilityNames.length; i++){
         const facilityIcon= getFacilityIcon( facilityNames[i] );
         facilityIcon.icon.classList.add('hidden');
+
+        
     }
     for(let i =0 ; i < currentMapData.thisFacilities.length; i++){
         const facildata = currentMapData.thisFacilities[i];
@@ -172,7 +196,16 @@ function renderFacilityIcons(){
                 facildata.enabled = power;
             }
         }
-
+        //실사 아이템으로 변경 표시
+        /*
+        if(facildata.item !=null){
+            if(facildata.item.path == "Base/default.png"){
+                facilityIcon.img.src = facildata.defalutPath;
+            }else{
+                facilityIcon.img.src = facildata.item.path;
+            }
+        }
+            */
         facilityIcon.icon.classList.remove('hidden');
         facilityIcon.enabledIcon.classList.toggle('hidden', facildata.enabled);
        
@@ -279,10 +312,12 @@ const playerStatModal = document.getElementById("playerStatModal");
 playerStatModal.addEventListener("click", (e) => {
     if (e.target === playerStatModal) {
         playerStatModal.classList.add("hidden");
+        turnPanelVisible(false);
     }
 });
 function openPlayerStatModal(){
     renderPlayerStat();
+    turnPanelVisible(true);
     playerStatModal.classList.remove('hidden');
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -510,6 +545,11 @@ function findInventoryItemData(itemname){
             return inventory[i];
         }
     }
+    for(let i = 0 ; i <inventory.length;i++){
+        if(inventory[i].subType == itemname){
+            return inventory[i];
+        }
+    }
     return null;
 }
 
@@ -522,12 +562,12 @@ function itemColor(subType){
             return "bg-green-300";
         case "water":
             return "bg-cyan-300";
-
         case "bleach":
             return "bg-lime-200";
-        
         case "taintedWater":
             return "bg-emerald-300";
+        case "gasoline":
+            return "bg-amber-500";
     }
     return 
 }

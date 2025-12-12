@@ -597,7 +597,7 @@ function TurnEnd() {
     if(!delaying) {
         //스토리지 턴 횟수 초기화
          storageTurn=0;
-        console.log(`${hour}:${min}`);
+        
 
 
         //좀비소환
@@ -670,6 +670,8 @@ function TurnEnd() {
         renderGameUI();
         renderStorageTurn();//아이템부패처리
         renderStorageModal();
+        //발전기 전력 소모 확인
+        console.log(`${hour}:${min}`);
     }
     
    // log_popup();//감추기

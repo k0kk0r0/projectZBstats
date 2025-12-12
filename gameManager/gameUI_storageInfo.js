@@ -78,9 +78,11 @@ function openStorageModal(bool){
     if(gameOver)return
     storageModal.classList.remove('hidden');
     renderStorageModal(bool);
+    turnPanelVisible(true);
 }
 function closeStorageModal(){
     closeSubOption();
+    turnPanelVisible(false);
     storageModal.classList.add("hidden");
 }
 storageModal.addEventListener("click", (e) => {
@@ -117,6 +119,33 @@ function renderStorageTurn(){
                 }
 
             }
+        }
+        //발전기 연료소모 확인
+        const generator = mapData[m].thisFacilities.find(n => n.name=='generator');
+        let powerNeedCount=1; //기본 전등 유지
+        for(let i =0 ;i < mapData[m].thisFacilities.length; i++){
+            if(mapData[m].thisFacilities[i].needItem == 'power'){
+                if(mapData[m].thisFacilities[i].enabled){
+                    //전기가 필요한 데 작동중이라면
+                    powerNeedCount++;
+                }
+            }
+        }
+        if(generator!=null){   
+            if(generator.enabled){
+                if(generator.item.condition>0){
+                    
+                    generator.item.condition-= powerNeedCount;
+                    generator.item.maxCondition -=0.5; //발전기 최대내구도 감소
+                    console.log(`${m}번째 맵의 발전기 연료 ${powerNeedCount}만큼 소모 ${generator.item.condition}/100`);
+                    if(generator.item.condition<=0){
+                        generator.item.condition=0;
+                        generator.enabled =false;
+                    }
+                    
+                }
+            }
+            
         }
     }
     
@@ -284,6 +313,13 @@ function renderStorageModal(){
     storageTag.querySelectorAll('.storageBtn').forEach( (btn) => {
         
         const facilityEnableList=["fridge", "oven", "micro"];
+        if(btn.dataset.index == storageIndex){
+            btn.classList.remove('bg-slate-400');
+            btn.classList.add('bg-blue-400');
+        }else{
+            btn.classList.remove('bg-blue-400');
+            btn.classList.add('bg-slate-400');
+        }
         for(let i =0; i< facilityEnableList.length;i++){
             const facil = getFacility(facilityEnableList[i]);
             if(facil==null){
@@ -295,12 +331,20 @@ function renderStorageModal(){
                         btn.innerText.replace("(꺼짐)","");
                         btn.innerText+='(켜짐)';
                         btn.classList.remove('bg-slate-400');
-                        btn.classList.add('bg-green-400');
+                        if(facil.name =="fridge"){
+                            btn.classList.add('bg-blue-600');
+                        }
+                        if(facil.name =="oven" || facil.name =="micro"){
+                            btn.classList.add('bg-red-500');
+                        }
+                        
                         break;
                     }else{
                        // console.log(`${facil.name} 꺼짐`);
                         btn.innerText.replace("(켜짐)","");
                          btn.innerText+='(꺼짐)';
+                         btn.classList.remove('bg-blue-600');
+                         btn.classList.remove('bg-red-500');
                          btn.classList.remove('bg-green-400');
                          btn.classList.add('bg-slate-400');
                         break;
@@ -309,13 +353,7 @@ function renderStorageModal(){
             }
            
         }
-        if(btn.dataset.index == storageIndex){
-            btn.classList.remove('bg-slate-400');
-            btn.classList.add('bg-blue-400');
-        }else{
-            btn.classList.remove('bg-blue-400');
-            btn.classList.add('bg-slate-400');
-        }
+        
     });
     const playerstat = playerStat() ?? {bagWeight:20};
     weight ={

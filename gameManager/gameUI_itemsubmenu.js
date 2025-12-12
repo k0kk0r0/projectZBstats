@@ -59,7 +59,7 @@ function facilitySubMenu(facilityName){
 
     const data = getFacility(facilityName);
     if(data.item!=null){
-        makeBox("시설 정보", null).addEventListener('click', ()=>{
+        makeBox("시설 정보", null,"bg-slate-300").addEventListener('click', ()=>{
             //시설 아이템 정보 호출
             showItemModal(data.item);
             closeSubOption();
@@ -84,18 +84,23 @@ function facilitySubMenu(facilityName){
             }
         }
         
-        if(data.needItem =="power" || data.needItem =="battery"){
+        if(data.needItem =="power" || data.needItem =="battery" || data.name =="generator"){
             if(getFacilityEnable(facilityName)){
                 makeBox("전원 끄기").addEventListener('click', ()=>{
                     setFacilityEnable(facilityName, false);
                     if(zombieIsAlived)advanceTurn();
                     closeSubOption();
+                    if(data.name =="generator"){
+                        bgLightDark(currentMapData);
+                    }
+                    log_popup(`${translating(data.name)}를 껐습니다`);
                 });
             }else{
                 makeBox("전원 켜기",false,"bg-blue-300").addEventListener('click', ()=>{
                     if(data.needItem =="power" ){
                          if(getPower()){
-                         setFacilityEnable(facilityName, true);
+                            setFacilityEnable(facilityName, true);
+                            log_popup(`${translating(data.name)}를 켰습니다`);
                             if(zombieIsAlived)advanceTurn();
                         }else{
                             log_popup(`전력 공급이 없습니다.`);
@@ -105,8 +110,22 @@ function facilitySubMenu(facilityName){
                         if(data.item.condition>0){
                             //배터리 잔량이 있는 경우
                             setFacilityEnable(facilityName, true);
+                            log_popup(`${translating(data.name)}를 켰습니다`);
+                            if(zombieIsAlived)advanceTurn();
                         }else{
                             log_popup(`건전지가 없습니다.`);
+                        }
+                    }else if(data.name =="generator"){
+                        //가솔린의 경우
+                        if(data.item.condition>0){
+                            //발전기사용법?
+                            //가솔린 잔량이 있는 경우
+                            setFacilityEnable(facilityName, true);
+                            log_popup(`${translating(data.name)}를 켰습니다`);
+                            if(zombieIsAlived)advanceTurn();
+                            bgLightDark(currentMapData);
+                        }else{
+                            log_popup(`연료가 없습니다.`);
                         }
                     }
                    
@@ -125,19 +144,19 @@ function facilitySubMenu(facilityName){
                     setFacilityEnable(data.name,false);
                     renderStorageModal();
                     closeSubOption();
-                    
+                    advanceTurn();
                     log(`${data.name}에서 건전지를 제거했습니다.`);
                 });
             }else{
                 //배터리 장착
-                makeBox("배터리 장착하기",true).addEventListener('click', ()=>{
+                makeBox("배터리 장착하기",true, "bg-green-400").addEventListener('click', ()=>{
                     const battery = findInventoryItemData('Battery');
                     if(battery==null){
                         log_popup(`배터리가 없습니다.`);
                         closeSubOption();
                     }else{
                         data.item.condition = parseInt(battery.condition);
-                        console.log(data.item);
+                       // console.log(data.item);
                         battery.condition=0;
                         setFacilityEnable(data.name,true);
                         log(`${data.name}에서 건전지를 삽입했습니다.`);
@@ -147,7 +166,72 @@ function facilitySubMenu(facilityName){
                     }
                 });
             }
-            
+        }
+        if(data.name =="generator"){
+            if(data.item.condition < data.item.maxCondition){
+                //연료 넣기
+                makeBox("연료 넣기",true, itemColor('gasoline')).addEventListener('click', ()=>{
+                    closeSubOption();
+                    if(data.enabled){
+                        log_popup(`연료를 넣기 위해서 전원을 꺼야 합니다.`);
+                    }else{
+                        const gas = findInventoryItemData('gasoline');
+                        if(gas==null){
+                            log_popup(`연료가 없습니다.`);
+                        }else{
+                            let amount = 0;
+                            while (true){
+                                
+                                if(gas.condition<=0){
+                                    break;
+                                }
+                                if(data.item.condition>=100){
+                                    break;
+                                }
+                                data.item.condition++;
+                                gas.condition--;
+                                amount++;
+                            }
+                            if(amount>0){
+                                log(`${data.name}에 ${amount}만큼의 연료를 넣었습니다.`);
+                                renderStorageModal();
+                                advanceTurn();
+                            }else{
+                                log_popup(`연료가 없습니다.`);
+                                
+                            }
+                            
+                        }
+                        
+                    }
+                });
+            }
+            if(data.item.maxCondition < data.item.repair){
+                //발전기 내구도가 감소한 경우
+                 makeBox("발전기 수리하기",true,"bg-blue-300").addEventListener('click', ()=>{
+                    closeSubOption();
+                    if(data.enabled){
+                        log_popup(`발전기를 수리하기 위해서 전원을 꺼야 합니다.`);
+                    }else{
+                        const electro = findInventoryItemData('ElectronicsScrap');
+                        if(electro==null){
+                            log_popup(`${translating(electro.name)}가 없습니다.`);
+                        }else{
+                            const rv = 10;
+                            data.item.maxCondition += rv;
+                            if(data.item.maxCondition>data.item.repair){
+                                data.item.maxCondition = data.item.repair;
+                            }
+                            log(`${data.name}를 ${rv}만큼 수리했습니다.`);
+                            electro.subType='matrial';
+                            electro.condition=0;
+                            renderStorageModal();
+                            advanceTurn(); 
+                        }
+                        
+                    }
+                });
+            }
         }
         if(facilityName=='bed' || facilityName =='sofa'){
             //침대 및 소파
@@ -167,37 +251,24 @@ function facilitySubMenu(facilityName){
             optionBoxesDivide();
             makeBox("떼어내기",true, "bg-slate-300").addEventListener('click', ()=>{
                 closeSubOption();
-                
-                if(facilityName=='faucet'){
-                    if(getWeapon()!=null){
-                        if(getWeapon().name=='PipeWrench'){
-
-                        }else{
-                            log_popup(`파이프렌치를 장착해야 합니다.`);
-                            return;
-                        }
+                let bool =false;
+                //console.log(data.item.needTool);
+                if(data.item.needTool!=null){
+                    //제거 도구가 필요한 경우
+                    const wp = getWeapon();
+                    if(wp != null && wp.name == data.item.needTool){
+                        bool =true;
                     }else{
-                        log_popup(`파이프렌치를 장착해야 합니다.`);
+                        log_popup(`${translating(data.item.needTool)}를 장착해야 합니다.`);
                         return;
                     }
+                }else{
+                    bool=true;
                 }
-                if(facilityName=='bed' || facilityName=='sofa'){
-                    if(getWeapon()!=null){
-                        if(getWeapon().name=='Hammer'){
-
-                        }else{
-                            log_popup(`망치를 장착해야 합니다.`);
-                            return;
-                        }
-                    }else{
-                        log_popup(`망치를 장착해야 합니다.`);
-                        return;
-                    }
-                    
-                    
+                if(bool){
+                    removeFacility(facilityName);
+                    advanceTurn();
                 }
-                removeFacility(facilityName);
-                advanceTurn();
                 
             });
         }
@@ -265,7 +336,7 @@ function itemsubMenu(data, dataset){
     }
 
     if(data!=null){
-        makeBox("아이템 정보", null).addEventListener('click', ()=>{
+        makeBox("아이템 정보", null,"bg-slate-300").addEventListener('click', ()=>{
             //아이템 정보 호출
             showItemModal(data);
             closeSubOption();
@@ -533,12 +604,29 @@ function itemsubMenu(data, dataset){
             if(item.type=='Furniture'){
                 //가구의 경우
                 makeBox('설치하기', true, "bg-slate-300").addEventListener('click', ()=>{
-                    //currentMapData.thisFacilities.push(facilityItem(data.name));
-                    addFacility(data.name);
-                    inventory.splice( dataset.index,1);
-                    closeSubOption();
-                    advanceTurn();
-                    closeStorageModal();
+                    let bool =false;
+                    const facilItem = facilityItem(item.name);
+                    console.log(facilItem);
+                    if(facilItem.item.needTool!=null){
+                        //설치 도구가 필요한 경우
+                        const wp = getWeapon();
+                        if(wp != null && wp.name == facilItem.item.needTool){
+                            bool =true;
+                        }else{
+                            log_popup(`${translating(facilItem.item.needTool)}를 장착해야 합니다.`);
+                            return;
+                        }
+                    }else{
+                        //currentMapData.thisFacilities.push(facilityItem(data.name));
+                        bool =true;
+                    }
+                    if(bool){
+                        addFacility(facilItem, item);
+                        inventory.splice( dataset.index,1);
+                        closeSubOption();
+                        advanceTurn();
+                        closeStorageModal();
+                    }
                     
                 });
                 //건전지 넣기
@@ -556,7 +644,7 @@ function itemsubMenu(data, dataset){
                         });
                     }else{
                         //배터리 장착
-                        makeBox("배터리 장착하기",true).addEventListener('click', ()=>{
+                        makeBox("배터리 장착하기",true, "bg-green-400").addEventListener('click', ()=>{
                             const battery = findInventoryItemData('Battery');
                             if(battery==null){
                                 log_popup(`배터리가 없습니다.`);
