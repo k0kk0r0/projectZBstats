@@ -214,10 +214,17 @@ function facilityItem(facilityName){
             obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:1, path:'Base/default.png'};
             obj.item.info = translating("taintedWaterInfo");
         break;
+        case "gaspump":
+            obj.removable=false;
+            obj.needItem = 'power';
+            obj.item = {name:facilityName, type:'FluidContainer', subType:'gasoline', needItem:'power',condition:1000, maxCondition:1000};
+            obj.item.info ='전기가 있다면 기름을 뽑아낼 수 있습니다.';
+            obj.item.path="Base/Furniture/PumpGas2Go.png";
+        break;
         case "generator":
             obj.needItem = 'gasoline';
             obj.item = {name:facilityName, type:'Furniture', needItem:'gasoline', condition:randomInt(0,100), maxCondition:100, path:'Base/default.png'};
-            obj.item.info ='발전기는 설치된 건물의 전력을 공급합니다.;(추후 최대 3타일의 전기를 공급할 예정입니다)';
+            obj.item.info ='발전기는 설치된 건물과 양 옆 최대 3타일의 전기를 공급합니다;실내에서 작동하면 매연이 생깁니다.';
             obj.item.path="Base/Furniture/Generator.png"
             obj.item.weight = 40;
             obj.item.repair = 100;//발전기최대내구도
@@ -290,12 +297,28 @@ function findMapData(itemName){
     facils.push('storage','livestock');//항상 추가
     const facilityArray =[];
     for(let i =0 ; i<facils.length;i++){
-        const facilityName = facils[i];
-        const item = facilityItem(facilityName);
-        facilityArray.push(item);
-        if(item.addStorage){
-            storageArray.push( {name:facilityName, inventory:[] });
+        const _value = facils[i].split("-");
+        const facilityName = _value[0];
+        let make =true;
+        let rng = parseFloat(_value[1])??1;
+        if(_value[1]==null){
+            rng = 1;
         }
+        if(Math.random() <= rng){
+            //생성
+            make=true;
+        }else{
+            make =false;
+        }
+        
+        if(make){
+            const item = facilityItem(facilityName);
+            facilityArray.push(item);
+            if(item.addStorage){
+                storageArray.push( {name:facilityName, inventory:[] });
+            }
+        }
+        
     }
 
      let dropItemsArray=[];
@@ -307,7 +330,16 @@ function findMapData(itemName){
            // console.log(`${item[0]} (${(rng*100).toFixed(2)})`);
            let item = findItem( _dropitem[0]);
            if(_dropitem[2]!=null){
+             const amount = parseInt(_dropitem[2])??-1;
+           // console.log(amount);
+           //아이템 추가 시 condition 지정...
+            if(amount>=0){
+                item.condition = amount;
+                //console.log(item.condition);
+            }else{
                 item.condition = randomInt(1, item.maxCondition);
+            }
+                
            }
            if(item.subType=='food' || item.subType=='water'){
                 for(let n=0 ;n<storageArray.length; n++){
@@ -339,21 +371,26 @@ function findMapData(itemName){
     return data0
 }
 function randomMapData(){
-    let item;
+    let item = [];
     if(currentMapData.name =="road"){
         //현재 길거리에 있을 때에만
         const rng = Math.random();
         if(rng<0.15){
-            item= findMapData('store_tool');
-        }else if(rng<0.35){
-            item=  findMapData("livestock");
-        }else if(rng<0.7){
-            item=  findMapData("house");
+            item.push( findMapData('store_tool'));
+        }else if(rng<0.3){
+            item.push( findMapData('gas'));
+            item.push( findMapData('store_gas'));
+        }else if(rng<0.45){
+            item.push(  findMapData("livestock"));
+        }else if(rng<0.65){
+            item.push(  findMapData("river"));
+            item.push(  findMapData("house"));
+            //item.push(  findMapData('road'));
         }else{
-            item= findMapData('road');
+            item.push(  findMapData('road'));
         }
     }else{
-        item=  findMapData('road');
+        item.push(  findMapData('road'));
     }
     return item;
 }

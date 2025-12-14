@@ -56,11 +56,12 @@ Bt_turn.addEventListener('click', ()=>{
     advanceTurn();
 });
 function turnPanelVisible(value=false){
+    if(gameOver){return}
     turnModal.classList.toggle('hidden', !value);
 }
 /////////////////////// 시설물 관리 ////////////////////////////////
 //장소의 상단 설비 아이콘들
-const facilityNames = ["generator", "bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
+const facilityNames = ["generator", "gaspump","bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
 const facilityIcons = facilityNames.map(name =>{
     const icon = document.getElementById(`Icon_${name}`);
 
@@ -89,11 +90,23 @@ const facilityIcons = facilityNames.map(name =>{
  });
  function getPower(){
     let power =false;
+    
     if(powerEndTurn>0){
-        power =true;
-    }else if(getFacilityEnable("generator")){
-        //발전기가 있으면
-        power = true;
+       power =true;
+    }else{
+        //맵데이터에서 활성화 된 발전기 찾기
+        for(let m = mapNum-1; m<= mapNum+1; m++){
+            const generator = mapData[m].thisFacilities.find(n => n.name=='generator');
+            if(generator!=null){
+                if(generator.enabled){
+                    //발전기가 활성화 되어있는 경우
+                    power = true;
+                    //console.log(`${m}번째 맵 ${generator} 가동 중`);
+                    break;
+                }
+            }
+            
+        }
     }
     return power;
  }
@@ -194,6 +207,11 @@ function renderFacilityIcons(){
         if(facildata.needItem=='power'){
             if(power==false){
                 facildata.enabled = power;
+                //console.log( facildata.name, power);
+            }
+            if(facildata.removable==false){
+                //붙박이 시설물의 경우 무조건 켜지기
+                facildata.enabled= power;
             }
         }
         //실사 아이템으로 변경 표시
@@ -398,7 +416,11 @@ nextMapBt.addEventListener('click',() =>{
     mapNum++;
     
     if(mapNum==mapData.length-1){
-        mapData.push(randomMapData());     
+        const items = randomMapData();
+        for(let n =0; n< items.length; n++){
+            mapData.push(items[n]);  
+        }
+           
     }else{
        
     }
@@ -442,8 +464,13 @@ atHomeBt.addEventListener('click', ()=>{
 
     mapNum--;
     if(mapNum == 0){
-        mapData.splice(0,0,randomMapData());   
-        mapNum++;  
+        const items = randomMapData();
+        for(let n =0; n< items.length; n++){
+           // mapData.push(items[n]); 
+            mapData.splice(0,0,items[n]);   
+            mapNum++;   
+        }
+        
     }else{
        
     }

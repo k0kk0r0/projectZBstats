@@ -13,6 +13,7 @@ function optionBoxesDivide(){
 function facilitySubMenu(facilityName){
     //시설물 서브메뉴
     if(facilityName ==null)return
+    stopResting();
     itemSubOption.classList.remove("hidden");
     optionBoxes.innerHTML='';
 
@@ -64,8 +65,9 @@ function facilitySubMenu(facilityName){
             showItemModal(data.item);
             closeSubOption();
         });
-
-        if(facilityName=='faucet' || facilityName=='waterSource'){
+    }
+    if(data.item!=null && gameOver==false){
+        if(data.name=='faucet' || data.name=='waterSource'){
             if(data.item.condition>0){
                 //물 마시기
                 const drinkType = data.item.subType;
@@ -85,53 +87,57 @@ function facilitySubMenu(facilityName){
         }
         
         if(data.needItem =="power" || data.needItem =="battery" || data.name =="generator"){
-            if(getFacilityEnable(facilityName)){
-                makeBox("전원 끄기").addEventListener('click', ()=>{
-                    setFacilityEnable(facilityName, false);
-                    if(zombieIsAlived)advanceTurn();
-                    closeSubOption();
-                    if(data.name =="generator"){
-                        bgLightDark(currentMapData);
-                    }
-                    log_popup(`${translating(data.name)}를 껐습니다`);
-                });
-            }else{
-                makeBox("전원 켜기",false,"bg-blue-300").addEventListener('click', ()=>{
-                    if(data.needItem =="power" ){
-                         if(getPower()){
-                            setFacilityEnable(facilityName, true);
-                            log_popup(`${translating(data.name)}를 켰습니다`);
-                            if(zombieIsAlived)advanceTurn();
-                        }else{
-                            log_popup(`전력 공급이 없습니다.`);
-                        }
-                    }else if(data.needItem =="battery"){
-                        //배터리의 경우
-                        if(data.item.condition>0){
-                            //배터리 잔량이 있는 경우
-                            setFacilityEnable(facilityName, true);
-                            log_popup(`${translating(data.name)}를 켰습니다`);
-                            if(zombieIsAlived)advanceTurn();
-                        }else{
-                            log_popup(`건전지가 없습니다.`);
-                        }
-                    }else if(data.name =="generator"){
-                        //가솔린의 경우
-                        if(data.item.condition>0){
-                            //발전기사용법?
-                            //가솔린 잔량이 있는 경우
-                            setFacilityEnable(facilityName, true);
-                            log_popup(`${translating(data.name)}를 켰습니다`);
-                            if(zombieIsAlived)advanceTurn();
+            if( data.removable){
+                if(getFacilityEnable(data.name)){
+                    makeBox("전원 끄기").addEventListener('click', ()=>{
+                        setFacilityEnable(data.name, false);
+                        if(zombieIsAlived)advanceTurn();
+                        closeSubOption();
+                        if(data.name =="generator"){
                             bgLightDark(currentMapData);
-                        }else{
-                            log_popup(`연료가 없습니다.`);
+                            renderFacilityIcons();
                         }
-                    }
-                   
+                        log_popup(`${translating(data.name)}를 껐습니다`);
+                    });
+                }else{
+                    makeBox("전원 켜기",false,"bg-blue-300").addEventListener('click', ()=>{
+                        if(data.needItem =="power" ){
+                            if(getPower()){
+                                setFacilityEnable(data.name, true);
+                                log_popup(`${translating(data.name)}를 켰습니다`);
+                                if(zombieIsAlived)advanceTurn();
+                            }else{
+                                log_popup(`전력 공급이 필요합니다.`);
+                            }
+                        }else if(data.needItem =="battery"){
+                            //배터리의 경우
+                            if(data.item.condition>0){
+                                //배터리 잔량이 있는 경우
+                                setFacilityEnable(data.name, true);
+                                log_popup(`${translating(data.name)}를 켰습니다`);
+                                if(zombieIsAlived)advanceTurn();
+                            }else{
+                                log_popup(`건전지가 없습니다.`);
+                            }
+                        }else if(data.name =="generator"){
+                            //가솔린의 경우
+                            if(data.item.condition>0){
+                                //발전기사용법?
+                                //가솔린 잔량이 있는 경우
+                                setFacilityEnable(data.name, true);
+                                log_popup(`${translating(data.name)}를 켰습니다`);
+                                if(zombieIsAlived)advanceTurn();
+                                bgLightDark(currentMapData);
+                                renderFacilityIcons();
+                            }else{
+                                log_popup(`연료가 없습니다.`);
+                            }
+                        }
                     
-                    closeSubOption();
-                });
+                        
+                        closeSubOption();
+                    });
+                }
             }
         }
         if(data.needItem=='battery'){
@@ -167,6 +173,7 @@ function facilitySubMenu(facilityName){
                 });
             }
         }
+        
         if(data.name =="generator"){
             if(data.item.condition < data.item.maxCondition){
                 //연료 넣기
@@ -193,7 +200,7 @@ function facilitySubMenu(facilityName){
                                 amount++;
                             }
                             if(amount>0){
-                                log(`${data.name}에 ${amount}만큼의 연료를 넣었습니다.`);
+                                log(`${data.name}에 ${amount}만큼의 연료를 넣었습니다.`,true);
                                 renderStorageModal();
                                 advanceTurn();
                             }else{
@@ -233,7 +240,7 @@ function facilitySubMenu(facilityName){
                 });
             }
         }
-        if(facilityName=='bed' || facilityName =='sofa'){
+        if(data.name=='bed' || data.name =='sofa'){
             //침대 및 소파
             makeBox("휴식하기",true).addEventListener('click', ()=>{
                 startResting();
@@ -265,8 +272,16 @@ function facilitySubMenu(facilityName){
                 }else{
                     bool=true;
                 }
+                if(data.needItem =='power' || data.needItem =='gasoline'){
+                    //전력을 필요로 하는 시설의 경우
+                    if(data.enabled){
+                         log_popup(`먼저 전원을 꺼야 합니다.`);
+                       return;
+                    }
+                    
+                }
                 if(bool){
-                    removeFacility(facilityName);
+                    removeFacility(data.name);
                     advanceTurn();
                 }
                 
@@ -290,6 +305,7 @@ function facilitySubMenu(facilityName){
 
 function itemsubMenu(data, dataset){
     if(data ==null)return
+    stopResting();
     itemSubOption.classList.remove("hidden");
     //console.log(point, innerWidth, innerHeight);
     
@@ -343,8 +359,8 @@ function itemsubMenu(data, dataset){
         });
     }
     
-
-    if(dataset==null){
+    if(gameOver==false){
+    if(dataset==null ){
         if(data.type =='Weapon' ||data.type =='Armor' || data.type =='Accessory'){
             makeBox(`장착 해제`,false,`bg-blue-400`).addEventListener('click', ()=>{
                 
@@ -435,8 +451,9 @@ function itemsubMenu(data, dataset){
             //액체류 마시기, 채우기, 비우기
            
             if(item.condition>0){
-                const drinkType = (data.subType.split(';').length>1? `${translating( data.subType.split(';')[0] ) } 혼합액` : data.subType);
-                 const drinkname = translating( drinkType);
+                const split = data.subType.split(';');
+                const drinkType = (split.length>1? split[0]  : data.subType);
+                 const drinkname = translating( (split.length>1)?"혼합액":data.subType );
                 makeBox(`${drinkname} 마시기`,true, itemColor(drinkType)).addEventListener('click', ()=>{
                     playerDrink( data.subType.split(';')[0], item );
                     
@@ -449,21 +466,25 @@ function itemsubMenu(data, dataset){
 
                 let waterSource =null;
                 const faucet = getFacility("faucet");
+                const gaspump = getFacility("gaspump");
                 if(getFacilityEnable("faucet")){
                     waterSource = 'water';
                 }else if( getFacilityEnable("waterSource")){
                     waterSource = 'taintedWater';
+                }else if( getFacilityEnable("gaspump")){
+                    waterSource = 'gasoline';
                 }
 
                 // console.log(waterSource);
                 if(waterSource!=null){
                     const addFluidname = translating(waterSource);
                     makeBox(`${addFluidname} 채우기`,true, itemColor(waterSource)).addEventListener('click', ()=>{
+                        closeSubOption();
                         if(faucet!=null){
                             if(waterEndTurn>0){
                                 item.condition = item.maxCondition;
                                 advanceTurn();
-                                log(`${translating(faucet.name)}으로 물을 채웠습니다.`,true);
+                                log(`${translating(faucet.name)}으로 ${translating(waterSource)}을 채웠습니다.`,true);
                             }else{
                                 //물이 끊긴 경우 수전의 물 사용
                                 if(faucet.item.condition>0){
@@ -471,7 +492,7 @@ function itemsubMenu(data, dataset){
                                         //
                                         if(parseFloat(faucet.item.condition)<=0 || item.condition>= item.maxCondition){
                                             advanceTurn();
-                                            log(`${translating(faucet.name)}으로 물을 채웠습니다.`,true);
+                                            log(`${translating(faucet.name)}으로 ${translating(waterSource)}을 채웠습니다.`,true);
                                             break;
                                         }else{
                                             item.condition++;
@@ -479,11 +500,35 @@ function itemsubMenu(data, dataset){
                                         }
                                     }
                                 }else{
-                                    log_popup(`${translating(faucet.name)}에 물이 없습니다.`);
+                                    log_popup(`${translating(faucet.name)}에 ${translating(waterSource)}이 없습니다.`);
+                                    return;
                                 }
                                 
                             }
                             
+                        }
+                        if(gaspump!=null){
+                            if(getPower()){
+                                //전력이 들어와 있는 경우
+                                if(gaspump.item.condition>0){
+                                    while( true ){
+                                        //
+                                        if(parseFloat(gaspump.item.condition)<=0 || item.condition>= item.maxCondition){
+                                            advanceTurn();
+                                            log(`${translating(gaspump.name)}으로 ${translating(waterSource)}을 채웠습니다.`,true);
+                                            break;
+                                        }else{
+                                            item.condition++;
+                                            gaspump.item.condition--;
+                                        }
+                                    }
+                                }else{
+                                    log_popup(`${translating(gaspump.name)}에 ${translating(waterSource)}이 없습니다.`);
+                                }
+                            }else{
+                                log_popup(`전력 공급이 필요합니다.`);
+                                return;
+                            }
                         }
                         if(waterSource=='taintedWater'){
                             //강물이 있는 경우
@@ -681,6 +726,7 @@ function itemsubMenu(data, dataset){
                 if(zombieIsAlived)advanceTurn();
             });
         }
+    }
     }
     //크기조절
     

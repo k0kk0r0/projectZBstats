@@ -422,7 +422,6 @@ function woundHealingCalculate(){
             }
             wound.splice(i,1);
             i--;
-            wndCount--;
         }
         else if(data.turn>= data.turn0){
             //치료완료
@@ -460,6 +459,11 @@ function woundHealingCalculate(){
                 stat.health-= 3;
                 stat.sick +=2;
             }
+            if(data.tag =="gas"){
+                stat.health-= 10;
+                stat.sick +=4;
+            }
+            wndCount=0;
             if(data.heal<0){
                 if(data.tag=="scratched" || data.tag == "bitten"){
                     wndCount++;

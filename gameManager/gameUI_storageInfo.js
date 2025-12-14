@@ -75,7 +75,7 @@ Object.entries(equipIcons).forEach(([key]) => {
 /////////
 
 function openStorageModal(bool){
-    if(gameOver)return
+   // if(gameOver)return
     storageModal.classList.remove('hidden');
     renderStorageModal(bool);
     turnPanelVisible(true);
@@ -122,12 +122,12 @@ function renderStorageTurn(){
         }
         //발전기 연료소모 확인
         const generator = mapData[m].thisFacilities.find(n => n.name=='generator');
-        let powerNeedCount=1; //기본 전등 유지
+        let powerNeedCount=0.5; //기본 전등 유지
         for(let i =0 ;i < mapData[m].thisFacilities.length; i++){
             if(mapData[m].thisFacilities[i].needItem == 'power'){
                 if(mapData[m].thisFacilities[i].enabled){
                     //전기가 필요한 데 작동중이라면
-                    powerNeedCount++;
+                    powerNeedCount+= 0.5;
                 }
             }
         }
@@ -137,7 +137,7 @@ function renderStorageTurn(){
                     
                     generator.item.condition-= powerNeedCount;
                     generator.item.maxCondition -=0.5; //발전기 최대내구도 감소
-                    console.log(`${m}번째 맵의 발전기 연료 ${powerNeedCount}만큼 소모 ${generator.item.condition}/100`);
+                    console.log(`${m}번째 맵의 발전기 연료 ${powerNeedCount}만큼 소모 ${generator.item.condition}/${generator.item.maxCondition}`);
                     if(generator.item.condition<=0){
                         generator.item.condition=0;
                         generator.enabled =false;
@@ -185,7 +185,7 @@ function itemCook(item, cookedInventory){
                 item.subType='water';
                 item.cookTime=null;
                 item.cooktime=null;
-                log_popup(`물이 정화되었습니다`);
+                //log_popup(`물이 정화되었습니다`);
             }
         }
     }

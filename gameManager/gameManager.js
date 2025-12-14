@@ -1,5 +1,6 @@
 //게임매니저
 //게임의 전반적인 흐름과 상태를 관리하는 스크립트
+let debug = false;
 
 //타이머, UI 표시
 const timerTxt = document.getElementById('timer');
@@ -70,7 +71,6 @@ const weatherBg = document.getElementById('weatherBg');
 
 //게임 상태 변수
 //턴 진행 함수
-let debug = true;
 let delaying = false;
 let gameOver =false;
 
@@ -268,8 +268,9 @@ async function ResetAllGame(){
     day = 1; //현재 날짜
 
     log_popup();//감추기
-    powerEndTurn = randomInt(0,14*6);
-    waterEndTurn = randomInt(0,14*6);
+    powerEndTurn = randomInt(1,24*6);
+    waterEndTurn = randomInt(1,24*6);
+    
    
     
     gameOver=false;
@@ -300,6 +301,12 @@ async function ResetAllGame(){
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
     mapData.push( findMapData('road'));
+    if(debug){
+        mapData.push( findMapData('gas'));
+        powerEndTurn = 10;
+        waterEndTurn = 10;
+    }
+    
     mapNum = 1;
     mapData[mapNum].zombies =[];
     mapSetting(mapData[mapNum]);
@@ -488,7 +495,7 @@ function bgLightDark(data){
     }else{
         //실내의 경우
         
-        if( getFacilityEnable("generator") || powerEndTurn>0){
+        if( getPower()){
             //발전기가 켜져 있으면
             dark = false;
             stack.dark = dark;
@@ -625,6 +632,14 @@ function TurnEnd() {
         setMoodleValue("Stressed", -Math.floor((stat.stressed)/20) );
         setMoodleValue("Sick", -Math.floor((stat.sick)/20) );
 
+        //실내 발전기 가동 확인
+        
+        if(currentMapData.outdoor==false && getFacilityEnable("generator")){
+            //실내 발전기 가동 시
+            console.log(currentMapData.outdoor);
+            pushWound('gas',2);
+        }
+
         changeweather();//날씨변경
         
         woundHealingCalculate(); //부상계산
@@ -683,7 +698,7 @@ function findMoodle(_moodleName){
     return moodles.find(m => m.name == _moodleName);
 }
 function setMoodleValue(_moodleName, _value){
-    if(_value>4){_value=4}
+    if(_value>4 && _value<100){_value=4}
     if(_value<-4){_value=-4}
     let moodle = findMoodle(_moodleName);
     moodle.value = _value;
