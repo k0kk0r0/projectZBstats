@@ -16,7 +16,7 @@ async function dataload(dataPath){
    
 }
 function addItems(){
-    return "Zomboxivir,CannedCornedBeef";
+    return "Zomboxivir";
 }
 function healZomboxivir(name){
     if(name=='Zomboxivir'){

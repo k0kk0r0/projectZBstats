@@ -584,7 +584,7 @@ function playerEatFood(item, div=1){
         for(let i =0 ;i<inventory.length ; i++){  
             if(inventory[i] == item){
                 if(item.convert.length>0){
-                    inventory[i] = findItem( item.convert );
+                    inventory[i] = findItem( item.convert.split("-")[0] );
                 }else{
                     inventory[i]=null;
                 }

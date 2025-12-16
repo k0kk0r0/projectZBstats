@@ -488,7 +488,7 @@
     const img = document.createElement("img");
     img.src = icon.src;
     img.title = icon.name;
-    const rawName = (icon.src.split("_")[1]).split(".")[0];
+    const rawName = (icon.src.split("_")[1]).replace("2","").split(".")[0];
     if (img.src.includes("Profession") ){
       //직업 추가
         const label = document.createElement("label");

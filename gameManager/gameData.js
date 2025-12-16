@@ -7,6 +7,8 @@ let miscDatas = [];//기타 아이템 리스트
 let foodDatas = [];
 let modDatas = [];//모드 데이터
 
+let recipes= [];//레시피
+
 // PapaParse를 이용해 CSV 파일을 불러오는 함수 (기존 함수 재활용)
 function loadCSVData(link) {
     return new Promise((resolve) => {
@@ -68,6 +70,7 @@ async function init() {
     miscDatas = await loadItemDatas("Data/miscs.csv");
     foodDatas = await loadItemDatas("Data/foods.csv");
     clothDatas = await loadItemDatas("Data/cloths.csv"); 
+    recipes = await loadItemDatas("Data/recipes.csv");
     
     const modData = await loadModFiles('TheyKnew');
 
@@ -97,6 +100,32 @@ function findItem(itemName){
 
 
     return null;
+}
+function findRecipes(itemName ){
+    //무기데이터 검색 및 가공해서 반환
+    const data = recipes.find(w => w.name === itemName);
+    if(data==null){ return null }
+
+    const originalList = [];
+    const _list0 =data.original.split(";");
+    for(let n = 0; n< _list0.length;n++){
+        const item = _list0[n].split("-");
+        originalList.push({name:item[0], amount:item[1]} )
+    }
+
+    const convertList = [];
+    const _list =data.convert.split(";");
+    for(let n = 0; n< _list.length;n++){
+        const item = _list[n].split("-");
+        convertList.push({name:item[0], amount:item[1]} )
+    }
+    let data0 ={
+        name:data.name,
+        original: originalList,
+        convert: convertList,
+        needItem: data.needItem,
+    }
+    return data0;
 }
 function findWeapon(itemName ){
     //무기데이터 검색 및 가공해서 반환
@@ -132,7 +161,7 @@ function findCloth(itemName ){
         subType: data.subType.toString(),
         condition: parseInt(data.condition),
         maxCondition: parseInt(data.condition),
-        convert: data.convert.toString(),
+        recipe: data.recipe.toString(),
         weight: parseFloat(data.weight)
     }
     return data0;
@@ -148,7 +177,7 @@ function findMisc(itemName ){
         subType: data.subType.toString(),
         condition: parseInt(data.condition),
         maxCondition: parseInt(data.condition),
-        convert: data.convert.toString(),
+        recipe: data.recipe.toString(),
         weight: parseFloat(data.weight),
         count: parseInt(data.count)??0,
         info: data.info.toString()
@@ -230,9 +259,14 @@ function facilityItem(facilityName){
             obj.item.repair = 100;//발전기최대내구도
             obj.enabled=false;
         break;
+        case "rainCollectorBarrel":
+            obj.needItem ='water';
+            obj.item = findMisc("rainCollectorBarrel");
+        break;
+        
         case "faucet":
             obj.needItem ='water';
-            obj.item = {name:facilityName, type:'FluidContainer',subType:'water',  needItem:'water',condition:10, maxCondition:10, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'FluidContainer',subType:'water',  needItem:'water',condition:20, maxCondition:20, path:'Base/default.png'};
              obj.item.weight = 5;
              obj.item.needTool ='PipeWrench';
              obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png"
@@ -393,4 +427,8 @@ function randomMapData(){
         item.push(  findMapData('road'));
     }
     return item;
+}
+
+function randomDropTable(array){
+    return array[randomInt(0,array.length)];
 }

@@ -74,7 +74,7 @@ function facilitySubMenu(facilityName){
                     const drinkname = translating(drinkType);
                 makeBox(`${drinkname} 마시기`,true, itemColor(drinkType)).addEventListener('click', ()=>{
                     if(waterEndTurn>0){
-                        playerDrink( drinkType, {condition:1});
+                        playerDrink( drinkType, {condition:100});
                     }else{
                         playerDrink( drinkType, data.item );
                     }
@@ -419,20 +419,43 @@ function itemsubMenu(data, dataset){
             }
             }
 
-        if(data.convert != null){
-            if(data.type != 'food'){
+        if(data.recipe != null){
+            if(data.type != 'Food'){
                 //음식의 경우 따로 처리
                 let dismentleTxt ={
                     clothing: "옷 찢기",
                     watch: "시계 분해하기",
                     default :"분해하기"
                  }
-                  if(data.subType== "clothing" || data.subType== "watch"){
+                 //data.subType== "clothing" || data.subType== "watch"|| data.subType== "wood"
+                  if(data.recipe.length>0){
                 //의상 찢기, 분해
                     optionBoxesDivide();
                     makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, true, "bg-pink-300").addEventListener('click', ()=>{
-                        inventory.push( findItem(data.convert) );
-                        //pushItemToInventory(inventory, data.convert);
+                        closeSubOption();
+                        const recipe = findRecipes(data.recipe);
+                        if(getLight()==false){
+                            log_popup(`작업을 하기에는 너무 어둡습니다.`);
+                            return;
+                        }
+                        
+                        if(recipe==null){
+                            log_popup(`제작 가능한 레시피가 없습니다.`);
+                            return;
+                        }
+
+                        const needItem = findInventoryItemData(recipe.needItem);
+                        if(recipe.needItem.length>0 && needItem==null){
+                            log_popup(`${translating(recipe.needItem)}가 없습니다.`);
+                            return;
+                        }
+                        //제작에 필요한 도구가 있거나 필요 없다
+                        for(let n =0 ;n< recipe.convert.length; n++){
+                            for(let m=0; m <recipe.convert[n].amount; m++ ){
+                                pushItemToInventory(inventory, recipe.convert[n].name);
+                            }
+                        }  
+
                         if(dataset.route == storage_storage.id){
                             storage[storageIndex].inventory.splice(dataset.index,1);
                         }else{
@@ -442,7 +465,7 @@ function itemsubMenu(data, dataset){
                         renderStorageModal();
                         advanceTurn();
                         
-                        closeSubOption();
+                        
                     });
                 }
             }

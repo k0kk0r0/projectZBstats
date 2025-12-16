@@ -1,10 +1,14 @@
-type,subType,path,name,weight,condition,convert,count,info
+type,subType,path,name,weight,condition,recipe,count,info
 Misc,matrial,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,,발전기를 수리할 때 사용합니다
 Misc,matrial,Base/Miscs/Battery.png,Battery,0.1,50,,,
 Misc,junk,Base/Miscs/TinCanEmpty.png,TinCanEmpty,0.2,1,,,
 Misc,misc,Base/Miscs/ToiletPaper.png,ToiletPaper,0.1,1,,,
 Misc,matrial,Base/Miscs/Thread.png,Thread,0.1,20,,,옷을 수선할 때 사용됩니다
-Misc,tool,Base/Miscs/Needle.png,Needle,0.01,1,,,
+Misc,matrial,Base/Miscs/Garbagebag_box.png,Garbagebag_box,1,,,,비닐을 활용한 아이템을 만들 때 사용합니다
+Misc,matrial,Base/Miscs/Garbagebag.png,Garbagebag,1,,,,비닐을 활용한 아이템을 만들 때 사용합니다
+Misc,wood,Base/Miscs/Plank.png,Plank,3,,,,
+Misc,wood,Base/Miscs/Logs.png,Logs,9,,Plank,,
+Misc,matrial,Base/Miscs/Nails.png,Nails,0.1,20,,,
 FirstAid,bandage,Base/Miscs/Bandage.png,Bandage,0.1,1,,,
 FirstAid,bandage,Base/Miscs/Bandaid.png,Bandaid,0.1,1,,,
 FirstAid,bandage,Base/Miscs/Rag.png,Rag,0.1,1,,,옷을 기우거나 붕대 대용으로 사용할 수 있습니다.
@@ -12,6 +16,9 @@ FluidContainer,bleach,Base/Miscs/Bleach.png,Bleach,0.1,10,,,경고!! 락스는 �
 FluidContainer,water,Base/Miscs/WaterBottle.png,WaterBottle,0.1,10,,,
 FluidContainer,water,Base/Miscs/PopBottle.png,PopBottle,0.1,20,,,
 FluidContainer,gasoline,Base/Miscs/Petrol.png,GasCan,1.6,100,,,
-Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,ElectronicsScrap,,
-Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,ElectronicsScrap,,
-Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,ElectronicsScrap,,
+Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,DigitalWatch,,
+Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,DigitalWatch,,
+Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,DigitalWatch,,
+Misc,tool,Base/Tools/Needle.png,Needle,0.01,1,,,
+Misc,tool,Base/Tools/handsaw.png,Handsaw,0.7,,,,통나무를 자르는 데 필요합니다.
+FluidContainer,water,Base/Furniture/Carpentry_02_122.png,rainCollectorBarrel,7.5,600,,,빗물을 모을 수 있습니다

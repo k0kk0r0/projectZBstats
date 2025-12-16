@@ -722,6 +722,9 @@ function pushItemToInventory(_inventory, itemName){
     //당장은 안 쓰는 함수임..갯수구현 힘듬.
     //inventory.push( findItem(data.convert) );
     const item = findItem(itemName);
+    if(item==null){
+        return;
+    }
     if(item.count !=null){
         if(item.count>0){
             //숫자를 세는 경우

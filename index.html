@@ -239,6 +239,30 @@
               주유기
             </span>
           </div>
+          
+          
+          <div id="Icon_waterSource" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img id="Img_waterSource" src="images/waterSource.png" alt="수원" class="w-full h-full p-2">
+            <img src="images/Enabled.png" id="Enable_waterSource" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              수원
+            </span>
+          </div>
+          <div id="Icon_rainCollectorBarrel" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img id="Img_rainCollectorBarrel" src="images/rainCollectorBarrel.png" alt="빗물받이통" class="w-full h-full p-2">
+            <img src="images/Enabled.png" id="Enable_rainCollectorBarrel" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              빗물받이 통
+            </span>
+          </div>
+          <div id="Icon_faucet" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img id="Img_faucet" src="images/faucet.png" alt="수전" class="w-full h-full p-2">
+            <img src="images/Enabled.png" id="Enable_faucet" class="absolute inset-0 w-full h-full object-contain">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              수전
+            </span>
+          </div>
+
           <div id="Icon_bed" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img id="Img_bed" src="images/bed.png" alt="침대" class="w-full h-full p-2">
             <img src="images/Enabled.png" id="Enable_bed" class="absolute inset-0 w-full h-full object-contain">
@@ -253,20 +277,7 @@
               소파
             </span>
           </div>
-          <div id="Icon_faucet" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img id="Img_faucet" src="images/faucet.png" alt="수전" class="w-full h-full p-2">
-            <img src="images/Enabled.png" id="Enable_faucet" class="absolute inset-0 w-full h-full object-contain">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              수전
-            </span>
-          </div>
-          <div id="Icon_waterSource" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img id="Img_waterSource" src="images/waterSource.png" alt="수원" class="w-full h-full p-2">
-            <img src="images/Enabled.png" id="Enable_waterSource" class="absolute inset-0 w-full h-full object-contain">
-            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              수원
-            </span>
-          </div>
+          
           <div id="Icon_oven" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img id="Img_oven" src="images/oven.png" alt="오븐" class="w-full h-full p-2">
             <img src="images/Enabled.png" id="Enable_oven" class="absolute inset-0 w-full h-full object-contain">
@@ -469,7 +480,14 @@
               플레이어
             </span>
           </div>
-            <div id="storageBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+          <div id="craftBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="images/Carpentry_Off.png" alt="제작창" class="w-14 h-14">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              제작(미구현)
+            </span>
+          </div>
+
+          <div id="storageBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/storage.png" alt="보관함" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               보관함
@@ -522,7 +540,14 @@
       <div id="statList" class="grid grid-cols-2 gap-3 p-2"></div>
     </div>
   </div>
-
+  <!-- 크래프트 제작 모달 -->
+  <div id="craftModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative ">
+      <h2 class="text-2xl font-bold mb-4 text-center">🛠 제작 목록</h2>
+      <!-- 제작 목록이 여기에 자동으로 추가됨 -->
+      <div id="recipeList" class="grid grid-cols-1 gap-3 p-2"></div>
+    </div>
+  </div>
   <!--보관함 모달-->
   <div id="storageModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
     <div class="absolute grid grid-col-1 bg-gray-800 rounded-xl shadow-xl gap-2 p-6 bg-opacity-70">

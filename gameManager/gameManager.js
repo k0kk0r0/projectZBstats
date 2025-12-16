@@ -239,11 +239,113 @@ function maintenenceCalculate(item){
     }
     
 }
-
+//////////////시작무기설정//////////////
 function setWeapon( itemName= "random"){
     
     if(itemName === "random"){
+        const jobName = job.value;
+        console.log(job);
         equipments.weapon = findWeapon(weaponDatas[ randomInt(0, weaponDatas.length) ].name);
+        switch(jobName){
+            case "fireofficer":
+                
+                equipments.accessory = findItem("DigitalWatch");
+                equipments.weapon = findWeapon("Axe"); break;
+            case "policeofficer":
+                
+                equipments.accessory = findItem("DigitalWatch");
+                equipments.weapon = findWeapon("NightStick"); break;
+            case "parkranger":
+                equipments.weapon = findWeapon(randomDropTable(["HuntingKnife","KnifeLarge","Machete"])); break;
+            case "constructionworker":
+                equipments.weapon = findWeapon("Hammer"); break;
+            case "securityguard":
+                
+                equipments.accessory = findItem("DigitalWatch");
+                equipments.weapon = findWeapon("NightStick"); break;
+             case "hammer":
+                equipments.weapon = findWeapon("Hammer");
+                pushItemToInventory(inventory, "Nails");
+                pushItemToInventory(inventory, "Handsaw");break;
+                //pushItemToInventory(inventory, "Needle");
+             case "burglar":
+                equipments.weapon = findWeapon("Crowbar");
+                pushItemToInventory(inventory, "Garbagebag");break;
+            case "chef":
+                equipments.weapon = findWeapon("Cleaver");
+                pushItemToInventory(inventory, "SteakCooked");break;
+            case "repairman":  
+                equipments.weapon = findWeapon(randomDropTable(["PipeWrench","Wrench"]));   
+                pushItemToInventory(inventory, "Handsaw");break;
+            case "rancher":
+                equipments.weapon = findWeapon("Shovel");break;
+            case "farmer":
+                equipments.weapon = findWeapon("Shovel");break;
+            case "fisher":
+                equipments.weapon = findWeapon("HuntingKnife");break;
+            case "doctor":
+                //equipments.weapon = findWeapon("MetalTube");Bandaid
+                equipments.accessory = findItem("DigitalWatch_fancy");
+                pushItemToInventory(inventory, "Bandage");
+                pushItemToInventory(inventory, "Bandaid");break;
+            case "veteran":
+                equipments.weapon = findWeapon(randomDropTable(["HuntingKnife","Machete"]));break;
+            case "nurse":
+                //equipments.weapon = findWeapon("MetalTube");Bandaid
+                
+                equipments.accessory = findItem("DigitalWatch_fancy");
+                pushItemToInventory(inventory, "Bandage");
+                pushItemToInventory(inventory, "Bandaid");break;
+            case "lumberjack":
+                equipments.weapon = findWeapon("WoodAxe");
+                pushItemToInventory(inventory, "Handsaw");break;
+            case "burgerflipper":
+                equipments.weapon = findWeapon("Cleaver");
+                pushItemToInventory(inventory, "fork");break;
+            case "electrician":
+                equipments.weapon = findWeapon("Screwdriver");break;
+            case "engineer":  
+                equipments.weapon = findWeapon(randomDropTable(["Screwdriver","Wrench"]));break;
+            case "metalworker":
+                equipments.weapon = findWeapon("MetalTube");break;
+            case "smither":
+                equipments.weapon = findWeapon("MetalTube");break;
+            case "mechanic":  
+                equipments.weapon = findWeapon(randomDropTable(["MetalTube","Wrench"]));break;
+            case "tailor":
+                //equipments.weapon = findWeapon("MetalTube");
+                pushItemToInventory(inventory, "Needle");
+                pushItemToInventory(inventory, "Thread");break;
+            default:
+                equipments.weapon = findWeapon(weaponDatas[ randomInt(0, weaponDatas.length) ].name);
+            break
+        }
+        /*
+        fireofficer
+        policeofficer
+        parkranger
+        constructionworker
+        securityguard
+        hammer
+        burglar
+        chef
+        repairman
+        rancher
+        farmer
+        fisher
+        //doctor
+        veteran
+        //nurse
+        lumberjack
+        //fitnessinstructor
+        burgerflipper
+        electrician
+        engineer
+        metalworker
+        smither
+        mechanic
+        tailor
+        */
     }else{
         equipments.weapon = findWeapon(itemName); 
     }

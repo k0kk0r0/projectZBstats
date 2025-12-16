@@ -12,11 +12,11 @@ const nextMapTxt = document.getElementById('nextMapTxt');
 
 //메뉴창
 const menuBt = document.getElementById('menuBt');
-const skillBt = document.getElementById('skillBt');
 const playerStatBt = document.getElementById("playerStatBt");
+const craftBt = document.getElementById("craftBt");
 const storageBt = document.getElementById('storageBt');
 const inventoryBt = document.getElementById('inventoryBt');
-
+const skillBt = document.getElementById('skillBt');
 
 //무기 아이콘
 const weaponIcon = document.getElementById('weaponIcon');
@@ -61,7 +61,7 @@ function turnPanelVisible(value=false){
 }
 /////////////////////// 시설물 관리 ////////////////////////////////
 //장소의 상단 설비 아이콘들
-const facilityNames = ["generator", "gaspump","bed","sofa", "radio", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
+const facilityNames = ["generator", "gaspump","bed","sofa", "radio","rainCollectorBarrel", "faucet","fridge","oven", "micro","storage","livestock","waterSource"];
 const facilityIcons = facilityNames.map(name =>{
     const icon = document.getElementById(`Icon_${name}`);
 
@@ -88,6 +88,34 @@ const facilityIcons = facilityNames.map(name =>{
         enabledIcon: document.getElementById(`Enable_${name}`),
     }
  });
+ function getLight(){
+    let light;
+    if(currentMapData.outdoor){
+        //실외의 경우
+        if( hour>=8 && hour < 20 ){
+            //낮 시간대
+            light = true;
+        }else{
+            light =false;
+        }
+    }else{
+        //실내의 경우
+        
+        if( getPower()){
+            //발전기가 켜져 있으면
+            light = true;
+        }else{
+            if( hour>=8 && hour < 20 ){
+                //낮 시간대
+                light = true;
+            }else{
+                //밤 시간대
+                light = false;
+            }
+        }
+    }
+    return light;
+ }
  function getPower(){
     let power =false;
     
@@ -258,6 +286,73 @@ function renderSkill(){
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
+function renderCraftModal(){
+    //레시피 창 
+    const recipeList = document.getElementById("recipeList");
+    recipeList.innerHTML='';
+    function makeBox(data, size=100, color='bg-gray-200'){
+        // HTML 구성 아이템
+        
+        let origin='';
+        for(let n =0; n < data.original.length; n++){
+           
+            const item =findItem(data.original[n].name);
+            if(item!=null){
+                //convertItemList.push( item );
+                origin +=
+                    `<img class="w-8 h-8" src=${item.path}>
+                    <span>x${data.original[n].amount}</span>
+                    <span>${translating(item.name)}</span>`
+            }
+        }
+
+        let result='';
+        for(let n =0; n < data.convert.length; n++){
+           
+            const item =findItem(data.convert[n].name);
+            if(item!=null){
+                //convertItemList.push( item );
+                result +=
+                    `<img class="w-8 h-8" src=${item.path}>
+                    <span>x${data.convert[n].amount}</span>
+                    <span>${translating(item.name)}</span>`
+            }
+        }
+        
+        let needItemIcon=`<img class="w-8 h-8" src="icons/default.png">`;
+        if(data.needItem.length>0){
+            const needItem = findItem(data.needItem);
+            needItemIcon =`<img class="w-8 h-8" src=${needItem.path}>`;
+        }
+        
+        const item = document.createElement("div");
+        item.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
+
+        item.innerHTML = `
+        <div class="h-full ${color} transition-all duration-300" style="width: ${size}%;"></div>
+        <span class="absolute inset-0 grid grid-cols-[3fr_1fr_3fr] justify-between items-center px-3 text-lg font-semibold text-black">
+         
+            <div class="items-center flex gap-2 ">
+                ${origin}
+                
+            </div>
+            <div class="justify-center flex">
+            ${needItemIcon}
+                <span>➡</span>
+            </div>
+            <div class="items-center flex gap-2 ">
+                ${result}
+            </div>
+        </span>
+        `;
+
+        recipeList.appendChild(item);
+    }
+    for(let n = 0 ; n <recipes.length; n++){
+        makeBox(findRecipes(recipes[n].name));
+    }
+}
+///////////////////////////////////////////////////////////////////////////////////////////
 function renderPlayerStat(){
     //플레이어 스텟 표시
     const statList = document.getElementById("statList");
@@ -338,6 +433,19 @@ function openPlayerStatModal(){
     turnPanelVisible(true);
     playerStatModal.classList.remove('hidden');
 }
+
+const craftModal = document.getElementById("craftModal");
+craftModal.addEventListener("click", (e) => {
+    if (e.target === craftModal) {
+        craftModal.classList.add("hidden");
+        turnPanelVisible(false);
+    }
+});
+function openCraftModal(){
+    renderCraftModal();
+    //turnPanelVisible(true);
+    craftModal.classList.remove('hidden');
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //버튼함수
 menuBt.addEventListener('click', () => {
@@ -366,6 +474,12 @@ inventoryBt.addEventListener('click', ()=>{
     openStorageModal();
     closeMenuModal();
 });
+craftBt.addEventListener('click', ()=>{
+    //제작 창 열기
+    openCraftModal();
+    closeMenuModal();
+});
+
 
 
 pushBt.addEventListener('click', () => {
