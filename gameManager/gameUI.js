@@ -1,3 +1,5 @@
+
+
 //명령 버튼
 const pushBt = document.getElementById('pushBt');
 const attackBt = document.getElementById('attackBt');
@@ -156,13 +158,16 @@ function setFacilityEnable(name, value){
     renderFacilityIcons();
 }
 function addFacility(facilItem, item=null){
+    if(currentMapData.thisFacilities.find(n => n.name==facilItem.name)!=null){
+        log_popup(`이미 설치한 시설입니다`);
+        return;
+    }
+
+
     if(facilItem.needItem=='water'){
         if(waterEndTurn>0){
             //물이 끊기지 않은 경우
             facilItem.item.condition = facilItem.item.maxCondition;
-        }else if(getFacilityEnable("waterBarrel")){
-            //빗물받이통이 있는 경우
-
         }else{
             //아무것도 없는 경우
             facilItem.item.condition = 0;
@@ -199,7 +204,7 @@ function removeFacility(name){
 
     //시설을 제거하고 인벤토리에 아이템 넣기
     let item =getFacility(name).item ;
-    if(item.needItem=='water'){
+    if(item.subType=='water'){
          item.condition=0;
     }
    
@@ -240,6 +245,29 @@ function renderFacilityIcons(){
             if(facildata.removable==false){
                 //붙박이 시설물의 경우 무조건 켜지기
                 facildata.enabled= power;
+            }
+        }
+        if(facildata.needItem=='water'){
+            if(waterEndTurn>0){
+            //물이 끊기지 않은 경우
+                facildata.item.condition = facildata.item.maxCondition;
+            }else if(getFacilityEnable("rainCollectorBarrel")){
+                //빗물받이통이 있는 경우
+                let rainCollectorBarrel = getFacility("rainCollectorBarrel").item;
+                while (true){
+                    if(facildata.item.condition>=facildata.item.maxCondition){
+                        break;
+                    }
+                    if(rainCollectorBarrel.condition<=0){
+                        break;
+                    }
+                    facildata.item.condition++;
+                    rainCollectorBarrel.condition--;
+                // console.log(data.condition, matrial.condition);
+                }
+            }else{
+                //아무것도 없는 경우
+                //facildata.item.condition = 0;
             }
         }
         //실사 아이템으로 변경 표시
@@ -287,22 +315,27 @@ function renderSkill(){
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 function renderCraftModal(){
-    //레시피 창 
+    //제작 레시피 창 
     const recipeList = document.getElementById("recipeList");
     recipeList.innerHTML='';
     function makeBox(data, size=100, color='bg-gray-200'){
         // HTML 구성 아이템
         
+        
+        const originalItemList =[];
+        const convertItemList = [];
         let origin='';
         for(let n =0; n < data.original.length; n++){
            
             const item =findItem(data.original[n].name);
+            item.amount = data.original[n].amount;
             if(item!=null){
-                //convertItemList.push( item );
+                originalItemList.push( item );
                 origin +=
                     `<img class="w-8 h-8" src=${item.path}>
-                    <span>x${data.original[n].amount}</span>
-                    <span>${translating(item.name)}</span>`
+                    <span>x${item.amount}</span>
+                  `;
+                  //  <span>${translating(item.name)}</span>
             }
         }
 
@@ -310,12 +343,14 @@ function renderCraftModal(){
         for(let n =0; n < data.convert.length; n++){
            
             const item =findItem(data.convert[n].name);
+            item.amount = data.convert[n].amount;
             if(item!=null){
-                //convertItemList.push( item );
+                convertItemList.push( item );
                 result +=
                     `<img class="w-8 h-8" src=${item.path}>
-                    <span>x${data.convert[n].amount}</span>
-                    <span>${translating(item.name)}</span>`
+                    <span>x${item.amount}</span>
+                    <span>${translating(item.name)}</span>
+                    `;
             }
         }
         
@@ -326,11 +361,11 @@ function renderCraftModal(){
         }
         
         const item = document.createElement("div");
-        item.className = "relative bg-gray-200 rounded h-8 overflow-hidden";
+        item.className = "relative bg-gray-200 rounded h-10 overflow-hidden";
 
         item.innerHTML = `
-        <div class="h-full ${color} transition-all duration-300" style="width: ${size}%;"></div>
-        <span class="absolute inset-0 grid grid-cols-[3fr_1fr_3fr] justify-between items-center px-3 text-lg font-semibold text-black">
+        <div class="progressBar h-full bg-green-500 duration-100" style="width: ${0}%;"></div>
+        <span class="absolute inset-0 grid grid-cols-[2fr_1fr_3fr] justify-between items-center px-3 text-lg font-semibold text-black">
          
             <div class="items-center flex gap-2 ">
                 ${origin}
@@ -345,11 +380,131 @@ function renderCraftModal(){
             </div>
         </span>
         `;
+        
+        item.addEventListener('click',()=>{
+            //originalItemList, convertItemList
+             let progress=0;
+             const pgbar = item.querySelector(".progressBar");
+             let matrials = [];
+            if(makeInterval==null){
+                matrials=[];
+                
+                for(let i =0 ; i< originalItemList.length; i++){
+                    const needItem = originalItemList[i];
+                    let num = 0;
+                    for(let n = 0; n< inventory.length; n++){
+                        if(inventory[n].name == needItem.name){
+                            if(num < needItem.amount){
+                                if(inventory[n].condition>0){
+                                    if(inventory[n].condition - needItem.amount>=0){
+                                        //필요 아이템 하나의 양이 사용량 만큼 있는 아이템의 경우
+                                        matrials.push(inventory[n]);
+                                        num = needItem.amount;
+                                        break;
+                                    }else{
 
+                                    }
+                                }else{
+                                    //필요 아이템 하나씩 추가
+                                    matrials.push(inventory[n]);
+                                    num++;
+                                }
+                            }
+                            
+                            
+                        }
+                    }
+                    
+                    if(num == needItem.amount){
+                        //console.log(`${needItem.name} : ${matrials.lenght}`);
+                    }else{
+                        log_popup(`${translating(needItem.name)} 아이템이 ${needItem.amount-num}개 만큼 부족합니다`);
+                        if(!debug) return;
+                        //return;
+                    }
+                    
+                }
+                
+
+
+
+                if(data.needItem.length>0){
+                    if(findInventoryItemData(data.needItem)==null){
+                        log_popup(`${translating(data.needItem)} 도구가 없습니다`);
+                        if(!debug)return;
+                    }
+                }
+                
+                
+                makeInterval = setInterval(()=>{
+                    progress+=4;
+                    //console.log(progress);
+                    pgbar.classList.remove('hidden');
+                    pgbar.style.width = `${progress}%`;
+                    if(progress>=140){
+                        make();
+                        pgbar.classList.add('hidden');
+                        pgbar.style.width = `0%`;
+                        clearInterval(makeInterval);
+                        makeInterval =null;
+                    }
+                },50);
+                function make(){
+                   
+                    for(let i =0 ; i< originalItemList.length; i++){
+                        const needItem = originalItemList[i];
+                        for(let n =0 ;n<matrials.length;n++){
+                           // console.log(matrials[n]);
+                            if(needItem.name == matrials[n].name){
+                                if( matrials[n].condition- needItem.amount >= 0 ){
+                                    matrials[n].condition -= needItem.amount;
+                                    if(matrials[n].condition<=0){
+                                        matrials[n].subType='matrial';
+                                    }
+                                }else{
+                                    
+                                    matrials[n].subType='matrial';
+                                    matrials[n].condition=0;
+                                }
+                            }         
+                        }
+                    }
+                    
+                    //아이템 추가하기
+                    for(let n=0; n<convertItemList.length;n++){
+                        let num = 0;
+                        while (true){
+                            num++;
+                            pushItemToInventory(inventory,convertItemList[n].name);
+                            if(num>=convertItemList[n].amount ){
+                                break;
+                            }
+                        }
+                        
+                        
+                    }
+                    removeMatrialItem();
+                    renderStorageModal();
+                    advanceTurn(); 
+                    log(`제작이 완료되었습니다`, true);
+                }
+            }else{
+                pgbar.style.width = `0%`;
+                clearInterval(makeInterval);
+                makeInterval =null;
+            }
+            
+            
+        });
         recipeList.appendChild(item);
     }
     for(let n = 0 ; n <recipes.length; n++){
-        makeBox(findRecipes(recipes[n].name));
+        const data=findRecipes(recipes[n].name);
+       // console.log(data);
+        if(data.visible){
+            makeBox(data);
+        }
+        
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -433,49 +588,57 @@ function openPlayerStatModal(){
     turnPanelVisible(true);
     playerStatModal.classList.remove('hidden');
 }
-
+let makeInterval =null;
 const craftModal = document.getElementById("craftModal");
 craftModal.addEventListener("click", (e) => {
     if (e.target === craftModal) {
         craftModal.classList.add("hidden");
-        turnPanelVisible(false);
+        if(makeInterval!=null){
+            clearInterval(makeInterval);
+            makeInterval =null;
+        }
     }
 });
 function openCraftModal(){
     renderCraftModal();
-    //turnPanelVisible(true);
     craftModal.classList.remove('hidden');
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //버튼함수
 menuBt.addEventListener('click', () => {
     //메뉴 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     openMenuModal();
 });
 playerStatBt.addEventListener('click', ()=>{
     //플레이어 스텟 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     openPlayerStatModal();
     closeMenuModal();
 });
 skillBt.addEventListener('click', ()=>{
     //스킬 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     openSkillModal();
     closeMenuModal();
 });
 storageBt.addEventListener('click', ()=>{
     //인벤토리와 보관함 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     storageVisible=true;
     openStorageModal();
     closeMenuModal();
 });
 inventoryBt.addEventListener('click', ()=>{
     //인벤토리 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     storageVisible=false;
     openStorageModal();
     closeMenuModal();
 });
 craftBt.addEventListener('click', ()=>{
     //제작 창 열기
+    if(delaying)return;//딜레이 중이면 무시
     openCraftModal();
     closeMenuModal();
 });
@@ -709,6 +872,8 @@ function itemColor(subType){
             return "bg-emerald-300";
         case "gasoline":
             return "bg-amber-500";
+        case "milk":
+            return "bg-neutral-300";
     }
     return 
 }

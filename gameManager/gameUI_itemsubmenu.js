@@ -13,6 +13,7 @@ function optionBoxesDivide(){
 function facilitySubMenu(facilityName){
     //시설물 서브메뉴
     if(facilityName ==null)return
+    if(delaying)return;//딜레이 중이면 무시
     stopResting();
     itemSubOption.classList.remove("hidden");
     optionBoxes.innerHTML='';
@@ -84,6 +85,22 @@ function facilitySubMenu(facilityName){
                     //closeSubOption();
                 });
             }
+        }
+        if(data.addStorage){
+            //전용 보관함이 있는 경우
+            makeBox("보관함 보기",null).addEventListener('click', ()=>{
+                for(let i =0;i<storage.length; i++){
+                    if(storage[i].name == data.name){
+                        //이 스토리지의 경우
+                        storageIndex = parseInt(i);
+                        break;
+                    }
+                }
+                storageVisible=true;
+                openStorageModal();
+                renderStorageModal();
+                //storageIndex
+            });
         }
         
         if(data.needItem =="power" || data.needItem =="battery" || data.name =="generator"){
@@ -305,6 +322,7 @@ function facilitySubMenu(facilityName){
 
 function itemsubMenu(data, dataset){
     if(data ==null)return
+    if(delaying)return;//딜레이 중이면 무시
     stopResting();
     itemSubOption.classList.remove("hidden");
     //console.log(point, innerWidth, innerHeight);
@@ -385,6 +403,10 @@ function itemsubMenu(data, dataset){
             //방어구인 경우
             if(data.condition< data.maxCondition*2){
                 makeBox(`${data.condition>=data.maxCondition?'옷 덧대기':'옷 수선하기'}`,true).addEventListener('click', ()=>{
+                    if(getLight()==false){
+                        log_popup(`작업을 하기에는 너무 어둡습니다.`);
+                        return;
+                    }
                     const needle = findInventoryItemData('Needle');
                     if(needle!=null ){
                         const thread = findInventoryItemData('Thread');
@@ -439,13 +461,13 @@ function itemsubMenu(data, dataset){
                             return;
                         }
                         
-                        if(recipe==null){
+                        if(recipe==null ){
                             log_popup(`제작 가능한 레시피가 없습니다.`);
                             return;
                         }
 
                         const needItem = findInventoryItemData(recipe.needItem);
-                        if(recipe.needItem.length>0 && needItem==null){
+                        if(recipe.needItem.length>0 && needItem==null && debug==false){
                             log_popup(`${translating(recipe.needItem)}가 없습니다.`);
                             return;
                         }
@@ -672,6 +694,7 @@ function itemsubMenu(data, dataset){
             if(item.type=='Furniture'){
                 //가구의 경우
                 makeBox('설치하기', true, "bg-slate-300").addEventListener('click', ()=>{
+                    closeSubOption();
                     let bool =false;
                     const facilItem = facilityItem(item.name);
                     console.log(facilItem);
@@ -689,9 +712,13 @@ function itemsubMenu(data, dataset){
                         bool =true;
                     }
                     if(bool){
+                        if(currentMapData.thisFacilities.find(n => n.name==facilItem.name)!=null){
+                            log_popup(`이미 설치한 시설입니다`);
+                            return;
+                        }
                         addFacility(facilItem, item);
                         inventory.splice( dataset.index,1);
-                        closeSubOption();
+                        
                         advanceTurn();
                         closeStorageModal();
                     }

@@ -45,7 +45,7 @@ function renderZombieDiv(zombie){
     const id= Math.floor(Math.random()*100000);
     const div = document.createElement('div');
     div.id=`zombie_${id}`;
-    div.className = "absolute bottom-4 right-0 w-24 h-32 z-20 transition-all duration-100 zombieDiv";
+    div.className = "absolute bottom-4 right-0 w-24 h-32 z-30 transition-all duration-100 zombieDiv";
 
     const img = document.createElement('img');
     img.src = `images/zb_${ zombie.tag}.png`;

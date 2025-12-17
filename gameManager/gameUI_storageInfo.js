@@ -76,6 +76,7 @@ Object.entries(equipIcons).forEach(([key]) => {
 
 function openStorageModal(bool){
    // if(gameOver)return
+   
     storageModal.classList.remove('hidden');
     renderStorageModal(bool);
     turnPanelVisible(true);
@@ -146,6 +147,22 @@ function renderStorageTurn(){
                 }
             }
             
+        }
+
+        if(stack.weather=='rain'){
+            //비가오는 경우
+            const value =1;
+            const rainCollectorBarrel = mapData[m].thisFacilities.find(n => n.name=='rainCollectorBarrel');
+            if(rainCollectorBarrel!=null){
+                rainCollectorBarrel.item.subType='taintedWater';
+                if(rainCollectorBarrel.item.condition<rainCollectorBarrel.item.maxCondition){
+                    rainCollectorBarrel.item.condition+=value;
+                    console.log(`${m}번째 맵의 빗물받이 통 ${value}만큼 증가${rainCollectorBarrel.item.condition}/${rainCollectorBarrel.item.maxCondition}`);
+                    
+                }
+                rainCollectorBarrel.enabled=true;
+                //setFacilityEnable("rainCollectorBarrel",true);
+            }
         }
     }
     
@@ -227,6 +244,7 @@ function itemCook(item, cookedInventory){
                    // stopResting();
                 }else{
                     item.foodStatus=4;
+                    item.cookable=false;
                     item.path = item.path.replace("Open","").replace("Cooked","").replace(".png", "Overdone.png");
                     item.condition=0;
                     item.poisoning=1;
@@ -315,9 +333,9 @@ function renderStorageModal(){
         const facilityEnableList=["fridge", "oven", "micro"];
         if(btn.dataset.index == storageIndex){
             btn.classList.remove('bg-slate-400');
-            btn.classList.add('bg-blue-400');
+            btn.classList.add('bg-blue-500');
         }else{
-            btn.classList.remove('bg-blue-400');
+            btn.classList.remove('bg-blue-500');
             btn.classList.add('bg-slate-400');
         }
         for(let i =0; i< facilityEnableList.length;i++){
@@ -332,7 +350,7 @@ function renderStorageModal(){
                         btn.innerText+='(켜짐)';
                         btn.classList.remove('bg-slate-400');
                         if(facil.name =="fridge"){
-                            btn.classList.add('bg-blue-600');
+                            btn.classList.add('bg-green-600');
                         }
                         if(facil.name =="oven" || facil.name =="micro"){
                             btn.classList.add('bg-red-500');
@@ -343,10 +361,10 @@ function renderStorageModal(){
                        // console.log(`${facil.name} 꺼짐`);
                         btn.innerText.replace("(켜짐)","");
                          btn.innerText+='(꺼짐)';
-                         btn.classList.remove('bg-blue-600');
+                         //btn.classList.remove('bg-blue-600');
                          btn.classList.remove('bg-red-500');
                          btn.classList.remove('bg-green-400');
-                         btn.classList.add('bg-slate-400');
+                         //btn.classList.add('bg-slate-400');
                         break;
                     }
                 }
@@ -725,6 +743,9 @@ function pushItemToInventory(_inventory, itemName){
     if(item==null){
         return;
     }
+    if(item.type=="Furniture"){
+        item.condition = 0;
+    }
     if(item.count !=null){
         if(item.count>0){
             //숫자를 세는 경우
@@ -765,17 +786,24 @@ function changeItemCondition(data, matrial, repeat){
 }
 function removeMatrialItem(subtype="matrial"){
     for(let i =0;i<inventory.length;i++){
-        if(inventory[i].subType==subtype){
-            if(inventory[i].condition<=0){
-                inventory.splice(i,1);
-                i--;
+        if(inventory[i] ==null){
+            inventory.splice(i,1);
+            i--;
+        }else{
+
+            if(inventory[i].subType==subtype){
+                if(inventory[i].condition<=0){
+                    inventory.splice(i,1);
+                    i--;
+                }
             }
         }
+        /*
         if(inventory[i].count!=null){
             if(inventory[i].count<=0){
                 inventory.splice(i,1);
                 i--;
             }
-        }
+        }*/
     }
 }

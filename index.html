@@ -315,7 +315,7 @@
         <div id="Scene" class="relative w-full max-h-[600px] bg-gray-600 border-4 border-gray-500 overflow-hidden">
           <div class="relative w-full h-full min-h-[480px] max-h-[600px]">
             <img id="mainBg" src="images/bg0_dark.png" alt="게임화면" class="absolute w-full h-full object-cover  z-10">
-            <img id="weatherBg" src="images/bg_foggy.png" alt="날씨" class="hidden absolute w-full h-full object-cover  z-40">
+            <img id="weatherBg" src="images/bg_foggy.png" alt="날씨" class="pointer-events-none hidden absolute w-full h-full object-cover  z-40">
           </div>
           
           <!-- 날짜 텍스트 (이미지 안쪽 상단에 표시됨) -->
@@ -363,16 +363,16 @@
               id="player"
               class="absolute bottom-4 left-40 w-16 h-32 z-20 transition-all duration-100">
               -->
-          <div id="player" class="absolute bottom-4 w-16 h-32 z-20 transition-all duration-100">
+          <div id="player" class="absolute bottom-4 w-16 h-32 z-30 transition-all duration-100">
             <img src="images/player.png" class="absolutew-full h-full">
             <img id="equipWp" src="icons/default.png" class="absolute bottom-4 left-0 w-12 h-12 rotate-90">
           </div>
-          <img src="images/playerRest.png" 
+            <img src="images/playerRest.png" 
               id="playerRest"
-              class="absolute bottom-4 left-[100px] w-20 h-20 z-20 transition-all duration-100 hidden">
+              class="absolute bottom-4 left-[100px] w-20 h-20 z-30 transition-all duration-100 hidden">
            <img src="images/zb_pants.png" 
               id="playerZb"
-              class="absolute bottom-4 left-[100px] w-36 h-36 z-20 transition-all duration-100 hidden">
+              class="absolute bottom-4 left-[100px] w-36 h-36 z-30 transition-all duration-100 hidden">
 
 
 
@@ -483,7 +483,7 @@
           <div id="craftBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
             <img src="images/Carpentry_Off.png" alt="제작창" class="w-14 h-14">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
-              제작(미구현)
+              제작
             </span>
           </div>
 
@@ -856,6 +856,7 @@
     <script src="gameManager/gameUI_storageInfo.js"></script>
     <script src="gameManager/gameUI_itemsubmenu.js"></script>
     <script src="gameManager/game_zombie.js"></script>
-    <script src="gameManager/game_player.js"></script> 
+    <script src="gameManager/game_player.js"></script>
+    <script src="gameManager/game_object.js"></script>  
   </body>
 </html>

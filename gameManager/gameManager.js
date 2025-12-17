@@ -1,6 +1,6 @@
 //게임매니저
 //게임의 전반적인 흐름과 상태를 관리하는 스크립트
-let debug = false;
+let debug =false;
 
 //타이머, UI 표시
 const timerTxt = document.getElementById('timer');
@@ -406,7 +406,11 @@ async function ResetAllGame(){
     if(debug){
         mapData.push( findMapData('gas'));
         powerEndTurn = 10;
-        waterEndTurn = 10;
+        waterEndTurn = 3;
+        pushItemToInventory(inventory, "Logs");
+        pushItemToInventory(inventory, "Logs");
+        pushItemToInventory(inventory, "Nails");
+        pushItemToInventory(inventory, "Nails");
     }
     
     mapNum = 1;
@@ -415,7 +419,7 @@ async function ResetAllGame(){
     
     stack = {
         weather:"sunny",
-        nextWeather:"foggy",
+        nextWeather:"rain",
         prevWeather:"sunny",
         weatherTime:randomInt(5,10),
 
@@ -479,6 +483,7 @@ function mapSetting(data) {
 
     clearZombies();
     spawnZombies(); //좀비소환
+    spawnObject(); //오브젝트 소환
     bgLightDark( currentMapData );
 
     //맵 아이템
@@ -743,6 +748,7 @@ function TurnEnd() {
         }
 
         changeweather();//날씨변경
+        
         
         woundHealingCalculate(); //부상계산
 

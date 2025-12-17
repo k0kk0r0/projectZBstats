@@ -258,9 +258,9 @@ function playerAttack(multiHit){
         if(playerstat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
         if(playerstat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
         */
-        if(damage>355){
+        if(damage>128){
             //임시 리미트
-            damage =355;
+            damage =128;
         }
         //대미지 최종 정수화
         damage = Math.ceil(damage);

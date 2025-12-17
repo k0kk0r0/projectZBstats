@@ -1,5 +1,6 @@
-name,original,convert,needItem
-Rag,ShirtGeneric-1,Rag-2,
-Plank,Logs-1,Plank-3,Handsaw
-DigitalWatch,DigitalWatch-1,ElectronicsScrap-1,Screwdriver
-rainCollectorBarrel,Plank-6;Nails-2,rainCollectorBarrel-1,Hammer
+visible,name,original,convert,needItem
+false,Rag,ShirtGeneric-1,Rag-2,
+false,Cloth,ShirtGeneric-1;Thread-1,ShirtGeneric-1,Needle
+true,Plank,Logs-1,Plank-3,Handsaw
+true,DigitalWatch,DigitalWatch-1,ElectronicsScrap-1,Screwdriver
+true,rainCollectorBarrel,Plank-6;Nails-2,rainCollectorBarrel-1-0,Hammer

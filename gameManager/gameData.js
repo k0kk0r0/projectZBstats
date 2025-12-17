@@ -120,6 +120,7 @@ function findRecipes(itemName ){
         convertList.push({name:item[0], amount:item[1]} )
     }
     let data0 ={
+        visible : JSON.parse(data.visible),
         name:data.name,
         original: originalList,
         convert: convertList,
@@ -179,7 +180,7 @@ function findMisc(itemName ){
         maxCondition: parseInt(data.condition),
         recipe: data.recipe.toString(),
         weight: parseFloat(data.weight),
-        count: parseInt(data.count)??0,
+        amount: parseInt(data.amount)??0,
         info: data.info.toString()
     }
     return data0;
@@ -260,8 +261,10 @@ function facilityItem(facilityName){
             obj.enabled=false;
         break;
         case "rainCollectorBarrel":
-            obj.needItem ='water';
+            obj.needItem ='taintedWater';
             obj.item = findMisc("rainCollectorBarrel");
+            obj.item.type = "FluidContainer";
+            obj.item.condition=0;
         break;
         
         case "faucet":
@@ -391,13 +394,26 @@ function findMapData(itemName){
     }
     storageArray.splice(0,0, {name:(JSON.parse(data.outdoor)?"ground":"storage"), inventory:dropItemsArray} );
 
+
+    const LivestockZone = [];
+    const LivestockZoneArray= data.LivestockZone.split(";");
+    for(let i =0; i< LivestockZoneArray.length ; i++){
+        _obj = LivestockZoneArray[i].split("-");
+        let rng = Math.random();
+        if(rng< parseFloat(_obj[1])){
+            //동물, 나무 등 등장
+            LivestockZone.push({name: _obj[0] , positionX:(100+ i*120+ randomInt(20,40)) ,positionY:(randomInt(5,20))});
+        }
+    }
     let data0 ={
         name: data.name,
         outdoor: JSON.parse(data.outdoor),
         zombies:[],
         src: data.src,
         thisFacilities: facilityArray,
-        storages:storageArray
+        storages:storageArray,
+        farmZone: [],
+        livestockZone : LivestockZone
     }
     for(let i =0; i< parseInt( data.zombieNum) ;i++){
         data0.zombies.push( spawnZombie( 'random') );
