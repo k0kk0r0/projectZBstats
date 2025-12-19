@@ -313,200 +313,7 @@ function renderSkill(){
         skillList.appendChild(item);
   }
 }
-///////////////////////////////////////////////////////////////////////////////////////////
-function renderCraftModal(){
-    //제작 레시피 창 
-    const recipeList = document.getElementById("recipeList");
-    recipeList.innerHTML='';
-    function makeBox(data, size=100, color='bg-gray-200'){
-        // HTML 구성 아이템
-        
-        
-        const originalItemList =[];
-        const convertItemList = [];
-        let origin='';
-        for(let n =0; n < data.original.length; n++){
-           
-            const item =findItem(data.original[n].name);
-            item.amount = data.original[n].amount;
-            if(item!=null){
-                originalItemList.push( item );
-                origin +=
-                    `<img class="w-8 h-8" src=${item.path}>
-                    <span>x${item.amount}</span>
-                  `;
-                  //  <span>${translating(item.name)}</span>
-            }
-        }
 
-        let result='';
-        for(let n =0; n < data.convert.length; n++){
-           
-            const item =findItem(data.convert[n].name);
-            item.amount = data.convert[n].amount;
-            if(item!=null){
-                convertItemList.push( item );
-                result +=
-                    `<img class="w-8 h-8" src=${item.path}>
-                    <span>x${item.amount}</span>
-                    <span>${translating(item.name)}</span>
-                    `;
-            }
-        }
-        
-        let needItemIcon=`<img class="w-8 h-8" src="icons/default.png">`;
-        if(data.needItem.length>0){
-            const needItem = findItem(data.needItem);
-            needItemIcon =`<img class="w-8 h-8" src=${needItem.path}>`;
-        }
-        
-        const item = document.createElement("div");
-        item.className = "relative bg-gray-200 rounded h-10 overflow-hidden";
-
-        item.innerHTML = `
-        <div class="progressBar h-full bg-green-500 duration-100" style="width: ${0}%;"></div>
-        <span class="absolute inset-0 grid grid-cols-[2fr_1fr_3fr] justify-between items-center px-3 text-lg font-semibold text-black">
-         
-            <div class="items-center flex gap-2 ">
-                ${origin}
-                
-            </div>
-            <div class="justify-center flex">
-            ${needItemIcon}
-                <span>➡</span>
-            </div>
-            <div class="items-center flex gap-2 ">
-                ${result}
-            </div>
-        </span>
-        `;
-        
-        item.addEventListener('click',()=>{
-            //originalItemList, convertItemList
-             let progress=0;
-             const pgbar = item.querySelector(".progressBar");
-             let matrials = [];
-            if(makeInterval==null){
-                matrials=[];
-                
-                for(let i =0 ; i< originalItemList.length; i++){
-                    const needItem = originalItemList[i];
-                    let num = 0;
-                    for(let n = 0; n< inventory.length; n++){
-                        if(inventory[n].name == needItem.name){
-                            if(num < needItem.amount){
-                                if(inventory[n].condition>0){
-                                    if(inventory[n].condition - needItem.amount>=0){
-                                        //필요 아이템 하나의 양이 사용량 만큼 있는 아이템의 경우
-                                        matrials.push(inventory[n]);
-                                        num = needItem.amount;
-                                        break;
-                                    }else{
-
-                                    }
-                                }else{
-                                    //필요 아이템 하나씩 추가
-                                    matrials.push(inventory[n]);
-                                    num++;
-                                }
-                            }
-                            
-                            
-                        }
-                    }
-                    
-                    if(num == needItem.amount){
-                        //console.log(`${needItem.name} : ${matrials.lenght}`);
-                    }else{
-                        log_popup(`${translating(needItem.name)} 아이템이 ${needItem.amount-num}개 만큼 부족합니다`);
-                        if(!debug) return;
-                        //return;
-                    }
-                    
-                }
-                
-
-
-
-                if(data.needItem.length>0){
-                    if(findInventoryItemData(data.needItem)==null){
-                        log_popup(`${translating(data.needItem)} 도구가 없습니다`);
-                        if(!debug)return;
-                    }
-                }
-                
-                
-                makeInterval = setInterval(()=>{
-                    progress+=4;
-                    //console.log(progress);
-                    pgbar.classList.remove('hidden');
-                    pgbar.style.width = `${progress}%`;
-                    if(progress>=140){
-                        make();
-                        pgbar.classList.add('hidden');
-                        pgbar.style.width = `0%`;
-                        clearInterval(makeInterval);
-                        makeInterval =null;
-                    }
-                },50);
-                function make(){
-                   
-                    for(let i =0 ; i< originalItemList.length; i++){
-                        const needItem = originalItemList[i];
-                        for(let n =0 ;n<matrials.length;n++){
-                           // console.log(matrials[n]);
-                            if(needItem.name == matrials[n].name){
-                                if( matrials[n].condition- needItem.amount >= 0 ){
-                                    matrials[n].condition -= needItem.amount;
-                                    if(matrials[n].condition<=0){
-                                        matrials[n].subType='matrial';
-                                    }
-                                }else{
-                                    
-                                    matrials[n].subType='matrial';
-                                    matrials[n].condition=0;
-                                }
-                            }         
-                        }
-                    }
-                    
-                    //아이템 추가하기
-                    for(let n=0; n<convertItemList.length;n++){
-                        let num = 0;
-                        while (true){
-                            num++;
-                            pushItemToInventory(inventory,convertItemList[n].name);
-                            if(num>=convertItemList[n].amount ){
-                                break;
-                            }
-                        }
-                        
-                        
-                    }
-                    removeMatrialItem();
-                    renderStorageModal();
-                    advanceTurn(); 
-                    log(`제작이 완료되었습니다`, true);
-                }
-            }else{
-                pgbar.style.width = `0%`;
-                clearInterval(makeInterval);
-                makeInterval =null;
-            }
-            
-            
-        });
-        recipeList.appendChild(item);
-    }
-    for(let n = 0 ; n <recipes.length; n++){
-        const data=findRecipes(recipes[n].name);
-       // console.log(data);
-        if(data.visible){
-            makeBox(data);
-        }
-        
-    }
-}
 ///////////////////////////////////////////////////////////////////////////////////////////
 function renderPlayerStat(){
     //플레이어 스텟 표시
@@ -588,7 +395,7 @@ function openPlayerStatModal(){
     turnPanelVisible(true);
     playerStatModal.classList.remove('hidden');
 }
-let makeInterval =null;
+
 const craftModal = document.getElementById("craftModal");
 craftModal.addEventListener("click", (e) => {
     if (e.target === craftModal) {
@@ -705,7 +512,9 @@ nextMapBt.addEventListener('click',() =>{
     delaying=true;
     let timedelay = 200;
     const runRng =Math.random();
-    if( runRng > playerStat().fitness*0.1){
+    const runPer = playerStat().fitness*0.1 - stat.weightRatio*0.15 ;
+    console.log(runPer);
+    if( runRng > runPer ){
         //플레이어 체력
         if(zombies.length>0){
             timedelay = 900;
@@ -714,7 +523,7 @@ nextMapBt.addEventListener('click',() =>{
         advanceTurn();
     }else{
         if(zombies.length>0){
-            log(`${((1-runRng)*100).toFixed(1)}% 확률로 도망치기 성공`);
+            log(`${((runPer )*100).toFixed(1)}% 확률로 도망치기 성공`);
         }
     }
     playerMove();
@@ -756,7 +565,9 @@ atHomeBt.addEventListener('click', ()=>{
     delaying=true;
     let timedelay = 200;
     const runRng =Math.random();
-    if( runRng > playerStat().fitness*0.1){
+    const runPer = playerStat().fitness*0.1 - stat.weightRatio*0.15 ;
+    console.log(runPer);
+    if( runRng > runPer ){
         //플레이어 체력
         if(zombies.length>0){
             timedelay = 900;
@@ -765,7 +576,7 @@ atHomeBt.addEventListener('click', ()=>{
         advanceTurn();
     }else{
         if(zombies.length>0){
-          log(`${((1-runRng)*100).toFixed(1)}% 확률로 도망치기 성공`);
+            log(`${((runPer )*100).toFixed(1)}% 확률로 도망치기 성공`);
         }
     }
     playerMove();

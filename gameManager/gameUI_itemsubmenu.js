@@ -180,7 +180,7 @@ function facilitySubMenu(facilityName){
                     }else{
                         data.item.condition = parseInt(battery.condition);
                        // console.log(data.item);
-                        battery.condition=0;
+                        battery.condition=-1;
                         setFacilityEnable(data.name,true);
                         log(`${data.name}에서 건전지를 삽입했습니다.`);
                         renderStorageModal();
@@ -247,8 +247,8 @@ function facilitySubMenu(facilityName){
                                 data.item.maxCondition = data.item.repair;
                             }
                             log(`${data.name}를 ${rv}만큼 수리했습니다.`);
-                            electro.subType='matrial';
-                            electro.condition=0;
+                            electro.subType='remove';
+                            electro.condition=-1;
                             renderStorageModal();
                             advanceTurn(); 
                         }
@@ -413,8 +413,8 @@ function itemsubMenu(data, dataset){
                         if(thread!=null && thread.condition>0){
                             const rag = findInventoryItemData("Rag");
                             if(rag!=null){
-                                rag.subType='matrial';
-                                rag.condition=0;
+                                rag.subType='remove';
+                                rag.condition=-1;
                                 
                                 
                                 thread.condition--;
@@ -442,16 +442,18 @@ function itemsubMenu(data, dataset){
             }
 
         if(data.recipe != null){
-            if(data.type != 'Food'){
+            //if(data.type != 'Food'){
                 //음식의 경우 따로 처리
                 let dismentleTxt ={
                     clothing: "옷 찢기",
                     watch: "시계 분해하기",
+                    canned: "캔 따기",
+                    box: "상자에서 꺼내기",
                     default :"분해하기"
                  }
                  //data.subType== "clothing" || data.subType== "watch"|| data.subType== "wood"
                   if(data.recipe.length>0){
-                //의상 찢기, 분해
+                //의상 찢기, 분해, 캔 따기, 꺼내기
                     optionBoxesDivide();
                     makeBox(dismentleTxt[data.subType]?? dismentleTxt.default, true, "bg-pink-300").addEventListener('click', ()=>{
                         closeSubOption();
@@ -471,26 +473,46 @@ function itemsubMenu(data, dataset){
                             log_popup(`${translating(recipe.needItem)}가 없습니다.`);
                             return;
                         }
-                        //제작에 필요한 도구가 있거나 필요 없다
+                        //제작에 필요한 도구 체크완료
+                        //아이템 추가
                         for(let n =0 ;n< recipe.convert.length; n++){
-                            for(let m=0; m <recipe.convert[n].amount; m++ ){
-                                pushItemToInventory(inventory, recipe.convert[n].name);
-                            }
+                            pushItemToInventory(inventory, recipe.convert[n].name, recipe.convert[n].amount);
                         }  
-
-                        if(dataset.route == storage_storage.id){
-                            storage[storageIndex].inventory.splice(dataset.index,1);
-                        }else{
-                            inventory.splice(dataset.index,1);
-                        }
                         
+                        
+                        let matrials;
+                        if(dataset.route == storage_storage.id){
+                            //storage[storageIndex].inventory.splice(dataset.index,1);
+                            matrials = storage[storageIndex].inventory[dataset.index];
+                        }else{
+                            //inventory.splice(dataset.index,1);
+                            matrials = inventory[dataset.index];
+                        }
+                        //console.log( Number.isNaN(matrials.condition) );
+                        if(Number.isNaN(matrials.condition)){
+                            //삭제할 것
+                            matrials.subType='remove';
+                            matrials.condition=-1;
+                        }else{
+                            if( matrials.condition>0 ){
+                                matrials.condition -= recipe.original[0].amount;
+                                if(matrials.condition<=0){
+                                    matrials.subType='remove';
+                                    matrials.condition=-1;
+                                }
+                            }else{
+                                matrials.subType='remove';
+                                matrials.condition=-1;
+                            }
+                        }
+                        removeMatrialItem();
                         renderStorageModal();
                         advanceTurn();
                         
                         
                     });
                 }
-            }
+            //}
         }
         if(data.type =="FluidContainer"){
             //액체류 마시기, 채우기, 비우기
@@ -624,6 +646,7 @@ function itemsubMenu(data, dataset){
                     closeSubOption();
                 }); 
             }
+            /*
             if(data.type == "Food"){
                 if(data.foodStatus==-1){
                     //캔 따기
@@ -639,7 +662,7 @@ function itemsubMenu(data, dataset){
                     }); 
                 }
                 
-            }
+            }*/
             if(data.subType == "food"){
                 //먹기
                 //const item = inventory[dataset.index];
@@ -747,7 +770,7 @@ function itemsubMenu(data, dataset){
                             }else{
                                 item.condition = parseInt(battery.condition);
                                 console.log(data);
-                                battery.condition=0;
+                                battery.condition=-1;
                                 log(`${item.name}에서 건전지를 삽입했습니다.`);
                                 advanceTurn();
                                 renderStorageModal();
@@ -772,6 +795,7 @@ function itemsubMenu(data, dataset){
             //보관함에 있을 때
             makeBox(`가방에 넣기`).addEventListener('click', ()=>{
                 itemMove(data, dataset);
+                console.log(data);
                 closeSubOption();
                 if(zombieIsAlived)advanceTurn();
             });

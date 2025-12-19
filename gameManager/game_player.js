@@ -47,7 +47,7 @@ function playerStat(){
     if(playerHasTrait("disorganized")){ _bagWeight = Math.floor((_bagWeight*0.7)*10)/10 }
     if(playerHasTrait("organized")){ _bagWeight = Math.floor((_bagWeight*1.3)*10)/10 }
 
-
+    stat.weight = {bagWeight:_bagWeight};
     //데이터반환
     return {bagWeight:_bagWeight, strength:str, fitness:fit, stressed:getMoodleValue("Stressed"), panic:-panicMd.value, endurance: enduValue };
 }
@@ -122,7 +122,7 @@ function startResting(timer=400){
         //스태미나, 체력 회복
         if(stat.stamina<100 || stat.health < 100){
              stat.stamina += 10;
-             stat.health += 2;
+             stat.health += 4;
             if(stat.stamina>=100)stat.stamina=100;
             if(stat.health>=100)stat.health=100;
             if(stat.stamina>=100 && stat.health>=100){

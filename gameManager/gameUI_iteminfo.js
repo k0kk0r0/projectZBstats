@@ -128,7 +128,7 @@
             //신선도가 있는 음식의 경우
             field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );
             field_conditionText.textContent = `신선도: ${cond}/${cond0} (${ratio}%)`;
-        }else if(item.subType=='matrial'){
+        }else if(item.subType=='matrial' || item.subType=='box'){
             //재료인 경우
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
             field_conditionText.textContent = `남은 양: ${cond}/${cond0} (${ratio}%)`;

@@ -121,7 +121,8 @@ function findRecipes(itemName ){
     }
     let data0 ={
         visible : JSON.parse(data.visible),
-        name:data.name,
+        name:data.name.toString(),
+        type: data.type.toString(),
         original: originalList,
         convert: convertList,
         needItem: data.needItem,
@@ -210,7 +211,7 @@ function findFood(itemName ){
         hunger: `;${data.hunger};`.toString(),// ;로 나눔, kcal 총량, 섭취 시 1/4로 나눔
 
         poisoning: parseFloat(data.poisoning),
-
+        recipe: data.recipe.toString(),
         convert: data.convert.toString(),
         div:4,
         maxDiv:4,
@@ -402,7 +403,7 @@ function findMapData(itemName){
         let rng = Math.random();
         if(rng< parseFloat(_obj[1])){
             //동물, 나무 등 등장
-            LivestockZone.push({name: _obj[0] , positionX:(100+ i*120+ randomInt(20,40)) ,positionY:(randomInt(5,20))});
+            LivestockZone.push({name: _obj[0] , positionX:(130+ i*120+ randomInt(20,40)) ,positionY:(randomInt(5,20))});
         }
     }
     let data0 ={

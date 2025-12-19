@@ -22,8 +22,9 @@ function renderObjectDiv(data){
             data.item = {name:data.name, condition:100, maxCondition:100, path:"Base/Objects/CowSpotted_Calf.png" , type:"Animal", subType:"milk"};
         break;
         case "Tree":
-            div.classList.add("z-20", "w-32", "h-64");
-            data.item = {name:"Tree", convert:"Logs;Logs", condition:5, maxCondition:5, path:"Base/Miscs/Logs.png" , type:"Tree", subType:"wood"};
+            const size = randomInt(1,4);
+            div.classList.add("z-20", `w-${4*(size+4)}`, `h-${8*(size+4)}`);
+            data.item = {name:"Tree", convert:`Logs-${size}`, condition:5, maxCondition:5, path:"Base/Miscs/Logs.png" , type:"Tree", subType:"wood"};
         break;
     }
     div.addEventListener('click', ()=>{
@@ -136,8 +137,10 @@ function objectSubMenu(data){
                             
                             log(`나무를 베었습니다.`);
                             const div = data.item.convert.split(";");
+                           
                             for(let n =0; n<div.length ;n++){
-                                pushItemToInventory(storage[0].inventory , div[n]);
+                                 const data= itemCommaDivide(div[n]);
+                                 pushItemToInventory(storage[0].inventory , data.item.name ,  data.amount);
                             }
                             
                             advanceTurn();

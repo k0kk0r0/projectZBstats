@@ -151,7 +151,7 @@ function renderStorageTurn(){
 
         if(stack.weather=='rain'){
             //비가오는 경우
-            const value =1;
+            const value =2;
             const rainCollectorBarrel = mapData[m].thisFacilities.find(n => n.name=='rainCollectorBarrel');
             if(rainCollectorBarrel!=null){
                 rainCollectorBarrel.item.subType='taintedWater';
@@ -428,8 +428,19 @@ function renderStorageModal(){
     
     storage_weightTxt.innerText = `${weight.storage.toFixed(2)}/50`;
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
+    stat.weight= weight;
     renderEquipment();
-   
+    
+    //무게 무들 계산
+    const weightNum =Math.ceil(  ((stat.weight.inventory/stat.weight.bagWeight)*4 ) -4);
+    stat.weightRatio = weightNum>0?weightNum:0;
+    if(stat.weightRatio>0){
+        //무게초과
+        setMoodleValue("HeavyLoad", -weightNum);
+    }else{
+        setMoodleValue("HeavyLoad", 0);
+    }
+    renderMoodles();
 }
 function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`text-md`){
     //
@@ -502,7 +513,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
             */
         }
 
-        if(data.subType=='matrial'){
+        if(data.subType=='matrial' ||data.subType=='box'){
             durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
             durabilityBar.style.height = `${ratio * 100}%`;
         }
@@ -610,12 +621,22 @@ function itemMove(data, dataset){
     data.cooktime = null;
      if(dataset.route == storage_player.id){
         //가방으로 이동
+        if(stat.weight.storage>50){
+            log_popup(`보관함 용량이 꽉 찼습니다.`);
+            console.log(stat.weight);
+            return;
+        }
         storage[storageIndex].inventory.push( data);
         inventory.splice(dataset.index,1);
         renderStorageModal();
     }
     else if(dataset.route == storage_storage.id ){
         //인벤으로 이동
+        if(stat.weight.inventory> stat.weight.bagWeight*2){
+            log_popup(`소지 용량이 꽉 찼습니다.`);
+             console.log(stat.weight);
+            return;
+        }
         inventory.push( data);
         storage[storageIndex].inventory.splice(dataset.index,1);
         renderStorageModal();
@@ -734,10 +755,22 @@ function itemEquip_mouseUp(e){
         return;
     }
 }
+function itemCommaDivide(string){
+    const div = string.split('-');
+    const item = findItem(div[0]);
+    console.log(div);
+    let num =1;
+    if(div[1]==null ){
+        
+    }else{
+        num = parseInt( div[1]);
+    }
+    
+    return {item:item, amount:num}
+}
 
-
-function pushItemToInventory(_inventory, itemName){
-    //당장은 안 쓰는 함수임..갯수구현 힘듬.
+function pushItemToInventory(_inventory, itemName, amount=1){
+    //갯수구현 힘듬.
     //inventory.push( findItem(data.convert) );
     const item = findItem(itemName);
     if(item==null){
@@ -751,16 +784,20 @@ function pushItemToInventory(_inventory, itemName){
             //숫자를 세는 경우
             for(let i = 0; i<_inventory.length;i++){
                 if(_inventory[i].name == item.name){
-                    _inventory[i].count++;
+                    _inventory[i].count+=amount;
                     return;
                 }
             }
-            _inventory.push( item );
+            //_inventory.push( item );
         }else{
-            _inventory.push( item );
+            for(let num = 0 ; num < amount; num++){
+                _inventory.push( findItem(itemName));
+            }
         }
     }else{
-        _inventory.push( item );
+       for(let num = 0 ; num < amount; num++){
+            _inventory.push( findItem(itemName) );
+        }
     }
     
 }
@@ -784,26 +821,41 @@ function changeItemCondition(data, matrial, repeat){
     }
     return data;
 }
-function removeMatrialItem(subtype="matrial"){
-    for(let i =0;i<inventory.length;i++){
-        if(inventory[i] ==null){
-            inventory.splice(i,1);
-            i--;
-        }else{
-
-            if(inventory[i].subType==subtype){
-                if(inventory[i].condition<=0){
-                    inventory.splice(i,1);
+function removeMatrialItem(subtype="remove"){
+  
+    
+    removeMatrialItemArray(inventory);
+    for(let n=0;n<storage.length; n++){
+       removeMatrialItemArray(storage[n].inventory);
+    }
+    function removeMatrialItemArray(inven){
+        for(let i =0;i<inven.length;i++){
+           
+            if(inven[i].subType==subtype){ 
+                //console.log(inven[i].name, inven[i].subType ,inven[i].condition);
+                if(Number.isNaN(inven[i].condition)==false){
+                
+                    //console.log(inven[i].name,  Number.isNaN(inven[i].condition));
+                    if(inven[i].condition<=0){
+                        console.log(`${inven[i].name} 제거함` );
+                        inven.splice(i,1);
+                        i--;
+                    }
+                    
+                }else{
+                     console.log(`${inven[i].name} 제거함` );
+                    inven.splice(i,1);
                     i--;
                 }
             }
+            
+            /*
+            if(inven[i].count!=null){
+                if(inven[i].count<=0){
+                    inven.splice(i,1);
+                    i--;
+                }
+            }*/
         }
-        /*
-        if(inventory[i].count!=null){
-            if(inventory[i].count<=0){
-                inventory.splice(i,1);
-                i--;
-            }
-        }*/
     }
 }

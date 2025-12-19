@@ -21,7 +21,7 @@ const equipWp = document.getElementById('equipWp');
 
 //무들 아이콘
 //gameModal.querySelectorAll('.moodleIcon');
-const moodleNames = ["Hungry", "Thirsty", "Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
+const moodleNames = ["HeavyLoad","Hungry", "Thirsty", "Tired", "Endurance", "Panic", "Sick", "Stressed", "Bleeding", "Zombie"];
 const slot = document.getElementById('moodleSlot');
 
 // moodleNames 배열을 순회하며 요소를 생성하고 즉시 참조를 저장
@@ -403,15 +403,7 @@ async function ResetAllGame(){
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
     mapData.push( findMapData('road'));
-    if(debug){
-        mapData.push( findMapData('gas'));
-        powerEndTurn = 10;
-        waterEndTurn = 3;
-        pushItemToInventory(inventory, "Logs");
-        pushItemToInventory(inventory, "Logs");
-        pushItemToInventory(inventory, "Nails");
-        pushItemToInventory(inventory, "Nails");
-    }
+    
     
     mapNum = 1;
     mapData[mapNum].zombies =[];
@@ -428,6 +420,16 @@ async function ResetAllGame(){
     };
     for(let i=0;i<moodles.length;i++){
         moodles[i].value =0;
+    }
+
+    if(debug){
+        mapData.push( findMapData('gas'));
+        powerEndTurn = 10;
+        waterEndTurn = 3;
+        pushItemToInventory(storage[0].inventory, "Logs4");
+        pushItemToInventory(storage[0].inventory, "Logs2",2);
+        pushItemToInventory(inventory, "Nails",2);
+        pushItemToInventory(inventory, "Garbagebag_box");
     }
 
     //playerMove();
@@ -718,6 +720,7 @@ function TurnEnd() {
             callZombies(1);
         //스텟 회복
         stat.stamina++;
+        stat.health++;
         if(stat.stamina>100){stat.stamina=100}
         if(stat.health>100){stat.health=100}
         //배고픔, 목마름
@@ -738,6 +741,8 @@ function TurnEnd() {
 
         setMoodleValue("Stressed", -Math.floor((stat.stressed)/20) );
         setMoodleValue("Sick", -Math.floor((stat.sick)/20) );
+
+        
 
         //실내 발전기 가동 확인
         
@@ -795,6 +800,10 @@ function TurnEnd() {
         renderStorageModal();
         //발전기 전력 소모 확인
         console.log(`${hour}:${min}`);
+        //무게가 무거울 경우
+       if(stat.weightRatio>=4 && stat.health>70){
+            stat.health-= 10;
+       }
     }
     
    // log_popup();//감추기

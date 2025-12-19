@@ -541,11 +541,17 @@
     </div>
   </div>
   <!-- 크래프트 제작 모달 -->
-  <div id="craftModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 relative ">
+  <div id="craftModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden h-full">
+    <div class="relative flex flex-col bg-white rounded-2xl shadow-xl w-[90vw] max-w-2xl p-6 h-[55vh] ">
       <h2 class="text-2xl font-bold mb-4 text-center">🛠 제작 목록</h2>
+      <div id="recipeTag" class="mg-2 gap-2 flex p-2 flex-wrap w-[90%]">
+          <button class="text-xl font-bold p-2 border rounded bg-blue-400">전체</button>
+          <button class="text-xl font-bold p-2 border rounded bg-slate-400">목공</button>
+          <button class="text-xl font-bold p-2 border rounded bg-slate-400">잡동사니</button>
+          <button class="text-xl font-bold p-2 border rounded bg-slate-400">가구</button>
+        </div>
       <!-- 제작 목록이 여기에 자동으로 추가됨 -->
-      <div id="recipeList" class="grid grid-cols-1 gap-3 p-2"></div>
+      <div id="recipeList" class="grid grid-cols-1 gap-3 p-2 overflow-y-auto "></div>
     </div>
   </div>
   <!--보관함 모달-->
@@ -855,6 +861,7 @@
     <script src="gameManager/gameUI_iteminfo.js"></script>
     <script src="gameManager/gameUI_storageInfo.js"></script>
     <script src="gameManager/gameUI_itemsubmenu.js"></script>
+    <script src="gameManager/gameUI_craft.js"></script>
     <script src="gameManager/game_zombie.js"></script>
     <script src="gameManager/game_player.js"></script>
     <script src="gameManager/game_object.js"></script>  
