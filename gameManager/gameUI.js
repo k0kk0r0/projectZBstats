@@ -768,10 +768,13 @@ function renderDebugModal(){
     const fontSize='text-md';
     storage_debug.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
     storage_debug.innerHTML='';//초기화
+    addDebugItemList();
+    
     for(let i =0; i< debugItemList.length;i++){
         //console.log(debugItemList[i]);
         addInventoryItem( debugItemList[i], storage_debug, -1, boxSize, fontSize);
     }
+
 }
 function addDebugItemList(){
     if(debugItemList.length >0){

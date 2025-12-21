@@ -82,7 +82,6 @@ async function init() {
     } else {
         console.error('모듈 API 또는 main 함수를 찾을 수 없습니다.');
     }
-    addDebugItemList();
 }
 init();
 function findItem(itemName){
