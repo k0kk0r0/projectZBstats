@@ -1,8 +1,8 @@
 
 //아이템리스트
+let mapDatas = [];//맵리스트
 let weaponDatas = []; //무기리스트
 let clothDatas = []; //의상리스트
-let mapDatas = [];//맵리스트
 let miscDatas = [];//기타 아이템 리스트
 let foodDatas = [];
 let modDatas = [];//모드 데이터
@@ -68,7 +68,7 @@ async function init() {
     mapDatas = await loadItemDatas("Data/mapDatas.csv");
     weaponDatas = await loadItemDatas("Data/weapons.csv");
     miscDatas = await loadItemDatas("Data/miscs.csv");
-    foodDatas = await loadItemDatas("Data/foods.csv");
+    foodDatas = await loadItemDatas("Data/foods_raw.csv");
     clothDatas = await loadItemDatas("Data/cloths.csv"); 
     recipes = await loadItemDatas("Data/recipes.csv");
     
@@ -82,7 +82,7 @@ async function init() {
     } else {
         console.error('모듈 API 또는 main 함수를 찾을 수 없습니다.');
     }
-    
+    addDebugItemList();
 }
 init();
 function findItem(itemName){
@@ -125,7 +125,7 @@ function findRecipes(itemName ){
         type: data.type.toString(),
         original: originalList,
         convert: convertList,
-        needItem: data.needItem,
+        needTool: data.needTool,
     }
     return data0;
 }
@@ -156,6 +156,28 @@ function findCloth(itemName ){
     //의상 데이터 검색 및 가공해서 반환
     const data = clothDatas.find(w => w.name === itemName);
     if(data==null){ return null }
+
+    //option, Encumbrance
+    data.encumbrance=null;
+    data.capacity=null;
+
+    const rawdata = data.option.split(";");
+    for(let i =0; i<rawdata.length;i++){
+        const _data = {
+            name:rawdata[i].split(":")[0],
+            value:rawdata[i].split(":")[1],
+        }
+        //console.log(_data);
+        switch(_data.name){
+            case 'encumbrance':
+                data[_data.name] = parseFloat(_data.value);
+                break;
+            default:
+                data[_data.name] = parseInt( _data.value);
+            break;
+        }
+    }
+
     let data0 ={
         path: data.path.toString(),
         name: data.name.toString(),
@@ -164,7 +186,12 @@ function findCloth(itemName ){
         condition: parseInt(data.condition),
         maxCondition: parseInt(data.condition),
         recipe: data.recipe.toString(),
-        weight: parseFloat(data.weight)
+        weight: parseFloat(data.weight),
+        info: data.info.toString(),
+
+        //option
+        encumbrance: parseFloat(data.encumbrance),
+        capacity: parseInt(data.capacity)
     }
     return data0;
 }
@@ -187,7 +214,7 @@ function findMisc(itemName ){
     return data0;
 }
 const foodStatusTxt=["", "신선한 ","신선하지 않은 ","상한 ","타버린 "]; //캔(-1) 기본값(0)
-function findFood(itemName ){
+function findFood_old(itemName ){
     //음식 아이템 데이터 검색 및 가공해서 반환
     const data = foodDatas.find(w => w.name === itemName);
     const xp = 24*6; //24시간*6턴
@@ -213,6 +240,74 @@ function findFood(itemName ){
         poisoning: parseFloat(data.poisoning),
         recipe: data.recipe.toString(),
         convert: data.convert.toString(),
+        div:4,
+        maxDiv:4,
+        weightDiv: parseFloat(data.weight/4),
+        info: data.info.toString()
+    }
+    return data0;
+}
+function findFood(itemName ){
+    //음식 아이템 데이터 검색 및 가공해서 반환
+    const data = foodDatas.find(w => w.name === itemName);
+    const xp = 24*6; //24시간*6턴
+    if(data==null){ return null }
+    data.cookable= false;
+    data.recipe ='';
+    data.convert ='';
+    data.needItem='';
+    data.poisoning=0;
+    const rawdata = data.option.split(";");
+    for(let i =0; i<rawdata.length;i++){
+        const _data = {
+            name:rawdata[i].split(":")[0],
+            value:rawdata[i].split(":")[1],
+        }
+        //console.log(_data);
+        switch(_data.name){
+            case 'cookable':
+                data.cookable = JSON.parse(_data.value);
+                break;
+            case 'poisoning':
+                data.poisoning = parseFloat(_data.value);
+                break;
+            case 'recipe':
+                data.recipe = _data.value.toString();
+                break;
+            case `convert`:
+                data.convert = _data.value.toString();
+                break;
+            case `needItem`:
+                data.needItem = _data.value.toString();
+                break;
+            default:
+                data[_data.name] = parseInt( _data.value);
+            break;
+        }
+    }
+
+    let data0 ={
+        path: data.path.toString(),
+        name: data.name.toString(),
+        type: data.type.toString(),
+        subType: data.subType.toString(),
+        condition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp: data.rottenDays*xp): data.condition ),
+        maxCondition: parseInt( data.rottenDays!=null? (data.freshDays!=null? data.freshDays*xp : data.rottenDays*xp ): data.condition  ),
+        weight: parseFloat(data.weight),
+
+        foodStatus: parseInt(data.foodStatus), 
+        hunger: `;${data.hunger};`.toString(),// ;로 나눔, kcal 총량, 섭취 시 1/4로 나눔
+
+        //옵션값들 모음
+        cookable:JSON.parse(data.cookable)??null,
+        freshDays: parseInt(data.freshDays*24)??null,
+        rottenDays: parseInt(data.rottenDays*24)??null,
+        cookTime: parseInt( data.cookTime )??null,
+        poisoning: parseFloat(data.poisoning)??null,
+        recipe: data.recipe.toString()??'',
+        convert: data.convert.toString()??'',
+        needItem: data.needItem.toString()??'',
+        //내장상수들, div:분할
         div:4,
         maxDiv:4,
         weightDiv: parseFloat(data.weight/4),

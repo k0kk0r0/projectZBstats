@@ -73,6 +73,8 @@
     makeDiv('FreshDays', item.freshDays? (item.freshDays<0? "보존식품" : `${(item.freshDays/24)}일`) : null);
     makeDiv('RottenDays', item.rottenDays? `${(item.rottenDays/24)}일` : null );
 
+    makeDiv('Encumbrance', item.encumbrance? `${item.encumbrance*100}%`: null);
+    makeDiv('Capacity' , item.capacity? item.capacity:null);
     makeDiv('Weight', (( item.type=="FluidContainer"? parseFloat(item.weight)+parseFloat(item.condition)/10 :item.weight ) ?? null) );
 
 
@@ -118,6 +120,10 @@
             field_conditionText.textContent = `내구도: ${ratio}%`;
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }
+        if(item.subType=='tool'){
+            field_conditionText.textContent = `내구도: ${cond}/${cond0} (${ratio}%)`;
+            field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
+        }
         else if(item.type=='FluidContainer'){
             //액체류의 경우
             field_conditionText.textContent = `남은 양: ${cond/10}/${cond0/10}L (${ratio}%)`;
@@ -126,7 +132,10 @@
             itemName.textContent += ` (${translating(item.subType)})`;
         }else if(item.subType=='food'){
             //신선도가 있는 음식의 경우
-            field_conditionBar.classList.add( itemRatioColor(cond/cond0 , (item.rottenDays-item.freshDays)/item.rottenDays)  );
+            //["", "1신선한 ","2신선하지 않은 ","3상한 ","4타버린 "]; //캔(-1) 기본값(0)
+
+            const foodratio = (item.rottenDays-item.freshDays)/item.rottenDays ;
+            field_conditionBar.classList.add( itemFoodColor(cond/cond0 , item.foodStatus, foodratio)  );
             field_conditionText.textContent = `신선도: ${cond}/${cond0} (${ratio}%)`;
         }else if(item.subType=='matrial' || item.subType=='box'){
             //재료인 경우

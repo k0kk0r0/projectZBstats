@@ -18,6 +18,7 @@ const player = document.getElementById('player');
 const playerRest = document.getElementById('playerRest');
 const playerZb = document.getElementById('playerZb');
 const equipWp = document.getElementById('equipWp');
+const inventoryBtIcon = document.getElementById('inventoryBtIcon');
 
 //무들 아이콘
 //gameModal.querySelectorAll('.moodleIcon');
@@ -102,7 +103,8 @@ const equipments = {
   armor: null,
   pants: null,
   shoes: null,
-  accessory: null
+  accessory: null,
+  bag:null,
 };
 let weight;
 let backpack;

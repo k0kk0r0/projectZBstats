@@ -1,0 +1,10 @@
+type,subType,path,name,weight,foodStatus,hunger,option,info
+Food,canned,Base/Foods/CannedCornedBeef.png,CannedCornedBeef,0.8,-1,24,recipe:CannedCornedBeefOpen;needItem:Hammer,캔따개가 없어도 개봉할 수 있습니다
+Food,food,Base/Foods/CannedCornedBeefOpen.png,CannedCornedBeefOpen,0.8,1,24,foodStatus:1;freshDays:2;rottenDays:4;cookable:false;cookTime:10;convert:TinCanEmpty,
+Food,food,Base/Foods/Ham.png,Ham,1,1,60,freshDays:5;rottenDays:10;cookTime:20;cookable:false,
+Food,food,Base/Foods/Steak.png,Steak,1,1,40;30;17;13,freshDays:2;rottenDays:4;cookTime:50;cookable:true;poisoning:0.75,
+Food,food,Base/Foods/Steak.png,SteakStale,1,2,30;30;17;13,freshDays:2;rottenDays:4;cookTime:50;cookable:true;poisoning:0.75,
+Food,food,Base/Foods/SteakCooked.png,SteakCooked,1,1,52;52;17;13,freshDays:2;rottenDays:4;cookTime:50;cookable:true;poisoning:0,
+Food,food,Base/Foods/SteakCooked.png,SteakStaleCooked,1,2,30;30;17;13,freshDays:2;rottenDays:4;cookTime:50;cookable:true;poisoning:0.75,
+Food,food,Base/Foods/SteakRotten.png,SteakCookedSteakRotten,1,3,30;30;17;13,cookable:false;poisoning:1,
+Food,food,Base/default.png,dummy,1무게,신선도,포만감-1신선한;2신선하지 않은;3상한;4타버린,세부옵션들;로나눔,정보

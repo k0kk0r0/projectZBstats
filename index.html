@@ -475,34 +475,40 @@
         <div class="flex gap-2 space-x-1">
         <!-- 액션 버튼들 -->
           <div id="playerStatBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/skillBt.png" alt="스텟 창" class="w-14 h-14">
+            <img src="images/skillBt.png" alt="스텟 창" class="w-14 h-14" style="margin-bottom: 8px;">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               플레이어
             </span>
           </div>
           <div id="craftBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/Carpentry_Off.png" alt="제작창" class="w-14 h-14">
+            <img src="images/Carpentry_Off.png" alt="제작창" class="w-14 h-14" style="margin-bottom: 8px;">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               제작
             </span>
           </div>
 
           <div id="storageBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/storage.png" alt="보관함" class="w-14 h-14">
+            <img src="images/storage.png" alt="보관함" class="w-14 h-14" style="margin-bottom: 8px;">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               보관함
             </span>
           </div>
           <div id="inventoryBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="Base/Backpacks/SheetSlingBag.png" alt="소지품" class="w-14 h-14">
+            <img id="inventoryBtIcon" src="images/InventoryBt.png" alt="소지품" class="w-14 h-14" style="margin-bottom: 8px;">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               소지품
             </span>
           </div>
           <div id="skillBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
-            <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14">
+            <img src="images/skillBt.png" alt="스킬창" class="w-14 h-14" style="margin-bottom: 8px;">
             <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
               스킬 창
+            </span>
+          </div>
+          <div id="debugBt" class="lg:w-16 lg:h-16 sm:w-24 sm:h-24 rounded relative flex items-center justify-center bg-white">
+            <img src="Base/Plumpabug_Left.png" alt="디버그" class="w-14 h-14" style="margin-bottom: 8px;">
+            <span class="absolute bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b">
+              디버그
             </span>
           </div>
       </div>
@@ -591,8 +597,8 @@
               </span>
             </div>
           </div>
-          <!-- 모자 -->
-          <div class="flex flex-col items-center">
+          <!-- 모자 (hidden)-->
+          <div class="flex flex-col items-center hidden">
             <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_hat_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               
@@ -613,7 +619,7 @@
             </div>
           </div>
           <!-- 바지 -->
-          <div class="flex flex-col items-center">
+          <div class="flex flex-col items-center hidden">
             <div class="equipiconbox relative overflow-hiddene p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_pants_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               <img id="equipIcon_pants" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="바지">
@@ -623,7 +629,7 @@
             </div>
           </div>
            <!-- 신발 -->
-          <div class="flex flex-col items-center">
+          <div class="flex flex-col items-center hidden">
             <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
               <div id="equipIcon_shoes_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
               
@@ -644,7 +650,17 @@
               </span>
             </div>
           </div>
-
+          <!-- 가방 -->
+          <div class="flex flex-col items-center">
+            <div class="equipiconbox relative overflow-hidden p-4 bg-gray-700 rounded flex items-center justify-center">
+              <div id="equipIcon_bag_bar" class="absolute bottom-0 left-0 right-0 rounded-b  "> </div>
+              
+              <img id="equipIcon_bag" src="icons/default.png" class="absolute z-50 p-2 w-full h-full object-contain" alt="가방">
+              <span id="equipName_bag" class="absolute z-50 bottom-0 left-0 right-0 text-md text-white bg-black/80 text-center rounded-b truncate">
+              🎒가방
+              </span>
+            </div>
+          </div>
         </div>
 
         <h2 id="inventory_weightTxt" class="absolute top-4 right-4 text-2xl"></h2>
@@ -669,11 +685,15 @@
       </div>
      </div>
   </div>
-  <!-- 상세메뉴 모달 -->
-  <div id="itemSubOption" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute bg-slate-500/80 rounded p-2">
-      <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
-        
+  <!--------------- 디버그 모달 ------------->
+  <div id="debugModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 h-full hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-[85vw]  p-6 flex flex-col relative h-[65vh]">
+      <h2 class="text-2xl font-bold mb-4 text-center">디버그</h2>
+      <!-- 닫기 버튼 -->
+      <button id="closeDebugModal" class="absolute top-2 right-4 text-gray-600 hover:text-black text-2xl font-bold">✕</button>
+      <div id ="storage_debug" class="">
+          <!-- <div class="w-12 bg-gray-700 rounded aspect-square"></div>-->
+        </div>
     </div>
   </div>
   <!-- ---------- 아이템 모달 HTML ---------- -->
@@ -719,6 +739,16 @@
         <button id="itemModalClose2" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 ">닫기</button>
       </div>
       -->
+    </div>
+  </div>
+  
+
+
+  <!-- 상세메뉴 모달 -->
+  <div id="itemSubOption" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div id="optionBoxes" class="grid grid-col-1 gap-2 absolute bg-slate-500/80 rounded p-2">
+      <!-- <button id="option0" class="bg-gray-500 text-2xl">옵션0</button>-->
+        
     </div>
   </div>
   <!-- 한 줄 경고창 -->

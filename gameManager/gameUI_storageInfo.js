@@ -423,9 +423,22 @@ function renderStorageModal(){
             weight.storage += parseFloat(_storageInventory[i].condition)/10;
         }
     }
-    //무게 더하기
-    if(equipments.weapon!=null){ weight.inventory+= parseFloat(equipments.weapon.weight)*0.3}
-    
+     if(equipments.bag !=null){
+        //가방이 있는 경우
+        weight.inventory *= equipments.bag.encumbrance;
+        weight.bagWeight = equipments.bag.capacity;
+        console.log(`무게감소율 : ${equipments.bag.encumbrance}`);
+    }
+    //장비 무게 더하기
+    Object.entries(equipIcons).forEach(([key]) => {
+        const data =equipments[key];
+        //const target = equipIcons[key];
+        if(data!=null){
+            weight.inventory+= parseFloat(data.weight)*0.3
+        }
+    });
+    //if(equipments.weapon!=null){ weight.inventory+= parseFloat(equipments.weapon.weight)*0.3}
+   
     storage_weightTxt.innerText = `${weight.storage.toFixed(2)}/50`;
     inventory_weightTxt.innerText = `${weight.inventory.toFixed(2)}/${weight.bagWeight}`;
     stat.weight= weight;
@@ -487,7 +500,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
 
     if(data.condition>0){
     
-        if(data.type=="Weapon" || data.type =="Armor" || data.type=="Furniture"){
+        if(data.type=="Weapon" || data.type =="Armor" || data.type=="Furniture" || data.subType=='tool'){
             //무기, 방어구 등인 경우...
             durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
             durabilityBar.style.height = `${ratio * 100}%`;
@@ -501,7 +514,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
         if(data.subType=='food'){
             //음식의 경우
             const freshratio =(data.rottenDays-data.freshDays)/data.rottenDays;
-            durabilityBar.classList.add(itemRatioColor(ratio, freshratio ));
+            durabilityBar.classList.add(itemFoodColor(ratio, data.foodStatus,freshratio ));
             durabilityBar.style.height=`${data.div/data.maxDiv*100}%`;
             /*
             if(data.condition<=0){
@@ -575,13 +588,20 @@ function renderEquipment(){
         weaponName.textContent ='';
 
     }
+    //들고있는 가방 랜더링
+    if(equipments.bag!=null){
+        inventoryBtIcon.src = equipments.bag.path;
+    }else{
+        inventoryBtIcon.src = 'images/InventoryBt.png';
+    }
     const string ={
         weapon:'⚔무기',
         hat:'🎩모자',
         armor:'👚방어구',
         pants:'👖바지',
         shoes:'👟신발',
-        accessory: `💍장신구`
+        accessory: `💍장신구`,
+        bag:`🎒가방`
     }
     Object.entries(equipIcons).forEach(([key]) => {
         const data =equipments[key];

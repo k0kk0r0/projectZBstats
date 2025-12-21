@@ -618,7 +618,7 @@ const storage_storage = document.getElementById("storage_storage");
 const storage_weightTxt = document.getElementById("storage_weightTxt");
 const inventory_weightTxt = document.getElementById("inventory_weightTxt");
 
-const equipNames = ["weapon", "hat", "armor", "pants", "shoes", "accessory"];
+const equipNames = ["weapon", "hat", "armor", "pants", "shoes", "accessory", "bag"];
 const equipIcons = {};
 equipNames.forEach(name => {
   equipIcons[name] = {
@@ -667,7 +667,20 @@ function findInventoryItemData(itemname){
     }
     return null;
 }
-
+function itemFoodColor(value, foodStatus=1, number = 0.5){
+    switch (foodStatus){
+        case 1:
+            return itemRatioColor(value, number);
+        case 2:
+            return itemRatioColor(value, 1);
+        case 3:
+            return "bg-amber-900";
+        case 4:
+            return "bg-zinc-900";
+        default:
+            return "";
+    }
+}
 function itemRatioColor(value, number = 0.5){
     return (value > number? "bg-green-400" : value > 0.25 ? "bg-yellow-200" : "bg-red-200");
 }
@@ -728,5 +741,66 @@ function setEquipment(data, dataset){
 }
 
 
-
-
+///////////////////////////디버그////////////////////////////////////
+const debugBt= document.getElementById("debugBt");
+const debugModal = document.getElementById("debugModal")
+const storage_debug = document.getElementById("storage_debug");
+ // 모달 바깥 클릭 시 닫기
+document.getElementById("closeDebugModal").addEventListener("click", (e) => {
+    debugModal.classList.add("hidden");
+});
+debugModal.addEventListener("click", (e) => {
+    if (e.target === debugModal) {
+        debugModal.classList.add("hidden");
+    }
+});
+function openDebugModal(){
+    renderDebugModal();
+    debugModal.classList.remove('hidden');
+}
+debugBt.addEventListener('click', ()=>{
+    openDebugModal();
+})
+const debugItemList = [];
+function renderDebugModal(){
+    
+    const boxSize='w-16 h-16';
+    const fontSize='text-md';
+    storage_debug.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
+    storage_debug.innerHTML='';//초기화
+    for(let i =0; i< debugItemList.length;i++){
+        //console.log(debugItemList[i]);
+        addInventoryItem( debugItemList[i], storage_debug, -1, boxSize, fontSize);
+    }
+}
+function addDebugItemList(){
+    if(debugItemList.length >0){
+       return;
+    }
+    // weaponDatas = []; //무기리스트
+    // clothDatas = []; //의상리스트
+    //miscDatas = [];//기타 아이템 리스트
+    //foodDatas = [];
+    //modDatas = [];//모드 데이터
+    for(let i =0 ; i< weaponDatas.length; i++){
+        if(weaponDatas[i].name!='dummy'){
+            debugItemList.push( findWeapon(weaponDatas[i].name));
+        }
+    }
+    for(let i =0 ; i< clothDatas.length; i++){
+        if(clothDatas[i].name!='dummy'){
+          debugItemList.push( findCloth(clothDatas[i].name));
+        }
+    }
+    for(let i =0 ; i< foodDatas.length; i++){
+        if(foodDatas[i].name!='dummy'){
+          debugItemList.push( findFood(foodDatas[i].name));
+        }
+    }
+    for(let i =0 ; i< miscDatas.length; i++){
+        if(miscDatas[i].name!='dummy'){
+          debugItemList.push( findMisc(miscDatas[i].name));
+        }
+    }
+    
+}

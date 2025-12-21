@@ -1,3 +1,12 @@
-type,subType,path,name,condition,weight,recipe
-Armor,clothing,Base/Cloths/TshirtGeneric.png,TshirtGeneric,5,1,Rag
-Armor,clothing,Base/Cloths/ShirtGeneric.png,ShirtGeneric,5,1,Rag
+type,subType,path,name,condition,weight,recipe,option,info
+Armor,clothing,Base/Cloths/TshirtGeneric.png,TshirtGeneric,5,1,Rag,,
+Armor,clothing,Base/Cloths/ShirtGeneric.png,ShirtGeneric,5,1,Rag,,
+Bag,back,Base/Backpacks/SheetSlingBag.png,SheetSlingBag,1,0.8,Sheet,encumbrance:0.5;capacity:10,
+Bag,back,Base/Backpacks/FishingBasket.png,FishingBasket,1,1.5,,encumbrance:0.5;capacity:6,
+Bag,back,Base/Backpacks/Duffelbag.png,Duffelbag,1,1,,encumbrance:0.65;capacity:18,
+Bag,back,Base/Backpacks/DuffelbagMedical.png,DuffelbagMedical,1,1,,encumbrance:0.65;capacity:18,
+Bag,back,Base/Backpacks/Backpack_Primary.png,SmallBackpack,1,1,,encumbrance:0.70;capacity:15,
+Bag,back,Base/Backpacks/Hiking_Green.png,Hiking_Green,1,1.2,,encumbrance:0.75;capacity:20,
+Bag,back,Base/Backpacks/BigHiking_Red.png,BigHiking_Red,1,1.5,,encumbrance:0.8;capacity:22,
+Bag,back,Base/Backpacks/AliceBag_SandCamo.png,AliceBag_SandCamo,1,2,,encumbrance:0.85;capacity:28,
+Bag,bag,Base/Backpacks/ .png,dummy,1,,,encumbrance:0.8;capacity:22,

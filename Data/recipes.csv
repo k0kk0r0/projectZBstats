@@ -1,9 +1,10 @@
-type,visible,name,original,convert,needItem
+type,visible,name,original,convert,needTool
 misc,false,Rag,ShirtGeneric-1,Rag-2,
 misc,false,Cloth,ShirtGeneric-1;Thread-1,ShirtGeneric-1,Needle
 carpentry,true,Plank,Logs-1,Plank-3,Handsaw
 furniture,true,rainCollectorBarrel,Plank-6;Garbagebag-4;Nails-5,rainCollectorBarrel-1-0,Hammer
-misc,true,Garbagebag20,Garbagebag_box-1,Garbagebag-4,
+misc,true,Garbagebag20,Garbagebagbox-1,Garbagebag-4,
+misc,true,SheetSlingBag,Sheet-1,SheetSlingBag-1,
 misc,true,SheetRope,Sheet-1,SheetRope-1,
 misc,true,Sheet,SheetRope-1,Sheet-1,
 misc,true,DigitalWatch,DigitalWatch-1,ElectronicsScrap-1,Screwdriver

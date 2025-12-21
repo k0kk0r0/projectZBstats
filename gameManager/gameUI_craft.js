@@ -85,9 +85,9 @@ function renderCraftModal(){
         }
         
         let needItemIcon=`<img class="w-8 h-8" src="icons/default.png">`;
-        if(data.needItem.length>0){
-            const needItem = findItem(data.needItem);
-            needItemIcon =`<img class="w-8 h-8" src=${needItem.path}>`;
+        if(data.needTool.length>0){
+            const needTool = findItem(data.needTool);
+            needItemIcon =`<img class="w-8 h-8" src=${needTool.path}>`;
         }
         
         const item = document.createElement("div");
@@ -124,7 +124,8 @@ function renderCraftModal(){
                     const needItem = originalItemList[i];
                     let num = 0;
                     for(let n = 0; n< inventory.length; n++){
-                        if(inventory[n].name == needItem.name){
+                       // if((inventory[n].name).startsWith(needItem.name)){
+                         if((inventory[n].name).split("_")[0]==(needItem.name)){
                             if(Number.isNaN(inventory[n].condition)){
                                 indexArray.push(n); 
                                 num++;
@@ -144,27 +145,7 @@ function renderCraftModal(){
                             if(num>=needItem.amount){
                                 break;
                             }
-                            /*
-                            if(num < needItem.amount){
-                                if(inventory[n].condition>0){
-                                    if(inventory[n].condition - needItem.amount>=0){
-                                        //필요 아이템 하나의 양이 사용량 만큼 있는 아이템의 경우
-                                        indexArray.push(n); 
-                                        num = needItem.amount;
-                                       
-                                    }else{
-
-                                    }
-                                }else{
-                                    //필요 아이템 하나씩 추가
-                                    indexArray.push(n);
-                                    num++;
-                                }
-                            }else{
-                                indexArray.push(n);
-                                num++;
-                            }
-                            */
+                            
                             
                         }
                     }
@@ -177,12 +158,11 @@ function renderCraftModal(){
                         //return;
                     }
                 }
-                console.log(indexArray);
-                if(data.needItem.length>0){
-                    if(findInventoryItemData(data.needItem)==null){
-                        log_popup(`${translating(data.needItem)} 도구가 없습니다`);
-                        if(!debug)return;
-                    }
+                //console.log(indexArray);
+                const needTool = findInventoryItemData(data.needTool);
+                if(data.needTool.length>0 && needTool==null){
+                    log_popup(`${translating(data.needTool)} 도구가 없습니다`);
+                    if(!debug)return;    
                 }
                 
                 makeInterval = setInterval(()=>{
@@ -217,7 +197,10 @@ function renderCraftModal(){
                             }
                         }
                     }
-                    
+                    if(needTool!=null){
+                        //툴 내구도 차감
+                        needTool.condition-=1;
+                    }
                     
                     
                     /*
