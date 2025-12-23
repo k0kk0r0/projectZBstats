@@ -198,17 +198,47 @@ function findMisc(itemName ){
     //기타 아이템 데이터 검색 및 가공해서 반환
     const data = miscDatas.find(w => w.name === itemName);
     if(data==null){ return null }
+
+    
+    data.needItem = null;
+    data.needTool = null;
+    data.repair =null;
+    data._condition=null;
+    const rawdata = data.option.split(";");
+    for(let i =0; i<rawdata.length;i++){
+        const _data = {
+            name:rawdata[i].split(":")[0],
+            value:rawdata[i].split(":")[1],
+        }
+        if(_data.name.length>0){
+            switch(_data.name){ 
+                case `repair`:
+                    data.repair = parseInt(_data.value);
+                    break;
+                case `_condition`:
+                    data._condition = parseInt(_data.value);
+                    break;
+                default:
+                    data[_data.name] = ( _data.value).toString();
+                break;
+            }
+        }
+    }
     let data0 ={
         path: data.path.toString(),
         name: data.name.toString(),
         type: data.type.toString(),
         subType: data.subType.toString(),
-        condition: parseInt(data.condition),
+        condition: data._condition ??parseInt(data.condition),
         maxCondition: parseInt(data.condition),
         recipe: data.recipe.toString(),
         weight: parseFloat(data.weight),
-        amount: parseInt(data.amount)??0,
-        info: data.info.toString()
+        info: data.info.toString(),
+
+        needItem: data.needItem,
+        needTool: data.needTool,
+        repair: data.repair??null
+        
     }
     return data0;
 }
@@ -336,7 +366,7 @@ function facilityItem(facilityName){
         break;
         case "waterSource":
             obj.removable=false;
-            obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:1, path:'Base/default.png'};
+            obj.item = {name:facilityName, type:'FluidContainer', subType:'taintedWater', condition:10000, path:'Base/default.png'};
             obj.item.info = translating("taintedWaterInfo");
         break;
         case "gaspump":
@@ -348,33 +378,31 @@ function facilityItem(facilityName){
         break;
         case "generator":
             obj.needItem = 'gasoline';
-            obj.item = {name:facilityName, type:'Furniture', needItem:'gasoline', condition:randomInt(0,100), maxCondition:100, path:'Base/default.png'};
-            obj.item.info ='발전기는 설치된 건물과 양 옆 최대 3타일의 전기를 공급합니다;실내에서 작동하면 매연이 생깁니다.';
-            obj.item.path="Base/Furniture/Generator.png"
-            obj.item.weight = 40;
-            obj.item.repair = 100;//발전기최대내구도
+            obj.item = findMisc(obj.name);
+            obj.item.condition = randomInt(0,obj.item.maxCondition);
             obj.enabled=false;
         break;
         case "rainCollectorBarrel":
             obj.needItem ='taintedWater';
-            obj.item = findMisc("rainCollectorBarrel");
+            obj.item = findMisc(obj.name);
             obj.item.type = "FluidContainer";
             obj.item.condition=0;
         break;
         
         case "faucet":
             obj.needItem ='water';
-            obj.item = {name:facilityName, type:'FluidContainer',subType:'water',  needItem:'water',condition:20, maxCondition:20, path:'Base/default.png'};
-             obj.item.weight = 5;
-             obj.item.needTool ='PipeWrench';
-             obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png"
+             obj.item =findMisc(obj.name);
+             obj.item.type = 'FluidContainer';
+             obj.item.subType ='water';
+             obj.item.condition = 0;
+            // obj.item.path="Base/Furniture/Fixtures_sinks_01_9.png";
         break;
         case "radio":
             obj.needItem = 'battery';
-            obj.item = {name:facilityName, type:'Furniture', needItem:'battery', condition:randomInt(0,50), maxCondition:50, path:'Base/default.png'};
-            obj.item.info ='라디오를 틀어놓으면 건전지가 소모됩니다.';
-            obj.item.path="Base/Furniture/RadioRed.png"
-            obj.item.weight = 2;
+            obj.item = findMisc(obj.name);
+            obj.item.condition = randomInt(0,obj.item.maxCondition);
+             //{name:facilityName, type:'Furniture', needItem:'battery', condition:randomInt(0,50), maxCondition:50, path:'Base/default.png'};
+            obj.item.needItem = 'battery';
         break;
         case "bed":
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';

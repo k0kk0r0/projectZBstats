@@ -1,2 +1,2 @@
-type,subType,path,name,weight,condition,recipe,count,info
+type,subType,path,name,weight,condition,recipe,option,info
 FirstAid,consume,Mods/TheyKnew/zomboxivir.png,Zomboxivir,0.1,1,,,후....이번만은 봐드리는 겁니다...(사용 시 좀비 감염 제거)

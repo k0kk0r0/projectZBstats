@@ -463,8 +463,9 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
     
     const div = document.createElement('div');
     div.id = `item_${data}`;
-    div.className = `relative flex bg-white rounded aspect-square ${boxSize}`;
+    div.className = `relative flex bg-white rounded aspect-square inventoryItem ${boxSize}`;
     div.dataset.data = JSON.stringify(data);
+    div.dataset.type = data.type;
     div.dataset.route = route.id;
     div.dataset.index = index;
 
@@ -500,7 +501,7 @@ function addInventoryItem(data , route, index, boxSize = 'w-16 h-16', fontSize=`
 
     if(data.condition>0){
     
-        if(data.type=="Weapon" || data.type =="Armor" || data.type=="Furniture" || data.subType=='tool'){
+        if(data.type=="Weapon" || data.type =="Armor" || data.type=="Furniture" || data.type=='Tool'){
             //무기, 방어구 등인 경우...
             durabilityBar.classList.add( `${ data.maxCondition>1 ? itemRatioColor(ratio) : "bg-white-500" }` );
             durabilityBar.style.height = `${ratio * 100}%`;

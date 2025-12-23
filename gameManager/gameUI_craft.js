@@ -3,32 +3,11 @@ const recipeTag = document.getElementById("recipeTag");
 const recipeList = document.getElementById("recipeList");
 let recipeIndex = 'all';
 let makeInterval =null;
-function addRecipeTag(name){
+function addRecipeTag(name, icon){
     //<button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
     //<button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
-    let icon ='';
-    switch(name){
-        case 'carpentry':
-            icon ='🪵';
-            break;
-        case 'misc':
-            icon ='🔩';
-            break;
-        case 'furniture':
-            icon ='📦';
-            break;
-        case 'trap':
-            icon ='🪤';
-            break;
-        case 'cloth':
-            icon='🧣';
-            break;
-        default:
-            icon ='🌐';
-            break;
-    }
     const btn = document.createElement('button');
-    btn.className = "text-xl font-bold p-2 border rounded recipeTagBtn";
+    btn.className = "text-xl font-bold p-2 border rounded tagBtn";
     btn.innerText = `${icon}${translating(name)}`;
     btn.dataset.name = name;
     btn.addEventListener('click', ()=>{
@@ -43,11 +22,16 @@ function renderCraftModal(){
     //제작 레시피 창 
     recipeList.innerHTML='';
     recipeTag.innerHTML='';
-    const list=['all', 'misc', 'carpentry', 'furniture'];
+    const list=[
+        {name:'all',icon:'🌐'}, 
+        {name:'misc',icon:'🔩'}, 
+        {name:'carpentry',icon:'🪵'}, 
+        {name:'furniture',icon:'🛏📦'}
+    ];
     for(let i =0 ;i <list.length; i++){
-        addRecipeTag( list[i]);
+        addRecipeTag( list[i].name, list[i].icon);
     }
-
+    //🪤🧣
     function makeBox(data){
         // HTML 구성 아이템
         
@@ -284,15 +268,16 @@ function renderCraftModal(){
         }
     }
 
-    const recipeTagBtn = recipeTag.querySelectorAll(".recipeTagBtn");
-    for(let n =0 ; n < recipeTagBtn.length; n++){
-        if(recipeTagBtn[n].dataset.name == recipeIndex){
+    recipeTag.querySelectorAll(".tagBtn").forEach((item)=>{
+   
+        if(item.dataset.name == recipeIndex){
             //선택된 상태라면
-            recipeTagBtn[n].classList.remove('bg-slate-400');
-            recipeTagBtn[n].classList.add('bg-blue-500');
+            item.classList.remove('bg-slate-400');
+            item.classList.add('bg-blue-500');
         }else{
-            recipeTagBtn[n].classList.add('bg-slate-400');
-            recipeTagBtn[n].classList.remove('bg-blue-500');
+            item.classList.add('bg-slate-400');
+            item.classList.remove('bg-blue-500');
         }
-    }
+    });
+    
 }

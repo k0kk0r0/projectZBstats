@@ -120,7 +120,7 @@
             field_conditionText.textContent = `내구도: ${ratio}%`;
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }
-        if(item.subType=='tool'){
+        if(item.type=='Tool'){
             field_conditionText.textContent = `내구도: ${cond}/${cond0} (${ratio}%)`;
             field_conditionBar.classList.add ( itemRatioColor(cond/cond0) );
         }

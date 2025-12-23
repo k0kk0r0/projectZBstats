@@ -164,15 +164,7 @@ function addFacility(facilItem, item=null){
     }
 
 
-    if(facilItem.needItem=='water'){
-        if(waterEndTurn>0){
-            //물이 끊기지 않은 경우
-            facilItem.item.condition = facilItem.item.maxCondition;
-        }else{
-            //아무것도 없는 경우
-            facilItem.item.condition = 0;
-        }
-    }
+    
     if(facilItem.needItem=='battery' || facilItem.needItem=='gasoline'){
         facilItem.item.condition = parseInt(item.condition);
     }
@@ -248,7 +240,7 @@ function renderFacilityIcons(){
             }
         }
         if(facildata.needItem=='water'){
-            if(waterEndTurn>0){
+            if(waterEndTurn>0 && !getFacilityEnable("waterSource")){
             //물이 끊기지 않은 경우
                 facildata.item.condition = facildata.item.maxCondition;
             }else if(getFacilityEnable("rainCollectorBarrel")){
@@ -267,7 +259,12 @@ function renderFacilityIcons(){
                 }
             }else{
                 //아무것도 없는 경우
-                //facildata.item.condition = 0;
+                facildata.item.condition = 0;
+            }
+            if(facildata.item.condition>0){
+                facildata.enabled=true;
+            }else{
+                facildata.enabled=false;
             }
         }
         //실사 아이템으로 변경 표시
@@ -755,6 +752,7 @@ debugModal.addEventListener("click", (e) => {
     }
 });
 function openDebugModal(){
+    addDebugItemList();
     renderDebugModal();
     debugModal.classList.remove('hidden');
 }
@@ -762,19 +760,32 @@ debugBt.addEventListener('click', ()=>{
     openDebugModal();
 })
 const debugItemList = [];
-function renderDebugModal(){
+const debugTag = document.getElementById("debugTag");
+let debugIndex='all';
+function renderDebugModal(tag='all'){
+    storage_debug.querySelectorAll('.inventoryItem').forEach( (item) => {
+        
+        if(tag == 'all'){
+            item.classList.remove('hidden');
+        }else if(item.dataset.type == tag){
+            item.classList.remove('hidden');
+        }else{
+            item.classList.add('hidden');
+        }
+    });
     
-    const boxSize='w-16 h-16';
-    const fontSize='text-md';
-    storage_debug.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
-    storage_debug.innerHTML='';//초기화
-    addDebugItemList();
-    
-    for(let i =0; i< debugItemList.length;i++){
-        //console.log(debugItemList[i]);
-        addInventoryItem( debugItemList[i], storage_debug, -1, boxSize, fontSize);
-    }
-
+    debugIndex = tag;
+    debugTag.querySelectorAll(".tagBtn").forEach((item)=>{
+   
+        if(item.dataset.name == debugIndex){
+            //선택된 상태라면
+            item.classList.remove('bg-slate-400');
+            item.classList.add('bg-blue-500');
+        }else{
+            item.classList.add('bg-slate-400');
+            item.classList.remove('bg-blue-500');
+        }
+    });
 }
 function addDebugItemList(){
     if(debugItemList.length >0){
@@ -805,5 +816,43 @@ function addDebugItemList(){
           debugItemList.push( findMisc(miscDatas[i].name));
         }
     }
-    
+
+    const boxSize='w-16 h-16';
+    const fontSize='text-md';
+    storage_debug.className ="p-2 overflow-y-auto grid gap-4 grid-cols-[repeat(auto-fill,minmax(60px,0fr))]";
+    storage_debug.innerHTML='';//초기화
+    for(let i =0; i< debugItemList.length;i++){
+        //console.log(debugItemList[i]);
+        addInventoryItem( debugItemList[i], storage_debug, -1, boxSize, fontSize);
+    }
+
+    debugTag.innerHTML ='';
+    const list=[
+        {name:'all',icon:'🌐'}, 
+        {name:'Misc',icon:'🔩'}, 
+        {name:'Weapon',icon:'⚔'}, 
+        {name:'Armor',icon:'👚'}, 
+        {name:'Accessory',icon:'💍'}, 
+        {name:'Bag',icon:'🎒'}, 
+        {name:'Food',icon:'🍔'}, 
+        {name:'FirstAid',icon:'💊'}, 
+        {name:'FluidContainer',icon:'🪣'}, 
+        {name:'Furniture',icon:'🛏'}
+        ];
+    for(let i =0 ;i <list.length; i++){
+        addDebugTag( list[i].name, list[i].icon);
+    }
+}
+
+function addDebugTag(name, icon){
+    //<button class="text-xl font-bold p-2 border rounded bg-blue-400">📦보관함</button>
+    //<button class="text-xl font-bold p-2 border rounded bg-slate-400">⚰시체</button>
+    const btn = document.createElement('button');
+    btn.className = "text-xl font-bold p-2 border rounded tagBtn";
+    btn.innerText = `${icon}${translating(name)}`;
+    btn.dataset.name = name;
+    btn.addEventListener('click', ()=>{
+        renderDebugModal(btn.dataset.name);
+    });
+    debugTag.appendChild(btn);
 }

@@ -1,4 +1,4 @@
-type,subType,path,name,weight,condition,recipe,count,info
+type,subType,path,name,weight,condition,recipe,option,info
 Misc,matrial,Base/Miscs/ElectronicsScrap.png,ElectronicsScrap,0.1,1,,,발전기를 수리할 때 사용합니다
 Misc,matrial,Base/Miscs/Battery.png,Battery,0.1,50,,,
 Misc,matrial,Base/Miscs/Sheet.png,Sheet,1,1,SheetRope,,
@@ -9,7 +9,7 @@ Misc,matrial,Base/Miscs/Thread.png,Thread,0.1,20,,,옷을 수선할 때 사용�
 Misc,box,Base/Miscs/Garbagebag_box.png,Garbagebagbox,1,5,Garbagebag20,,상자에서 비닐을 뜯을 수 있습니다.
 Misc,matrial,Base/Miscs/Garbagebag.png,Garbagebag,0.1,,,,비닐을 활용한 아이템을 만들 때 사용합니다
 Misc,wood,Base/Miscs/Plank.png,Plank,3,,,,
-Misc,wood,Base/Miscs/Logs.png,Logs,9,,Plank,,
+Misc,wood,Base/Miscs/Logs.png,Logs,9,,Plank,needTool:Handsaw,
 Misc,wood,Base/Miscs/Logs2.png,Logs2,6,,Logs2,,
 Misc,wood,Base/Miscs/Logs3.png,Logs3,9,,Logs3,,
 Misc,wood,Base/Miscs/Logs4.png,Logs4,12,,Logs4,,
@@ -24,6 +24,9 @@ FluidContainer,gasoline,Base/Miscs/Petrol.png,GasCan,1.6,100,,,
 Accessory,watch,Base/Miscs/DigitalWatch_Black.png,DigitalWatch,0.1,1,DigitalWatch,,
 Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,DigitalWatch,,
 Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,DigitalWatch,,
-Misc,tool,Base/Tools/Needle.png,Needle,0.01,1,,,
-Misc,tool,Base/Tools/Handsaw.png,Handsaw,0.7,10,,,통나무를 자르는 데 필요합니다.
-Furniture,empty,Base/Furniture/Carpentry_02_122.png,rainCollectorBarrel,7.5,600,,,빗물을 모을 수 있습니다
+Tool,tailoring,Base/Tools/Needle.png,Needle,0.01,1,,,
+Tool,carpentry,Base/Tools/Handsaw.png,Handsaw,0.7,10,,,통나무를 자르는 데 필요합니다.
+Furniture,empty,Base/Furniture/Carpentry_02_122.png,rainCollectorBarrel,7.5,600,,_condition:0,빗물을 모을 수 있습니다
+Furniture,radio,Base/Furniture/RadioRed.png,radio,2,50,ElectronicsScrap,needItem:battery,라디오를 틀어놓으면 건전지가 소모됩니다.
+Furniture,generator,Base/Furniture/Generator.png,generator,40,100,,needItem:gasoline;repair:100,발전기는 설치된 건물과 양 옆 최대 3타일의 전기를 공급합니다;실내에서 작동하면 매연이 생깁니다.
+Furniture,empty,Base/Furniture/Fixtures_sinks_01_9.png,faucet,5,20,,needItem:water;needTool:PipeWrench;_condition:0,

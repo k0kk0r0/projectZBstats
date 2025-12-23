@@ -72,13 +72,9 @@ function facilitySubMenu(facilityName){
             if(data.item.condition>0){
                 //물 마시기
                 const drinkType = data.item.subType;
-                    const drinkname = translating(drinkType);
+                const drinkname = translating(drinkType);
                 makeBox(`${drinkname} 마시기`,true, itemColor(drinkType)).addEventListener('click', ()=>{
-                    if(waterEndTurn>0){
-                        playerDrink( drinkType, {condition:100});
-                    }else{
-                        playerDrink( drinkType, data.item );
-                    }
+                    playerDrink( drinkType, data.item );
                     
                     
                     renderStorageModal();
