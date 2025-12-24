@@ -402,36 +402,27 @@ function facilityItem(facilityName){
             obj.item = findMisc(obj.name);
             obj.item.condition = randomInt(0,obj.item.maxCondition);
              //{name:facilityName, type:'Furniture', needItem:'battery', condition:randomInt(0,50), maxCondition:50, path:'Base/default.png'};
-            obj.item.needItem = 'battery';
+            //obj.item.needItem = 'battery';
         break;
         case "bed":
+            obj.item = findMisc("bed");
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
-            obj.item.path="Base/Furniture/Furniture_bedding_01_9+8.png"
-            obj.item.needTool ='Hammer';
-             obj.item.weight = 40;
         break;
         case "sofa":
+            obj.item = findMisc("sofa");
             obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
-             obj.item.weight = 7.5;
-             obj.item.path="Base/Furniture/Furniture_seating_indoor_02_20.png"
         break;
         case "fridge":
             obj.needItem = 'power';
             obj.enabled=true;
-            obj.item.info ='음식물이 상하는 속도가 1/2로 감소합니다.';
-            obj.item.weight = 40;
-            obj.item.path = 'Base/Furniture/Appliances_refrigeration_01_0.png';
+            obj.item = findMisc("fridge");
             obj.addStorage=true;
-            //addStorageList(facilityName, [], -1, 1);
         break;
         case "oven":
             obj.needItem = 'power';
             obj.enabled=false;
-            obj.item.info ='조리 가능한 음식을 요리하거나 오염된 물을 정화할 수 있습니다.';
-            obj.item.weight = 20;
-            obj.item.path = 'Base/Furniture/Appliances_cooking_01_5.png';
+            obj.item = findMisc("oven");
             obj.addStorage=true;
-            //addStorageList(facilityName, [], -1, 1);
         break;
         case "micro":
             obj.needItem = 'power';

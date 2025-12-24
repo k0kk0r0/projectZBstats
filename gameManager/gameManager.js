@@ -132,31 +132,34 @@ let zombieKillCount;
 let traits =[]; 
 const xpData = [1000, 1200,1500,1800,2000,2500, 3000,3500,5000,7500,10000 ];
 const pushStamina= 4;
+function addSkill(name, level){
+    skills[name] = {name:name, lv:level, xp:0, maxXp:parseInt(xpData[level]) };
+}
+const skillList =["Maintenance", "Axe","ShortBlade","LongBlade","ShortBlunt","LongBlunt",
+    "Tailoring","FirstAid"
+];
 function setPlayerTrait(){
     //선택한 플레이어 데이터 수집
     let data = getSelectedItemList();
 
     skills = {};
-    skills.strength = {lv:5, xp:0, maxXp: xpData[5]};
-    skills.fitness = {lv:5, xp:0, maxXp:xpData[5]};
-    skills.Maintenance = {lv:0, xp:0, maxXp:xpData[0]};
-    skills.Axe = {lv:0, xp:0, maxXp: xpData[0]};
-    skills.ShortBlade = {lv:0, xp:0, maxXp: xpData[0]};
-    skills.LongBlade = {lv:0, xp:0, maxXp: xpData[0]};
-    skills.ShortBlunt = {lv:0, xp:0, maxXp: xpData[0]};
-    skills.LongBlunt = {lv:0, xp:0, maxXp: xpData[0]};
+    addSkill("strength",5);
+    addSkill("fitness",5);
+    skillList.forEach(element => {
+        addSkill(element,0);
+    });
 
-    //생활스킬
-    skills.Tailoring = {lv:0, xp:0, maxXp: xpData[0]};
 
     traits=[];
     for(let i =0 ; i< data.length; i++){
         const value = data[i].value;
        if(data[i].type =="strength"){
-            skills.strength = {lv:value, xp:0, maxXp: xpData[value]};
+            //skills.strength = {lv:value, xp:0, maxXp: xpData[value]};
+            addSkill("strength",value);
        } 
        else if(data[i].type =="fitness") {
-            skills.fitness = {lv:value, xp:0, maxXp:xpData[value]};
+            //skills.fitness = {lv:value, xp:0, maxXp:xpData[value]};
+            addSkill("fitness",value);
        }
        else if(data[i].type =="Profession"){
             job = {name:data[i].name, value:value, type:data[i].type, src:data[i].imgsrc};
@@ -164,11 +167,12 @@ function setPlayerTrait(){
        }
        else if(data[i].type =="Trait"){
             traits.push( {name:data[i].name, value:value, type:data[i].type, src:data[i].imgsrc} );
-          console.log({name:data[i].name, value:value, src:data[i].imgsrc});
+           //console.log({name:data[i].name, value:value, src:data[i].imgsrc});
        }
       else{
             if(value>0){
-                skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
+                addSkill(data[i].name, value);
+                //skills[data[i].name] = {lv:value , xp:0, maxXp:xpData[value]};
                 // console.log(data[i].name);
             }else{
                 //변수0, 둔감함 같은 경우

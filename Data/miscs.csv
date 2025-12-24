@@ -26,7 +26,11 @@ Accessory,watch,Base/Miscs/DigitalWatch_Red.png,DigitalWatch_red,0.1,1,DigitalWa
 Accessory,watch,Base/Miscs/DigitalWatch_Fancy.png,DigitalWatch_fancy,0.1,1,DigitalWatch,,
 Tool,tailoring,Base/Tools/Needle.png,Needle,0.01,1,,,
 Tool,carpentry,Base/Tools/Handsaw.png,Handsaw,0.7,10,,,통나무를 자르는 데 필요합니다.
+Furniture,generator,Base/Furniture/Generator.png,generator,40,100,,needItem:gasoline;repair:100,발전기는 설치된 건물과 양 옆 최대 3타일의 전기를 공급합니다;실내에서 작동하면 매연이 생깁니다.
 Furniture,empty,Base/Furniture/Carpentry_02_122.png,rainCollectorBarrel,7.5,600,,_condition:0,빗물을 모을 수 있습니다
 Furniture,radio,Base/Furniture/RadioRed.png,radio,2,50,ElectronicsScrap,needItem:battery,라디오를 틀어놓으면 건전지가 소모됩니다.
-Furniture,generator,Base/Furniture/Generator.png,generator,40,100,,needItem:gasoline;repair:100,발전기는 설치된 건물과 양 옆 최대 3타일의 전기를 공급합니다;실내에서 작동하면 매연이 생깁니다.
 Furniture,empty,Base/Furniture/Fixtures_sinks_01_9.png,faucet,5,20,,needItem:water;needTool:PipeWrench;_condition:0,
+Furniture,fridge,Base/Furniture/Appliances_refrigeration_01_0.png,fridge,40,1,,needItem:power,음식물이 상하는 속도가 1/2로 감소합니다.
+Furniture,oven,Base/Furniture/Appliances_cooking_01_5.png,oven,20,1,,needItem:power,조리 가능한 음식을 요리하거나 오염된 물을 정화할 수 있습니다.
+Furniture,bed,Base/Furniture/Furniture_bedding_01_9+8.png,bed,40,1,,needTool:Hammer,잠을 잘 수 있습니다
+Furniture,sofa,Base/Furniture/Furniture_seating_indoor_02_20.png,sofa,7.5,1,,,잠을 잘 수 있습니다

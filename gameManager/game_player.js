@@ -482,6 +482,7 @@ function woundHealingCalculate(){
 function playerHealing(itemIndex){
     let bool =  playerBanding(itemIndex);
     if(bool){
+        addSkillXp("FirstAid",125);
         advanceTurn();
     }else{
         log_popup(`치료할 상처가 없습니다`);
