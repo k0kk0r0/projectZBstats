@@ -138,7 +138,7 @@ function renderCraftModal(){
                         //console.log(`${needItem.name} : ${matrials.lenght}`);
                     }else{
                         log_popup(`${translating(needItem.name)} 아이템이 ${needItem.amount-num}개 만큼 부족합니다`);
-                        if(!debug) return;
+                        return;
                         //return;
                     }
                 }
@@ -146,7 +146,7 @@ function renderCraftModal(){
                 const needTool = findInventoryItemData(data.needTool);
                 if(data.needTool.length>0 && needTool==null){
                     log_popup(`${translating(data.needTool)} 도구가 없습니다`);
-                    if(!debug)return;    
+                    return;    
                 }
                 
                 makeInterval = setInterval(()=>{
