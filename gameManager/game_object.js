@@ -36,7 +36,7 @@ function renderObjectDiv(data){
 function spawnObject(){
     //오브젝트 소환
     const array = currentMapData.livestockZone;
-    console.log(array);
+    //console.log(array);
     for(let i = 0; i < array.length; i++){
         renderObjectDiv( array[i]);
     }

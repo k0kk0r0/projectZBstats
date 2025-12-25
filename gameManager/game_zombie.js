@@ -4,6 +4,21 @@ function spawnZombie(_tag='random'){
     let zombieTag = '';
     const zombieInven = [];
 
+    //가방
+    if(Math.random()<0.2){
+        if(Math.random()<0.3){
+            if(Math.random()<0.5){
+                zombieInven.push("BigHiking_Red-0.2-");
+            }else{
+                zombieInven.push("Hiking_Green-0.2-");
+            }
+            
+        }else{
+            zombieInven.push("Duffelbag-0.5-");
+        }
+        
+    }
+    
     //옷가지
     if(Math.random()<0.2){
         zombieInven.push("TshirtGeneric-0.7-");
@@ -11,7 +26,7 @@ function spawnZombie(_tag='random'){
         zombieInven.push("ShirtGeneric-0.7-");
     }
 
-   
+
     zombieInven.push(`DigitalWatch${Math.random()<0.15?'_fancy':(Math.random()<0.5?'_red':'')}-0.3`)
     
 
@@ -33,6 +48,7 @@ function spawnZombie(_tag='random'){
             zombieTag = "pants";
             zombieInven.push("Rag-0.7");
             zombieInven.push("WaterBottle-0.1-"); 
+            
         }
     }else{
         zombieTag = _tag;
@@ -133,11 +149,11 @@ function renderZombie(){
     }
     
 }
-function callZombies(num, addPer=0){
+function callZombies(num){
     //좀비소환
     //stack.zombieSpawn++;
     const rng = Math.random();
-    let per = 0.05 + zombies.length*0.01 + addPer + stack.zombieSpawn* 0.01;
+    let per = 0.05 + zombies.length*0.01 + stack.zombieSpawn* 0.01;
     let txt =""
     if(playerHasTrait("conspicuous")){
         //넘치는존재감
@@ -148,6 +164,9 @@ function callZombies(num, addPer=0){
         //부족한존재감
         txt = "<부족한 존재감>에도 불구하고 ";
         per = per/2;
+    }
+    if(currentMapData.outside){
+        per = per*2;//야외의 경우 더 잘끌림
     }
 
     if(rng <= per){
@@ -170,13 +189,15 @@ function callZombies(num, addPer=0){
                 zombieData = nextzombies[zn];
                 nextzombies.splice(zn,1);
                 //console.log(`다음 맵 ${zn}번째 좀비 끌어오기`);
+                log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
+                renderZombieDiv(zombieData) ;
+                renderZombie();
+
+                stopResting();
+                stack.zombieSpawn = 0;
             }
         }
-        log(`${txt}주변의 좀비가 이끌려 나타났습니다.`, `${rng.toFixed(8)} < ${per.toFixed(3)}`);
-        renderZombieDiv(zombieData) ;
-        renderZombie();
-        stopResting();
-        stack.zombieSpawn = 0;
+        
     }
 }
 function clearZombies(){
@@ -191,6 +212,10 @@ function zombieAttack( timedelay=300){
         const attackNum = 2;
         const num = (attackNum > zombies.length)? zombies.length: attackNum;
         //console.log(num);
+        if(isSleeping){
+            console.log("잠자는중 좀비 공격 멈춤");
+            stopSleeping();
+        }
         if(delaying==false){
             delaying = true;
             stopResting();

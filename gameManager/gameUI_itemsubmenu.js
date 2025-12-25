@@ -260,8 +260,9 @@ function facilitySubMenu(facilityName){
                 closeSubOption();
             });
             makeBox("잠자기",true).addEventListener('click', ()=>{
-                startResting(200);
+                startSleeping(200);
                 closeSubOption();
+                
             });
             
         }

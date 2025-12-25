@@ -406,11 +406,9 @@ function facilityItem(facilityName){
         break;
         case "bed":
             obj.item = findMisc("bed");
-            obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
         break;
         case "sofa":
             obj.item = findMisc("sofa");
-            obj.item.info ='잠을 잘 수 있습니다(속도만 빠름)';
         break;
         case "fridge":
             obj.needItem = 'power';
@@ -496,6 +494,7 @@ function findMapData(itemName){
                 for(let n=0 ;n<storageArray.length; n++){
                     if(storageArray[n].name == 'fridge'){
                         //신선한 음식은 냉장고에 넣기
+                        item.condition -= gameTurn; //시간만큼 신선도 감소
                         storageArray[n].inventory.push( item );
                         break;
                     }
@@ -540,12 +539,19 @@ function randomMapData(){
         //현재 길거리에 있을 때에만
         const rng = Math.random();
         if(rng<0.15){
-            item.push( findMapData('store_tool'));
+            if(Math.random()<0.5){
+                item.push( findMapData('store_food'));
+            }else{
+                item.push( findMapData('store_tool'));
+            }
         }else if(rng<0.3){
             item.push( findMapData('gas'));
             item.push( findMapData('store_gas'));
         }else if(rng<0.45){
             item.push(  findMapData("livestock"));
+            if(Math.random()<0.5){
+                item.push(  findMapData("livestock"));
+            }
         }else if(rng<0.65){
             item.push(  findMapData("river"));
             item.push(  findMapData("house"));

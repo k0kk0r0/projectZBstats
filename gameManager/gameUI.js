@@ -47,6 +47,42 @@ function windowRatio(){
     }
 }
 //////////////////////////////////////////////////////////////////
+//화면 암전
+const blackBg = document.getElementById("blackBg");
+let blackBgValue=0;
+let blackBgIntervalId = null;
+function blackBgVisible(value=true){
+    if(value){
+        blackBg.classList.remove('hidden');
+        blackBgValue=0;
+       blackBgIntervalId = setInterval(blackBgIn, 50);
+    }else{
+        blackBg.classList.remove('hidden');
+        blackBgValue=100;
+        blackBgIntervalId = setInterval(blackBgOut, 50);
+    }
+}
+function blackBgIn(){
+    if(blackBgValue<100){
+        blackBgValue +=10;
+        blackBg.style.backgroundColor = `rgba(0,0,0,${blackBgValue/100})`;
+    }else{
+        blackBgValue=100;
+        clearInterval(blackBgIntervalId);
+    }
+}
+function blackBgOut(){
+    if(blackBgValue>0){
+        blackBgValue -=10;
+        blackBg.style.backgroundColor = `rgba(0,0,0,${blackBgValue/100})`;
+    }else{
+        blackBg.classList.add('hidden');
+        blackBgValue=0;
+        clearInterval(blackBgIntervalId);
+    }
+}
+
+//////////////////////////////////////////////////////////////////
 //하단 턴 넘김
 const turnModal = document.getElementById("turnModal");
 const Bt_stop = document.getElementById("Bt_stop");
@@ -261,6 +297,7 @@ function renderFacilityIcons(){
                 //아무것도 없는 경우
                 facildata.item.condition = 0;
             }
+            
             if(facildata.item.condition>0){
                 facildata.enabled=true;
             }else{
@@ -322,6 +359,7 @@ function renderPlayerStat(){
 
     makeStat("Stressed", stat.stressed, "bg-red-300");
     makeStat("Sick", stat.sick, "bg-green-200");
+    makeStat("Tired", stat.tired, "bg-slate-500");
     //makeStat("fatique", stat.Fatique, "bg-slate-400");
 
     for(let i =0 ;i <wound.length; i++){
@@ -510,7 +548,7 @@ nextMapBt.addEventListener('click',() =>{
     let timedelay = 200;
     const runRng =Math.random();
     const runPer = playerStat().fitness*0.1 - stat.weightRatio*0.15 ;
-    console.log(runPer);
+    //console.log(runPer);
     if( runRng > runPer ){
         //플레이어 체력
         if(zombies.length>0){

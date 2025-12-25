@@ -40,6 +40,12 @@ function playerStat(){
     if(stat.stamina<=10){enduValue--};
     setMoodleValue('Endurance', enduValue);
 
+    let tired = 0;
+    if(stat.tired>=60){ tired=-1;}
+    if(stat.tired>=70){ tired=-2;}
+    if(stat.tired>=80){ tired=-3;}  
+    if(stat.tired>=90){ tired=-4;}
+    setMoodleValue('Tired', tired);
 
     let str = findPlayerSkill('strength').lv;
     let fit= findPlayerSkill('fitness').lv;
@@ -49,7 +55,7 @@ function playerStat(){
 
     stat.weight = {bagWeight:_bagWeight};
     //데이터반환
-    return {bagWeight:_bagWeight, strength:str, fitness:fit, stressed:getMoodleValue("Stressed"), panic:-panicMd.value, endurance: enduValue };
+    return {bagWeight:_bagWeight, strength:str, fitness:fit, stressed:getMoodleValue("Stressed"),tired:tired, panic:-panicMd.value, endurance: enduValue };
 }
 function addSkillXp(name, value){
     let data = findPlayerSkill(name);
@@ -107,6 +113,43 @@ function playerMove(distance=40) {
   }
   requestAnimationFrame(chaMoveAnimate);
 }
+function startSleeping(timer=50){
+   
+    if(gameOver)return;
+     if(stat.tired<50){
+        log_popup("아직 덜 피곤합니다.");
+        return;
+     }
+        
+    isSleeping = true;
+    blackBgVisible(true);
+
+    const wakeUpTime = playerHasTrait("insomniac")? 30:0;
+    interval =  setInterval(() => {
+        if(stat.tired>0){
+             playerRecover();
+             stat.tired -= 2*stat.sleepEffect;
+            console.log(stat.tired);
+            advanceTurn();
+            if(stat.tired<=wakeUpTime){
+                stat.tired=wakeUpTime;
+                stopSleeping();
+            }
+        }
+
+    },timer);
+}
+function stopSleeping(){
+    if(!isSleeping) return;
+    isSleeping = false;
+    isDelaying = false;
+    clearInterval(interval );
+    interval = null;
+    renderGameUI();
+    blackBgVisible(false);
+    log("수면 끝");
+
+}
 function startResting(timer=400){
     //휴식 및 턴 넘기기
      if(gameOver)return;
@@ -121,10 +164,7 @@ function startResting(timer=400){
     interval =  setInterval(() => {
         //스태미나, 체력 회복
         if(stat.stamina<100 || stat.health < 100){
-             stat.stamina += 10;
-             stat.health += 4;
-            if(stat.stamina>=100)stat.stamina=100;
-            if(stat.health>=100)stat.health=100;
+             playerRecover();
             if(stat.stamina>=100 && stat.health>=100){
                 //회복하다가 한 번 멈춤
                 stopResting();
@@ -136,17 +176,26 @@ function startResting(timer=400){
         renderGameUI();
     },timer); 
 }
+function playerRecover(){
+    stat.stamina += 10;
+    stat.health += 4;
+    if(stat.stamina>=100)stat.stamina=100;
+    if(stat.health>=100)stat.health=100;
+}
 function stopResting(){
     if(!isResting) return;
+    
     isResting = false;
     clearInterval(interval );
     interval = null;
     renderGameUI();
     log("휴식 끝");
+    blackBgVisible(false);
 }
 function playerAttack(multiHit){
     const playerstat = playerStat();
     stat.thirst-=0.5;
+    stat.tired +=stat.tiredXp*2;
     if(equipments.weapon ==null){
         if(zombies.length>0){
             //좀비가 1명 이상
@@ -251,13 +300,12 @@ function playerAttack(multiHit){
         if(playerstat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
         if(playerstat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
         if(playerstat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
-        //피로(fatique))
-        /*
-        if(playerstat.endurance==-1){ damage *= 0.95; debuf.push(["endurance", -5]);}
-        if(playerstat.endurance==-2){damage *=0.9; debuf.push(["endurance", -10]);}
-        if(playerstat.endurance==-3){damage *=0.8; debuf.push(["endurance", -20]);}
-        if(playerstat.endurance==-4){damage *=0.5; debuf.push(["endurance", -50]);}
-        */
+        //피로(tired))
+        if(playerstat.tired==-1){ damage *= 0.95; debuf.push(["Tired", -5]);}
+        if(playerstat.tired==-2){damage *=0.9; debuf.push(["Tired", -10]);}
+        if(playerstat.tired==-3){damage *=0.8; debuf.push(["Tired", -20]);}
+        if(playerstat.tired==-4){damage *=0.5; debuf.push(["Tired", -50]);}
+        
         if(damage>128){
             //임시 리미트
             damage =128;
@@ -272,7 +320,6 @@ function playerAttack(multiHit){
         let debuftxt ="";
         for(let n =0; n< debuf.length; n++){
             debuftxt += `${translating(debuf[n][0])}: ${debuf[n][1]>0?"+":''}${debuf[n][1]}% `;
-
         }
         log( `${i+1}번째 좀비가 ${damage}의 대미지를 입었다. ${debuftxt.length>0?`\n`:''} ${debuftxt}`);
         let rng = Math.random();
@@ -303,6 +350,7 @@ function playerPush(multiHit){
     if(stat.stamina<=0){
         stat.stamina = 0;
     }
+    stat.tired +=stat.tiredXp*2;
     let num = (multiHit >= zombies.length)? zombies.length : multiHit; 
     log(`플레이어의 밀치기!`);
     for(let i =0 ; i <num ; i++){

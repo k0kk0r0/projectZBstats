@@ -1,6 +1,6 @@
 //게임매니저
 //게임의 전반적인 흐름과 상태를 관리하는 스크립트
-let debug =false;
+let debug = true;
 
 //타이머, UI 표시
 const timerTxt = document.getElementById('timer');
@@ -81,10 +81,12 @@ player.style.left = `${basePos}px`;
 let position = basePos;
 let isAnimating = false; // 중복 클릭 방지용
 let isResting = false; //휴식 상태 여부
+let isSleeping =false;
 
 let hour= 7; //게임 시간 (시간단위)
 let min = 0; //게임 시간 (분단위)
 let day = 1; //현재 날짜
+let gameTurn=0; //현재 턴
 let waterEndTurn;
 let powerEndTurn;
 let mapData = [];
@@ -112,6 +114,21 @@ let inventory ;
 let storage;
 let stat ;
 function resetStat(){
+    let _tiredXp =1;
+    let _sleepEffect =1;
+    if(playerHasTrait("needsmoresleep")){
+        _tiredXp =1.3;
+        _sleepEffect = 0.9;
+    }
+    if(playerHasTrait("needslesssleep")){
+        _tiredXp =0.7;
+        _sleepEffect =1.1;
+    }
+    if(playerHasTrait("insomniac")){
+        _tiredXp =1.5;
+        _sleepEffect =0.8;
+    }
+
     return {
         stamina:100,
         health:100,
@@ -121,8 +138,11 @@ function resetStat(){
         sick:0,
         panic:0,
         pain:0,
+        tired:0,
         //Fatique:10,
         
+        tiredXp:_tiredXp,
+        sleepEffect:_sleepEffect,
     }
 }
 let wound = [];//상처 배열
@@ -371,6 +391,9 @@ function getWeapon(){
 //게임 초기화 함수
 //ResetAllGame(); //나중에 버튼으로 추가
 async function ResetAllGame(){
+    debugBt.classList.toggle("hidden", !debug);
+    blackBgVisible(false);
+    gameTurn=0;
     hour= 7; //게임 시간 (시간단위)
     min = 0; //게임 시간 (분단위)
     day = 1; //현재 날짜
@@ -383,6 +406,7 @@ async function ResetAllGame(){
     
     gameOver=false;
     isResting = false;
+    isSleeping =false;
     delaying = false;    
 
     
@@ -397,18 +421,44 @@ async function ResetAllGame(){
     storage = [];
     inventory = [];
     wound = [];
+    setPlayerTrait();
     stat = resetStat();
     zombieKillCount=0;
-     setPlayerTrait();
 
     //맵 이동 함수
     currentMapData=null;
     
     zombies=[];
     mapData = [];
+
+    const _maps=[
+        ["river","house","road"],
+        ["gas",'store_gas','road'],
+        ["river","livestock","road"],
+        ["livestock","livestock","road"],
+        ["livestock","road"],
+        ["house","road"],
+        ["house","road"],
+        ["house","road"],
+        ["house","road"],
+        ["road","house","road"],
+        ["store_tool","road"],
+        ["store_food","road"],
+        ["store_food","road"],
+
+    ];
     mapData.push( findMapData('river'));
     mapData.push( findMapData('house'));
     mapData.push( findMapData('road'));
+    while(_maps.length>0){ 
+        const num = randomInt(0,_maps.length);
+        for(let i = 0; i< _maps[num].length; i++){
+            mapData.push( findMapData(_maps[num][i]));
+        }
+        _maps.splice(num,1);
+        if(_maps.length==0){break;}
+    }
+   
     
     
     mapNum = 1;
@@ -426,16 +476,6 @@ async function ResetAllGame(){
     };
     for(let i=0;i<moodles.length;i++){
         moodles[i].value =0;
-    }
-
-    if(debug){
-        mapData.push( findMapData('gas'));
-        powerEndTurn = 10;
-        waterEndTurn = 3;
-        pushItemToInventory(storage[0].inventory, "Logs4");
-        pushItemToInventory(storage[0].inventory, "Logs2",2);
-        pushItemToInventory(inventory, "Nails",2);
-        pushItemToInventory(inventory, "Garbagebag_box");
     }
 
     //playerMove();
@@ -706,11 +746,14 @@ function advanceTurn() {
         }
     }
     renderGameUI();
-    setTimeout(() => {
-         if(gameOver)return;
+    if(isSleeping){
         TurnEnd();
-    },  200);
-    
+    }else{
+        setTimeout(() => {
+            if(gameOver)return;
+            TurnEnd();
+        },  200);
+    }
 }
 
 function TurnEnd() {
@@ -782,7 +825,7 @@ function TurnEnd() {
             }
         }
         
-        
+        gameTurn++;
         min += 10; //15분씩 증가
         // 분이 60이 넘으면 시간 증가
         
@@ -971,7 +1014,9 @@ function checkGameOver(){
             commandBtsVisible(false);
             interval =null;
             gameOver =true;
-            delaying= true;
+            delaying= false;
+            isResting = false;
+            isSleeping = false;
             //게임오버
             clearInterval(interval );
             renderPlayer();
